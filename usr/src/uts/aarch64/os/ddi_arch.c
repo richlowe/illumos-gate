@@ -177,10 +177,10 @@ i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 struct regspec *
 i_ddi_rnumber_to_regspec(dev_info_t *dip, int rnumber)
 {
-	if (rnumber >= sparc_pd_getnreg(DEVI(dip)))
+	if (rnumber >= i_ddi_pd_getnreg(DEVI(dip)))
 		return ((struct regspec *)0);
 
-	return (sparc_pd_getreg(DEVI(dip), rnumber));
+	return (i_ddi_pd_getreg(DEVI(dip), rnumber));
 }
 
 /*
@@ -220,7 +220,7 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
 	static char *out_of_range =
 	    "Out of range register specification from device node <%s>\n";
 
-	nrange = sparc_pd_getnrng(dp);
+	nrange = i_ddi_pd_getnrng(dp);
 	if (nrange == 0)  {
 #ifdef	DDI_MAP_DEBUG
 		ddi_map_debug("    No range.\n");
@@ -234,7 +234,7 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
 	 * really means a size of 2**(bitsperword).
 	 */
 
-	for (b = 0, rangep = sparc_pd_getrng(dp, 0); b < nrange; ++b, ++rangep)
+	for (b = 0, rangep = i_ddi_pd_getrng(dp, 0); b < nrange; ++b, ++rangep)
 		if (reg_is_enclosed_in_range(rp, rangep))
 			break;		/* found a match */
 

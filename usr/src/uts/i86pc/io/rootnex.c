@@ -737,9 +737,9 @@ rootnex_ctl_reportdev(dev_info_t *dev)
 	    "%s%d at root", ddi_driver_name(dev), ddi_get_instance(dev));
 	len = strlen(buf);
 
-	for (i = 0; i < sparc_pd_getnreg(dev); i++) {
+	for (i = 0; i < i_ddi_pd_getnreg(dev); i++) {
 
-		struct regspec *rp = sparc_pd_getreg(dev, i);
+		struct regspec *rp = i_ddi_pd_getreg(dev, i);
 
 		if (i == 0)
 			f_len += snprintf(buf + len, REPORTDEV_BUFSIZE - len,
@@ -769,7 +769,7 @@ rootnex_ctl_reportdev(dev_info_t *dev)
 		}
 		len = strlen(buf);
 	}
-	for (i = 0, n = sparc_pd_getnintr(dev); i < n; i++) {
+	for (i = 0, n = i_ddi_pd_getnintr(dev); i < n; i++) {
 		int pri;
 
 		if (i != 0) {
@@ -777,9 +777,9 @@ rootnex_ctl_reportdev(dev_info_t *dev)
 			    ",");
 			len = strlen(buf);
 		}
-		pri = INT_IPL(sparc_pd_getintr(dev, i)->intrspec_pri);
+		pri = INT_IPL(i_ddi_pd_getintr(dev, i)->intrspec_pri);
 		f_len += snprintf(buf + len, REPORTDEV_BUFSIZE - len,
-		    " sparc ipl %d", pri);
+		    " processor ipl %d", pri);
 		len = strlen(buf);
 	}
 #ifdef DEBUG
@@ -937,7 +937,7 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	 * for the nexus, we don't need to call i_ddi_apply_range().  Verify
 	 * that is the case.
 	 */
-	ASSERT0(sparc_pd_getnrng(dip));
+	ASSERT0(i_ddi_pd_getnrng(dip));
 
 	switch (mp->map_op)  {
 	case DDI_MO_MAP_LOCKED:

@@ -623,16 +623,16 @@ rootnex_ctlops(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 
 	if (ctlop == DDI_CTLOPS_NREGS) {
 		ptr = (int *)result;
-		*ptr = sparc_pd_getnreg(rdip);
+		*ptr = i_ddi_pd_getnreg(rdip);
 	} else {
 		off_t *size = (off_t *)result;
 
 		ptr = (int *)arg;
 		n = *ptr;
-		if (n >= sparc_pd_getnreg(rdip)) {
+		if (n >= i_ddi_pd_getnreg(rdip)) {
 			return (DDI_FAILURE);
 		}
-		*size = (off_t)sparc_pd_getreg(rdip, n)->regspec_size;
+		*size = (off_t)i_ddi_pd_getreg(rdip, n)->regspec_size;
 	}
 	return (DDI_SUCCESS);
 }
@@ -653,9 +653,9 @@ rootnex_ctl_reportdev(dev_info_t *dev)
 	    "%s%d at root", ddi_driver_name(dev), ddi_get_instance(dev));
 	len = strlen(buf);
 
-	for (i = 0; i < sparc_pd_getnreg(dev); i++) {
+	for (i = 0; i < i_ddi_pd_getnreg(dev); i++) {
 
-		struct regspec *rp = sparc_pd_getreg(dev, i);
+		struct regspec *rp = i_ddi_pd_getreg(dev, i);
 
 		if (i == 0)
 			f_len += snprintf(buf + len, REPORTDEV_BUFSIZE - len,
@@ -792,7 +792,7 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	 * for the nexus, we don't need to call i_ddi_apply_range().  Verify
 	 * that is the case.
 	 */
-	ASSERT0(sparc_pd_getnrng(dip));
+	ASSERT0(i_ddi_pd_getnrng(dip));
 
 	switch (mp->map_op)  {
 	case DDI_MO_MAP_LOCKED:

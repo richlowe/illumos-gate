@@ -1066,10 +1066,10 @@ isa_name_child(dev_info_t *child, char *name, int namelen)
 		 * For .conf nodes, generate name from parent private data
 		 */
 		name[0] = '\0';
-		if (sparc_pd_getnreg(child) > 0) {
+		if (i_ddi_pd_getnreg(child) > 0) {
 			(void) snprintf(name, namelen, "%x,%x",
-			    (uint_t)sparc_pd_getreg(child, 0)->regspec_bustype,
-			    (uint_t)sparc_pd_getreg(child, 0)->regspec_addr);
+			    (uint_t)i_ddi_pd_getreg(child, 0)->regspec_bustype,
+			    (uint_t)i_ddi_pd_getreg(child, 0)->regspec_addr);
 		}
 		return (DDI_SUCCESS);
 	}

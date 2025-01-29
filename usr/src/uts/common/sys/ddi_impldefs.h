@@ -801,12 +801,12 @@ struct ddi_parent_private_data {
 #define	DEVI_PD(d)	\
 	((struct ddi_parent_private_data *)DEVI((d))->devi_parent_data)
 
-#define	sparc_pd_getnreg(dev)		(DEVI_PD(dev)->par_nreg)
-#define	sparc_pd_getnintr(dev)		(DEVI_PD(dev)->par_nintr)
-#define	sparc_pd_getnrng(dev)		(DEVI_PD(dev)->par_nrng)
-#define	sparc_pd_getreg(dev, n)		(&DEVI_PD(dev)->par_reg[(n)])
-#define	sparc_pd_getintr(dev, n)	(&DEVI_PD(dev)->par_intr[(n)])
-#define	sparc_pd_getrng(dev, n)		(&DEVI_PD(dev)->par_rng[(n)])
+#define	i_ddi_pd_getnreg(dev)		(DEVI_PD(dev)->par_nreg)
+#define	i_ddi_pd_getnintr(dev)		(DEVI_PD(dev)->par_nintr)
+#define	i_ddi_pd_getnrng(dev)		(DEVI_PD(dev)->par_nrng)
+#define	i_ddi_pd_getreg(dev, n)		(&DEVI_PD(dev)->par_reg[(n)])
+#define	i_ddi_pd_getintr(dev, n)	(&DEVI_PD(dev)->par_intr[(n)])
+#define	i_ddi_pd_getrng(dev, n)		(&DEVI_PD(dev)->par_rng[(n)])
 
 #ifdef _KERNEL
 /*

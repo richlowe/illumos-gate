@@ -872,8 +872,8 @@ intrspec`>> took part in the framework).  It is not clear if there's value in
 the information here, it appears to exist for a minority of busses, and like
 all DDI1 interfaces only covers fixed interrupts.
 
-The general access for this information are `sparc_pd_getintr()` and
-`sparc_pd_getnintr()`.  These are only used by device reporting on Intel and
+The general access for this information are `i_ddi_pd_getintr()` and
+`i_ddi_pd_getnintr()`.  These are only used by device reporting on Intel and
 AArch64.
 
 Access via the private pointers is actually more common. The majority of uses

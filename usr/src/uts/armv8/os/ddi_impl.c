@@ -1808,44 +1808,6 @@ impl_fix_props(dev_info_t *dip, dev_info_t *ch_dip, char *name,
 	/* nothing (yet) */
 }
 
-static int
-get_address_cells(pnode_t node)
-{
-	int address_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, OBP_ADDRESS_CELLS);
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, OBP_ADDRESS_CELLS, (caddr_t)&prop);
-			address_cells = ntohl(prop);
-			break;
-		}
-		node = prom_parentnode(node);
-	}
-	return (address_cells);
-}
-
-static int
-get_size_cells(pnode_t node)
-{
-	int size_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, OBP_SIZE_CELLS);
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, OBP_SIZE_CELLS, (caddr_t)&prop);
-			size_cells = ntohl(prop);
-			break;
-		}
-		node = prom_parentnode(node);
-	}
-	return (size_cells);
-}
-
 /*
  * We're prepared for either 2 or 1 address cells and 2 or 1 size cells.
  *
@@ -2179,13 +2141,13 @@ impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 
 	name[0] = '\0';
 
-	if (sparc_pd_getnreg(child) > 0) {
+	if (i_ddi_pd_getnreg(child) > 0) {
 		/*
 		 * Note that unlike other platforms, we don't include the
 		 * bustype, to match practice in devicetree.
 		 */
 		(void) snprintf(name, namelen, "%lx",
-		    sparc_pd_getreg(child, 0)->regspec_addr);
+		    i_ddi_pd_getreg(child, 0)->regspec_addr);
 	}
 
 	return (DDI_SUCCESS);
@@ -3028,6 +2990,44 @@ i_ddi_cacheattr_to_hatacc(uint_t flags, uint_t *hataccp)
 		cmn_err(CE_WARN, "%s: cache_attr=0x%x is ignored.",
 		    fname, cache_attr);
 	}
+}
+
+static int
+get_address_cells(pnode_t node)
+{
+	int address_cells = 0;
+
+	while (node > 0) {
+		int len = prom_getproplen(node, "#address-cells");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "#address-cells", (caddr_t)&prop);
+			address_cells = ntohl(prop);
+			break;
+		}
+		node = prom_parentnode(node);
+	}
+	return (address_cells);
+}
+
+static int
+get_size_cells(pnode_t node)
+{
+	int size_cells = 0;
+
+	while (node > 0) {
+		int len = prom_getproplen(node, "#size-cells");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "#size-cells", (caddr_t)&prop);
+			size_cells = ntohl(prop);
+			break;
+		}
+		node = prom_parentnode(node);
+	}
+	return (size_cells);
 }
 
 struct dma_range {
