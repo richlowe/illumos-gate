@@ -43,7 +43,7 @@
 #include <sys/promif.h>
 #include <sys/spl.h>
 #include <sys/irq.h>
-#include <sys/gic.h>
+#include <sys/syspic.h>
 #include <sys/smp_impldefs.h>
 
 struct	xc_mbox {
@@ -233,7 +233,7 @@ xc_common(
 	cpuset = set;
 	CPUSET_DEL(cpuset, lcx);
 	if (!CPUSET_ISNULL(cpuset)) {
-		gic_send_ipi(cpuset, IRQ_IPI_HI);
+		syspic_send_ipi(cpuset, IRQ_IPI_HI);
 	}
 
 	/*

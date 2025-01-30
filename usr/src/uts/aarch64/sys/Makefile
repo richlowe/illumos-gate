@@ -42,7 +42,6 @@ HDRS	=			\
 	fasttrap_isa.h		\
 	fp.h			\
 	frame.h			\
-	gic.h			\
 	inline.h		\
 	kdi_machimpl.h		\
 	kdi_regs.h		\

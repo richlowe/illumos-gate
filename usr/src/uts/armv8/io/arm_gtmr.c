@@ -466,7 +466,7 @@ arm_gtmr_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	 * implementation-defined interrupt number.
 	 */
 	if (add_avintr(NULL, CBE_HIGH_PIL, cbe_fire_ipi, "cbe_fire_ipi",
-	    IRQ_IPI_CBE, 0, NULL, NULL, NULL) != 1)
+	    IRQ_IPI_CBE, 0, NULL, NULL, dip) != 1)
 		dev_err(dip, CE_PANIC, "add_avintr() failed for ipi handler");
 
 	/*

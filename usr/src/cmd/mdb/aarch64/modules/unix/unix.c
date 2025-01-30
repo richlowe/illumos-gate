@@ -17,6 +17,8 @@
 #include <sys/bitmap.h>
 #include <sys/gic.h>
 #include <sys/gic_reg.h>
+#include <sys/syspic.h>
+#include <sys/syspic_impl.h>
 #include <sys/modctl.h>
 #include <sys/sunddi.h>
 
@@ -101,7 +103,7 @@ gic_vec_to_type(uint_t vec)
 static int
 gic_print_vec(uintptr_t state_addr, const void *aw_buff, void *arg)
 {
-	gic_intr_state_t state;
+	syspic_intr_state_t state;
 	struct av_head *avec_tbl = arg;
 	struct autovec av;
 
@@ -109,12 +111,12 @@ gic_print_vec(uintptr_t state_addr, const void *aw_buff, void *arg)
 		return (WALK_ERR);
 	}
 
-	uintptr_t av_addr = (uintptr_t)avec_tbl[state.gi_vector].avh_link;
+	uintptr_t av_addr = (uintptr_t)avec_tbl[state.si_vector].avh_link;
 
 	while (av_addr != 0x0) {
 		if (mdb_vread(&av, sizeof (struct autovec), av_addr) == -1) {
 			mdb_warn("Failed to read autovec %p for vec %d",
-			    av_addr, state.gi_vector);
+			    av_addr, state.si_vector);
 			break;
 		}
 
@@ -126,10 +128,10 @@ gic_print_vec(uintptr_t state_addr, const void *aw_buff, void *arg)
 		/*
 		 * NB: Should match the format header in `gic_interrupts_dcmd`
 		 */
-		mdb_printf("%-8d  %-8s  %-8s  %-8d  ", state.gi_vector,
-		    gic_vec_to_type(state.gi_vector),
-		    state.gi_edge_triggered ? "edge" : "level",
-		    state.gi_prio);
+		mdb_printf("%-8d  %-8s  %-8s  %-8d  ", state.si_vector,
+		    gic_vec_to_type(state.si_vector),
+		    state.si_edge_triggered ? "edge" : "level",
+		    state.si_prio);
 
 		if (av.av_dip != 0) {
 			char driv[MODMAXNAMELEN + 1];
@@ -174,8 +176,8 @@ gic_interrupts_dcmd(uintptr_t addr, uint_t flags, int argc,
 	}
 
 	GElf_Sym sym;
-	if (mdb_lookup_by_name("gic_intrs", &sym) == -1) {
-		mdb_warn("failed to lookup up gic_intrs");
+	if (mdb_lookup_by_name("syspic_intrs", &sym) == -1) {
+		mdb_warn("failed to lookup up syspic_intrs");
 		return (DCMD_ERR);
 	}
 
