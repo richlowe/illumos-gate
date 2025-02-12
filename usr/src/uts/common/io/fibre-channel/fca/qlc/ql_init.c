@@ -403,7 +403,7 @@ ql_set_max_read_req(ql_adapter_state_t *ha)
 			    "default\n", tmp);
 		}
 	} else if ((ofst = ql_get_cap_ofst(ha, PCI_CAP_ID_PCI_E))) {
-		ofst += PCI_PCIE_DEVICE_CONTROL;
+		ofst += PCIE_DEVCTL;
 		QL_PRINT_10(ha, "PCI-E Device Control Reg = %xh\n", ofst);
 		if (tmp == 128 || tmp == 256 || tmp == 512 ||
 		    tmp == 1024 || tmp == 2048 || tmp == 4096) {

@@ -69,7 +69,7 @@ extern "C" {
 struct	fcipstr {
 	struct fcipstr	*sl_nextp;	/* next in list */
 	queue_t		*sl_rq;		/* pointer to our rq */
-	struct fcip 	*sl_fcip;	/* attached device */
+	struct fcip	*sl_fcip;	/* attached device */
 	t_uscalar_t	sl_state;	/* current DL state */
 	t_uscalar_t	sl_sap;		/* bound sap */
 	uint32_t	sl_flags;	/* misc. flags */
@@ -249,8 +249,8 @@ struct fcip {
 	ulong_t			fcip_norbufs;	/* # out of buffers for rcv */
 	ulong_t			fcip_nocanput;  /* # input canputret.false */
 	ulong_t			fcip_allocbfail;  /* # allocb failed */
-	int 			fcip_tx_lbolt;  /* time of last tx interrupt */
-	int 			fcip_rx_lbolt; 	/* time of last rx interrupt */
+	int			fcip_tx_lbolt;	/* time of last tx interrupt */
+	int			fcip_rx_lbolt;	/* time of last rx interrupt */
 
 	/*
 	 * MIB II variables
@@ -489,6 +489,8 @@ struct	fcipstat {
 
 #define	LA_ELS_FARP_REQ			0x54
 #define	LA_ELS_FARP_REPLY		0x55
+#define	LA_ELS_LPC			0x71
+#define	LA_ELS_LSTS			0x72
 
 /* Match address code points */
 #define	FARP_MATCH_RSVD			0x00

@@ -52,127 +52,25 @@ extern "C" {
 #include <sys/utsname.h>
 #include <sys/file.h>
 #include <sys/param.h>
+#include <sys/pcie.h>
 #include <sys/time.h>
 #include <sys/ddifm.h>
 #include <sys/sunddi.h>
 #include <sys/fm/protocol.h>
 #include <sys/fm/io/ddi.h>
+
 #include <ql_open.h>
 
 #include <sys/fibre-channel/fc.h>
+#include <sys/fibre-channel/ulp/fcip.h>
 #include <sys/fibre-channel/impl/fc_fcaif.h>
 
-#ifndef	DDI_INTR_TYPE_FIXED
-#define	DDI_INTR_TYPE_FIXED	0x1
-#endif
-#ifndef	DDI_INTR_TYPE_MSI
-#define	DDI_INTR_TYPE_MSI	0x2
-#endif
-#ifndef	DDI_INTR_TYPE_MSIX
-#define	DDI_INTR_TYPE_MSIX	0x4
-#endif
-#ifndef	DDI_INTR_FLAG_BLOCK
-#define	DDI_INTR_FLAG_BLOCK	0x100
-#endif
-#ifndef	DDI_INTR_ALLOC_NORMAL
-#define	DDI_INTR_ALLOC_NORMAL	0
-#endif
-#ifndef	DDI_INTR_ALLOC_STRICT
-#define	DDI_INTR_ALLOC_STRICT	1
-#endif
-
-#define	PCI_PCIE_DEVICE_CONTROL		0x8	/* Device control reg offset */
-#define	PCI_MSI_CONTROL			0x2	/* MSI Control reg offset */
-#define	PCI_MSI_MSG_ADDR		0x4	/* MSI Msg Addr reg offset */
-#define	PCI_MSI_MSG_UPPER_ADDR		0x8	/* MSI MSI Msg Upper Addr reg */
-/* offset */
-#define	PCI_MSI_MSG_DATA		0xc	/* MSI Msg Data reg offset */
-#define	PCI_MSI_X_CONTROL		0x2	/* MSI-X Control reg offset */
-#define	MSI_X_TABLE_SIZE_MASK		0x7ff	/* MSI-X Table Size mask */
-
-#define	PCIE_EXT_CAP_PTR		0x100
-#define	PCIE_EXT_CAP_NEXT_SHIFT		20
-#define	PCIE_EXT_CAP_ID_SRIOV		0x0010	/* SRIOV capabilities offset */
-#define	PCIE_EXT_CAP_SRIOV_TOTAL_VFS	0xe
-#define	PCIE_SRIOV_PAGE_SIZE_MULTIPLIER	4096
-
-/*
- * NPIV defines
- */
-#ifndef	FC_NPIV_FDISC_FAILED
-#define	FC_NPIV_FDISC_FAILED	0x45
-#endif
-#ifndef	FC_NPIV_FDISC_WWN_INUSE
-#define	FC_NPIV_FDISC_WWN_INUSE	0x46
-#endif
-#ifndef	FC_NPIV_NOT_SUPPORTED
-#define	FC_NPIV_NOT_SUPPORTED	0x47
-#endif
-#ifndef	FC_NPIV_WRONG_TOPOLOGY
-#define	FC_NPIV_WRONG_TOPOLOGY	0x48
-#endif
-#ifndef	FC_NPIV_NPIV_BOUND
-#define	FC_NPIV_NPIV_BOUND	0x49
-#endif
-#ifndef	FC_HBA_PORTSPEED_32GBIT
-#define	FC_HBA_PORTSPEED_32GBIT	64
-#endif
-
 #pragma weak ddi_intr_get_supported_types
-#pragma weak ddi_intr_get_nintrs
-#pragma weak ddi_intr_alloc
-#pragma weak ddi_intr_free
-#pragma weak ddi_intr_get_pri
-#pragma weak ddi_intr_add_handler
-#pragma weak ddi_intr_dup_handler
-#pragma weak ddi_intr_get_navail
-#pragma weak ddi_intr_block_disable
-#pragma weak ddi_intr_block_enable
-#pragma weak ddi_intr_disable
-#pragma weak ddi_intr_enable
-#pragma weak ddi_intr_get_cap
-#pragma weak ddi_intr_remove_handler
-extern int ddi_intr_get_supported_types();
-extern int ddi_intr_get_nintrs();
-extern int ddi_intr_alloc();
-extern int ddi_intr_free();
-extern int ddi_intr_get_pri();
-extern int ddi_intr_add_handler();
-extern int ddi_intr_dup_handler();
-extern int ddi_intr_get_navail();
-extern int ddi_intr_block_disable();
-extern int ddi_intr_block_enable();
-extern int ddi_intr_disable();
-extern int ddi_intr_enable();
-extern int ddi_intr_get_cap();
-extern int ddi_intr_remove_handler();
+extern int ddi_intr_get_supported_types(dev_info_t *, int *);
 
 #define	QL_CLEAR_DMA_HANDLE(x)	((ddi_dma_impl_t *)x)->dmai_fault_notify = 0; \
 				((ddi_dma_impl_t *)x)->dmai_fault_check = 0; \
 				((ddi_dma_impl_t *)x)->dmai_fault	= 0
-
-#ifndef	FC_STATE_1GBIT_SPEED
-#define	FC_STATE_1GBIT_SPEED	0x0100	/* 1 Gbit/sec */
-#endif
-#ifndef	FC_STATE_2GBIT_SPEED
-#define	FC_STATE_2GBIT_SPEED	0x0400	/* 2 Gbit/sec */
-#endif
-#ifndef	FC_STATE_4GBIT_SPEED
-#define	FC_STATE_4GBIT_SPEED	0x0500	/* 4 Gbit/sec */
-#endif
-#ifndef FC_STATE_8GBIT_SPEED
-#define	FC_STATE_8GBIT_SPEED	0x0700	/* 8 Gbit/sec */
-#endif
-#ifndef FC_STATE_10GBIT_SPEED
-#define	FC_STATE_10GBIT_SPEED	0x0600	/* 10 Gbit/sec */
-#endif
-#ifndef FC_STATE_16GBIT_SPEED
-#define	FC_STATE_16GBIT_SPEED	0x0800	/* 16 Gbit/sec */
-#endif
-#ifndef FC_STATE_32GBIT_SPEED
-#define	FC_STATE_32GBIT_SPEED	0x1000	/* 32 Gbit/sec */
-#endif
-
 /*
  * Data bit definitions.
  */
@@ -351,13 +249,6 @@ extern int ddi_intr_remove_handler();
 #define	MAX_LUNS	16384
 #define	QL_FCA_BRAND	0x0fca2200
 
-/* Following to be removed when defined by OS. */
-/* ************************************************************************ */
-#define	LA_ELS_FARP_REQ		0x54
-#define	LA_ELS_FARP_REPLY	0x55
-#define	LA_ELS_LPC		0x71
-#define	LA_ELS_LSTS		0x72
-
 typedef struct {
 	ls_code_t ls_code;
 	uint8_t rsvd[3];
@@ -513,10 +404,6 @@ typedef struct {
 #define	QL_FCIP_RSP_SGLLEN	1
 #define	QL_FCP_CMD_SGLLEN	1
 #define	QL_FCP_RSP_SGLLEN	1
-#endif
-
-#ifndef	DDI_DMA_RELAXED_ORDERING
-#define	DDI_DMA_RELAXED_ORDERING	0x400
 #endif
 
 #define	QL_DMA_GRANULARITY	1
