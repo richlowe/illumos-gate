@@ -65,9 +65,6 @@ extern "C" {
 #include <sys/fibre-channel/ulp/fcip.h>
 #include <sys/fibre-channel/impl/fc_fcaif.h>
 
-#pragma weak ddi_intr_get_supported_types
-extern int ddi_intr_get_supported_types(dev_info_t *, int *);
-
 #define	QL_CLEAR_DMA_HANDLE(x)	((ddi_dma_impl_t *)x)->dmai_fault_notify = 0; \
 				((ddi_dma_impl_t *)x)->dmai_fault_check = 0; \
 				((ddi_dma_impl_t *)x)->dmai_fault	= 0

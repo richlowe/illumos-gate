@@ -17371,26 +17371,10 @@ ql_setup_interrupts(ql_adapter_state_t *ha)
 
 	QL_PRINT_3(ha, "started\n");
 
-	/*
-	 * The Solaris Advanced Interrupt Functions (aif) are only
-	 * supported on s10U1 or greater.
-	 */
-	if (ql_os_release_level < 10 || ql_disable_aif != 0) {
+	if (ql_disable_aif != 0) {
 		EL(ha, "interrupt framework is not supported or is "
 		    "disabled, using legacy\n");
 		return (ql_legacy_intr(ha));
-	} else if (ql_os_release_level == 10) {
-		/*
-		 * See if the advanced interrupt functions (aif) are
-		 * in the kernel
-		 */
-		void	*fptr = (void *)&ddi_intr_get_supported_types;
-
-		if (fptr == NULL) {
-			EL(ha, "aif is not supported, using legacy "
-			    "interrupts (rev)\n");
-			return (ql_legacy_intr(ha));
-		}
 	}
 
 	/* See what types of interrupts this HBA and platform support */
