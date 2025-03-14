@@ -50,7 +50,7 @@ ecam_cfgspace_acc(pci_cfgacc_req_t *req)
 
 	if (!pcie_cfgspace_access_check(bus, dev, func, reg, req->size)) {
 		if (!req->write)
-			VAL64(req) = -1;
+			VAL64(req) = PCI_EINVAL64;
 		return;
 	}
 

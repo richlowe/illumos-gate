@@ -17,8 +17,29 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*-
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 2020 Dr Robert Harvey Crowston <crowston@protonmail.com>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ *
+ */
+
 /*
  * Copyright 2025 Richard Lowe
+ * Copyright 2025 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <sys/ddi.h>
@@ -29,8 +50,18 @@
 #include <sys/pci_cfgacc.h>
 #include <sys/pcie_impl.h>
 
-#define	BCM2711_DEV_CFG_DATA	0x8000 /* (read/write) config space data */
-#define	BCM2711_DEV_CFG_INDEX	0x9000 /* (write) config space index  */
+#define	BCM2711_REG_CONTROLLER_HW_REV	0x406c
+#define	BCM2711_REG_BRIDGE_CTRL		0x9210
+#define	BCM2711_BRIDGE_DISABLE_FLAG	0x1
+#define	BCM2711_BRIDGE_RESET_FLAG	0x2
+#define	BCM2711_REG_PCIE_HARD_DEBUG	0x4204
+#define	BCM2711_REG_BRIDGE_STATE	0x4068
+#define	BCM2711_REG_BRIDGE_LINK_STATE	0x00bc
+
+#define	BCM2711_DEV_CFG_DATA		0x8000 /* (read/write) config space data */
+#define	BCM2711_DEV_CFG_INDEX		0x9000 /* (write) config space index  */
+
+#define	BCM2711_MAX_BUS			1
 
 typedef struct {
 	dev_info_t *bc_dip;
@@ -49,22 +80,23 @@ bcm2711_cfg_read_root(bcm2711_pcie_softc_t *softc, int bus, int dev, int func,
 	 * Requests to bus 0, the root complex, must also have device 0, per
 	 * the BSD driver
 	 */
-	VERIFY0(dev);
+	if (dev != 0)
+		return (PCI_EINVAL64);
 
-	switch (size * NBBY) {
-	case 8:
+	switch (size) {
+	case PCI_CFG_SIZE_BYTE:
 		return (ddi_get8(softc->bc_handle,
 		    (uint8_t *)(softc->bc_base + PCIE_CADDR_ECAM(bus, dev, func,
 		    reg))));
-	case 16:
+	case PCI_CFG_SIZE_WORD:
 		return (ddi_get16(softc->bc_handle,
 		    (uint16_t *)(softc->bc_base + PCIE_CADDR_ECAM(bus, dev,
 		    func, reg))));
-	case 32:
+	case PCI_CFG_SIZE_DWORD:
 		return (ddi_get32(softc->bc_handle,
 		    (uint32_t *)(softc->bc_base + PCIE_CADDR_ECAM(bus, dev,
 		    func, reg))));
-	case 64:
+	case PCI_CFG_SIZE_QWORD:
 		return (ddi_get64(softc->bc_handle,
 		    (uint64_t *)(softc->bc_base + PCIE_CADDR_ECAM(bus, dev,
 		    func, reg))));
@@ -83,21 +115,24 @@ bcm2711_cfg_read_dev(bcm2711_pcie_softc_t *softc, int bus, int dev, int func,
 {
 	VERIFY3S(bus, !=, 0);
 
+	if (bus > BCM2711_MAX_BUS || dev != 0 || func != 0)
+		return (PCI_EINVAL64);
+
 	ddi_put32(softc->bc_handle,
 	    (uint32_t *)(softc->bc_base + BCM2711_DEV_CFG_INDEX),
 	    PCIE_CADDR_ECAM(bus, dev, func, 0));
 
-	switch (size * NBBY) {
-	case 8:
+	switch (size) {
+	case PCI_CFG_SIZE_BYTE:
 		return (ddi_get8(softc->bc_handle,
 		    (uint8_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg)));
-	case 16:
+	case PCI_CFG_SIZE_WORD:
 		return (ddi_get16(softc->bc_handle,
 		    (uint16_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg)));
-	case 32:
+	case PCI_CFG_SIZE_DWORD:
 		return (ddi_get32(softc->bc_handle,
 		    (uint32_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg)));
-	case 64:
+	case PCI_CFG_SIZE_QWORD:
 		return (ddi_get64(softc->bc_handle,
 		    (uint64_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg)));
 	}
@@ -137,22 +172,23 @@ bcm2711_cfg_write_root(bcm2711_pcie_softc_t *softc, int bus, int dev, int func,
 	 * Requests to bus 0, the root complex, must also have device 0, per
 	 * the BSD driver
 	 */
-	VERIFY0(dev);
+	if (dev != 0)
+		return;
 
-	switch (size * NBBY) {
-	case 8:
+	switch (size) {
+	case PCI_CFG_SIZE_BYTE:
 		ddi_put8(softc->bc_handle, (uint8_t *)(softc->bc_base +
 		    PCIE_CADDR_ECAM(bus, dev, func, reg)), val);
 		break;
-	case 16:
+	case PCI_CFG_SIZE_WORD:
 		ddi_put16(softc->bc_handle, (uint16_t *)(softc->bc_base +
 		    PCIE_CADDR_ECAM(bus, dev, func, reg)), val);
 		break;
-	case 32:
+	case PCI_CFG_SIZE_DWORD:
 		ddi_put32(softc->bc_handle, (uint32_t *)(softc->bc_base +
 		    PCIE_CADDR_ECAM(bus, dev, func, reg)), val);
 		break;
-	case 64:
+	case PCI_CFG_SIZE_QWORD:
 		ddi_put64(softc->bc_handle, (uint64_t *)(softc->bc_base +
 		    PCIE_CADDR_ECAM(bus, dev, func, reg)), val);
 		break;
@@ -168,27 +204,30 @@ bcm2711_cfg_write_dev(bcm2711_pcie_softc_t *softc, int bus, int dev, int func,
 {
 	VERIFY3S(bus, !=, 0);
 
+	if (bus > BCM2711_MAX_BUS || dev != 0 || func != 0)
+		return;
+
 	ddi_put32(softc->bc_handle,
 	    (uint32_t *)(softc->bc_base + BCM2711_DEV_CFG_INDEX),
 	    PCIE_CADDR_ECAM(bus, dev, func, 0));
 
-	switch (size * NBBY) {
-	case 8:
+	switch (size) {
+	case PCI_CFG_SIZE_BYTE:
 		ddi_put8(softc->bc_handle,
 		    (uint8_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg),
 		    val);
 		break;
-	case 16:
+	case PCI_CFG_SIZE_WORD:
 		ddi_put16(softc->bc_handle,
 		    (uint16_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg),
 		    val);
 		break;
-	case 32:
+	case PCI_CFG_SIZE_DWORD:
 		ddi_put32(softc->bc_handle,
 		    (uint32_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg),
 		    val);
 		break;
-	case 64:
+	case PCI_CFG_SIZE_QWORD:
 		ddi_put64(softc->bc_handle,
 		    (uint64_t *)(softc->bc_base + BCM2711_DEV_CFG_DATA + reg),
 		    val);
@@ -229,7 +268,7 @@ bcm2711_cfgspace_acc(pci_cfgacc_req_t *req)
 
 	if (!pcie_cfgspace_access_check(bus, dev, func, reg, req->size)) {
 		if (!req->write)
-			VAL64(req) = -1;
+			VAL64(req) = PCI_EINVAL64;
 		return;
 	}
 
@@ -269,6 +308,56 @@ bcm2711_pcie_bus_config(dev_info_t *pdip, uint_t flags, ddi_bus_config_op_t op,
 	return (rval);
 }
 
+static uint32_t
+bcm2711_pcie_read_reg(const bcm2711_pcie_softc_t *softc, uint32_t reg)
+{
+	uint32_t val =
+	    ddi_get32(softc->bc_handle, (uint32_t *)(softc->bc_base + reg));
+
+	return (val);
+}
+
+static void
+bcm2711_pcie_write_reg(const bcm2711_pcie_softc_t *softc, uint32_t reg,
+    uint32_t val)
+{
+	ddi_put32(softc->bc_handle, (uint32_t *)(softc->bc_base + reg), val);
+}
+
+static void
+bcm2711_pcie_reset_controller(const bcm2711_pcie_softc_t *softc)
+{
+	uint32_t val;
+
+	val = bcm2711_pcie_read_reg(softc, BCM2711_REG_BRIDGE_CTRL);
+	val |= BCM2711_BRIDGE_DISABLE_FLAG | BCM2711_BRIDGE_RESET_FLAG;
+	bcm2711_pcie_write_reg(softc, BCM2711_REG_BRIDGE_CTRL, val);
+
+	drv_usecwait(100);
+
+	val = bcm2711_pcie_read_reg(softc, BCM2711_REG_BRIDGE_CTRL);
+	val &= ~BCM2711_BRIDGE_RESET_FLAG;
+	bcm2711_pcie_write_reg(softc, BCM2711_REG_BRIDGE_CTRL, val);
+
+	drv_usecwait(100);
+
+	bcm2711_pcie_write_reg(softc, BCM2711_REG_PCIE_HARD_DEBUG, 0);
+
+	drv_usecwait(100);
+}
+
+static void
+bcm2711_pcie_enable_controller(const bcm2711_pcie_softc_t *softc)
+{
+	uint32_t val;
+
+	val = bcm2711_pcie_read_reg(softc, BCM2711_REG_BRIDGE_CTRL);
+	val &= ~BCM2711_BRIDGE_DISABLE_FLAG;
+	bcm2711_pcie_write_reg(softc, BCM2711_REG_BRIDGE_CTRL, val);
+
+	drv_usecwait(100);
+}
+
 int
 bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
@@ -306,6 +395,48 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 	VERIFY3U(softc->bc_base, !=, 0);
 
+	bcm2711_pcie_reset_controller(softc);
+
+	uint32_t hw_rev = bcm2711_pcie_read_reg(softc,
+	    BCM2711_REG_CONTROLLER_HW_REV) & 0xffff;
+
+	dev_err(dip, CE_NOTE, "hardware revision: 0x%x.", hw_rev);
+
+	bcm2711_pcie_enable_controller(softc);
+
+	/*
+	 * wait for controller startup
+	 */
+	for (uint_t i = 0;; i++) {
+		uint32_t bstate =
+		    bcm2711_pcie_read_reg(softc, BCM2711_REG_BRIDGE_STATE);
+
+		if ((bstate & 0x30) == 0x30)
+			break;
+
+		/*
+		 * The controller failed to start in 100 ms
+		 */
+		if (i >= 100) {
+			dev_err(dip, CE_WARN, "controller failed to start");
+			return (DDI_FAILURE);
+		}
+
+		drv_usecwait(1000);
+	}
+
+	uint32_t link_state =
+	    bcm2711_pcie_read_reg(softc, BCM2711_REG_BRIDGE_LINK_STATE) >> 0x10;
+
+	if (link_state == 0) {
+		dev_err(dip, CE_WARN, "controller started but link is not up");
+		return (DDI_FAILURE);
+	}
+
+	/*
+	 * XXXPCI: do we need to set the CPU->PCI memory window?
+	 */
+
 	/*
 	 * XXXPCI: This is not the mechanism I would prefer, but I cannot find
 	 * one I prefer.
@@ -314,7 +445,7 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	    OBP_CFGSPACE_HOOK, (intptr_t)&bcm2711_cfgspace_acc)) !=
 	    DDI_PROP_SUCCESS) {
 		dev_err(dip, CE_WARN, "failed to set cfgspace access "
-		    "hook: %d\n", ret);
+		    "hook: %d", ret);
 		return (DDI_FAILURE);
 	}
 
