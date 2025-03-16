@@ -24,6 +24,7 @@
  */
 /*
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 /*
@@ -400,8 +401,19 @@ create_devinfo_tree(void)
 	pnode_t nodeid;
 
 	i_ddi_node_cache_init();
-#if defined(__sparc) || defined(__aarch64__)
+#if defined(__sparc)
 	nodeid = prom_nextnode(0);
+#elif defined(__aarch64__)
+	/*
+	 * On ACPI systems we have an entirely software-defined tree like we
+	 * do on i86pc. When we're not using ACPI we assume FDT, which means
+	 * that we are PROM-backed like we would be on SPARC.
+	 */
+	if (BOP_GETPROPLEN(bootops, "acpi-root-tab") != -1) {
+		nodeid = DEVI_SID_NODEID;
+	} else {
+		nodeid = prom_nextnode(0);
+	}
 #else /* x86 */
 	nodeid = DEVI_SID_NODEID;
 #endif
@@ -432,13 +444,17 @@ create_devinfo_tree(void)
 #if !defined(__sparc)
 	/*
 	 * On x86, there is no prom. Create device tree by
-	 * probing pci config space
+	 * probing pci config space.
+	 *
+	 * On aarch64 the is no prom, but there may be
+	 * prom-like tables, and there may be ACPI, in
+	 * which case an x86-like path is needed.
 	 */
 	{
 		extern void impl_setup_ddi(void);
 		impl_setup_ddi();
 	}
-#endif /* x86 */
+#endif /* !__sparc */
 }
 
 /*
