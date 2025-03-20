@@ -1,4 +1,5 @@
 #
+
 # CDDL HEADER START
 #
 # The contents of this file are subject to the terms of the
@@ -19,13 +20,12 @@
 # CDDL HEADER END
 #
 #
-# uts/i86pc/pcie/Makefile
-#
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright 2019 Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).

@@ -2008,7 +2008,6 @@ pcie_init_bus(dev_info_t *dip, pcie_req_id_t bdf, uint8_t flags)
 	}
 
 	/* Then, relevant extended capabilities */
-
 	if (!PCIE_IS_PCIE(bus_p))
 		goto caps_done;
 

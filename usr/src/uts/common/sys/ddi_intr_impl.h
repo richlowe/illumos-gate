@@ -292,7 +292,6 @@ typedef struct devinfo_intr {
 
 	ddi_intr_handle_t *devi_intr_handle_p;	/* Hdl for legacy intr APIs */
 
-	/* XXXPCI: Why no sparc? */
 #if defined(__x86) || defined(__aarch64__)
 	/* Save the PCI config space handle */
 	ddi_acc_handle_t devi_cfg_handle;

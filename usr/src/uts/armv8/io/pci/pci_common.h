@@ -35,7 +35,7 @@ extern "C" {
 
 /*
  *	Common header file with definitions shared between
- *	pci(4D) and npe(4D)
+ *	pci(4D) and pcierc(4D)
  */
 
 /* State structure. */
@@ -49,10 +49,11 @@ typedef struct pci_state {
 	kmutex_t pci_err_mutex;
 
 	/*
-	 * The following members are only used by npe(4D).
-	 * See uts/i86pc/io/pciex/npe.c for more information.
+	 * The following members are only used by pcierc(4D).
+	 * See uts/armv8/io/pciex/pcierc/pcierc.c for more information.
 	 */
 	ndi_event_hdl_t pci_ndi_event_hdl;
+	boolean_t pci_enumerated;
 } pci_state_t;
 
 /*

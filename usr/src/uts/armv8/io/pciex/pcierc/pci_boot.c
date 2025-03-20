@@ -107,15 +107,12 @@
 #include <sys/plat/pci_prd.h>
 #include <sys/obpdefs.h>
 
-/* pci bus resource maps */
-struct pci_bus_resource *pci_bus_res;
-
 #define	dcmn_err	if (pci_boot_debug != 0) cmn_err
 #define	bus_debug(bus)	(pci_boot_debug != 0 && pci_debug_bus_start != -1 && \
 	    pci_debug_bus_end != -1 && (bus) >= pci_debug_bus_start && \
 	    (bus) <= pci_debug_bus_end)
-#define	dump_memlists(tag, bus) \
-	if (bus_debug((bus))) dump_memlists_impl((tag), (bus))
+#define	dump_memlists(pbr, tag, bus)				\
+	if (bus_debug((bus))) dump_memlists_impl(pbr, (tag), (bus))
 #define	MSGHDR		"!%s[%02x/%02x/%x]: "
 
 /*
@@ -148,37 +145,30 @@ typedef enum {
 static uchar_t max_dev_pci = 32;	/* PCI standard */
 int pci_boot_maxbus;
 
-int pci_boot_debug = 1;
+int pci_boot_debug = 0;
 int pci_debug_bus_start = 0;
-int pci_debug_bus_end = 0x4;
+int pci_debug_bus_end = 0xff;
 
-static int num_root_bus = 0;	/* count of root buses */
 extern dev_info_t *pcie_get_rc_dip(dev_info_t *);
-boolean_t create_pcie_root_bus(uchar_t, dev_info_t *);
 
 /*
  * Module prototypes
  */
-static void enumerate_bus_devs(dev_info_t *, uchar_t);
-static void process_devfunc(dev_info_t *, uchar_t, uchar_t, uchar_t);
-static void add_reg_props(dev_info_t *, dev_info_t *, uchar_t, uchar_t, uchar_t,
-    boolean_t);
-static void add_ppb_props(dev_info_t *, dev_info_t *, uchar_t, uchar_t, uchar_t,
-    boolean_t, boolean_t);
-static void add_bus_range_prop(int);
-static void add_ranges_prop(int, boolean_t);
-static void add_bus_available_prop(int);
-static void alloc_res_array(void);
-
-dev_info_t *
-pci_boot_bus_to_dip(uint32_t busno)
-{
-	ASSERT3U(busno, <=, pci_boot_maxbus);
-	return (pci_bus_res[busno].dip);
-}
+static void enumerate_bus_devs(dev_info_t *, uchar_t,
+    struct pci_bus_resource *);
+static void process_devfunc(dev_info_t *, struct pci_bus_resource *,
+    uchar_t, uchar_t, uchar_t);
+static void add_reg_props(dev_info_t *, dev_info_t *, struct pci_bus_resource *,
+    uchar_t, uchar_t, uchar_t);
+static void add_ppb_props(dev_info_t *, dev_info_t *, struct pci_bus_resource *,
+    uchar_t, uchar_t, uchar_t, boolean_t, boolean_t);
+static void add_bus_range_prop(struct pci_bus_resource *, int);
+static void add_ranges_prop(struct pci_bus_resource *, int, boolean_t);
+static void alloc_res_array(struct pci_bus_resource **);
 
 static void
-dump_memlists_impl(const char *tag, int bus)
+dump_memlists_impl(struct pci_bus_resource *pci_bus_res, const char *tag,
+    int bus)
 {
 	printf("Memlist dump at %s - bus %x\n", tag, bus);
 	if (pci_bus_res[bus].io_used != NULL) {
@@ -213,67 +203,52 @@ dump_memlists_impl(const char *tag, int bus)
 void
 pci_setup_tree(dev_info_t *dip)
 {
+	/* pci bus resource maps */
+	struct pci_bus_resource *pci_bus_res = NULL;
 	uint_t i;
-	uint_t root_bus_addr = 0;
-	static boolean_t initialized = B_FALSE;
 
-	/* No root complex driver has initialized yet, set up global data */
-	if (!initialized) {
-		initialized = B_TRUE;
-		alloc_res_array();
+	alloc_res_array(&pci_bus_res);
 
-		for (i = 0; i <= pci_boot_maxbus; i++) {
-			pci_bus_res[i].par_bus = (uchar_t)-1;
-			pci_bus_res[i].root_addr = (uchar_t)-1;
-			pci_bus_res[i].sub_bus = i;
-		}
+	for (i = 0; i <= pci_boot_maxbus; i++) {
+		pci_bus_res[i].par_bus = (uchar_t)-1;
+		pci_bus_res[i].sub_bus = i;
 	}
 
-	int bus_def[] = {0, 0xff};
-	int *busrng;
-	uint_t busrng_sz;
+	int busrng[] = {0, 0xff};
+	int *bus_prop;
+	uint_t bus_prop_sz;
 
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS, "bus-range",
-	    &busrng, &busrng_sz) == DDI_SUCCESS) {
-		VERIFY3U(busrng_sz, ==, 2);
-		bus_def[0] = busrng[0];
-		bus_def[1] = busrng[1];
-		ddi_prop_free(busrng);
+	    &bus_prop, &bus_prop_sz) == DDI_SUCCESS) {
+		VERIFY3U(bus_prop_sz, ==, 2);
+		busrng[0] = bus_prop[0];
+		busrng[1] = bus_prop[1];
+		ddi_prop_free(bus_prop);
 	}
 
 	/* We have already run through this dip */
-	if (pci_bus_res[bus_def[0]].dip != NULL) {
-		VERIFY3P(pci_bus_res[bus_def[0]].dip, ==, dip);
+	if (pci_bus_res[busrng[0]].dip != NULL) {
+		VERIFY3P(pci_bus_res[busrng[0]].dip, ==, dip);
 		return;
 	}
-
-	dev_err(dip, CE_NOTE, "PCI enumerating [%d, %d]",
-	    bus_def[0], bus_def[1]);
-
-	num_root_bus++;
 
 	/*
 	 * The first bus is _our_ bus, others in the range
 	 * are available to subordinate bridges.
 	 */
-	pci_bus_res[bus_def[0]].dip = dip;
-	pci_bus_res[bus_def[0]].root_addr = root_bus_addr++;
+	pci_bus_res[busrng[0]].dip = dip;
 
-	if (create_pcie_root_bus(bus_def[0], dip) == B_FALSE) {
-		/*
-		 * Undo (most of) what create_pcie_root_bus did,
-		 * while failing
-		 */
-		(void) ndi_prop_update_string(DDI_DEV_T_NONE,
-		    dip, OBP_DEVICETYPE, "pci");
+	for (int i = busrng[0]; i <= busrng[1]; i++) {
+		enumerate_bus_devs(dip, i, pci_bus_res);
 	}
+}
 
-	(void) ndi_devi_bind_driver(dip, 0);
-
-	for (int i = bus_def[0]; i <= bus_def[1]; i++) {
-		enumerate_bus_devs(dip, i);
-	}
+void
+pci_enumerate(dev_info_t *dip)
+{
+	pci_boot_maxbus = pci_prd_max_bus();
+	pci_setup_tree(dip);
 }
 
 static void
@@ -382,11 +357,11 @@ fetch_ppb_res(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
 		base = ((val & PCI_BCNF_IO_MASK) << PCI_BCNF_IO_SHIFT);
 
 		if ((val & PCI_BCNF_ADDR_MASK) == PCI_BCNF_IO_32BIT) {
-			val = pci_cfgacc_get16(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_IO_BASE_HI);
+			val = pci_cfgacc_get16(rcdip,
+			    PCI_GETBDF(bus, dev, func), PCI_BCNF_IO_BASE_HI);
 			base |= val << 16;
-			val = pci_cfgacc_get16(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_IO_LIMIT_HI);
+			val = pci_cfgacc_get16(rcdip,
+			    PCI_GETBDF(bus, dev, func), PCI_BCNF_IO_LIMIT_HI);
 			limit |= val << 16;
 		}
 		VERIFY0(base >> 32);
@@ -413,11 +388,11 @@ fetch_ppb_res(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
 		base = ((val & PCI_BCNF_MEM_MASK) << PCI_BCNF_MEM_SHIFT);
 
 		if ((val & PCI_BCNF_ADDR_MASK) == PCI_BCNF_PF_MEM_64BIT) {
-			val = pci_cfgacc_get32(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_PF_BASE_HIGH);
+			val = pci_cfgacc_get32(rcdip,
+			    PCI_GETBDF(bus, dev, func), PCI_BCNF_PF_BASE_HIGH);
 			base |= val << 32;
-			val = pci_cfgacc_get32(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_PF_LIMIT_HIGH);
+			val = pci_cfgacc_get32(rcdip,
+			    PCI_GETBDF(bus, dev, func), PCI_BCNF_PF_LIMIT_HIGH);
 			limit |= val << 32;
 		}
 		break;
@@ -435,7 +410,8 @@ fetch_ppb_res(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
  * to hold the already configured device details.
  */
 void
-enumerate_bus_devs(dev_info_t *rcdip, uchar_t bus)
+enumerate_bus_devs(dev_info_t *rcdip, uchar_t bus,
+    struct pci_bus_resource *pci_bus_res)
 {
 	uchar_t dev, func, nfunc, header;
 
@@ -478,7 +454,7 @@ enumerate_bus_devs(dev_info_t *rcdip, uchar_t bus)
 
 			dcmn_err(CE_CONT, "%x:%x:%x process_devfunc\n", bus,
 			    dev, func);
-			process_devfunc(rcdip, bus, dev, func);
+			process_devfunc(rcdip, pci_bus_res, bus, dev, func);
 		}
 	}
 
@@ -517,110 +493,6 @@ enumerate_bus_devs(dev_info_t *rcdip, uchar_t bus)
 	}
 }
 
-/*
- * As a workaround for devices which is_pciide() (below, which see) would not
- * match due to device issues, check an undocumented device tree property
- * 'pci-ide', the value of which is a 1275 device identifier.
- *
- * Should a device matching this (in normal 'compatible' order) be found, and
- * the device not otherwise bound, it will be have its node name changed to
- * 'pci-ide' so the pci-ide driver will attach.
- *
- * This can be set via `eeprom pci-ide=pciXXXX,YYYY` (see eeprom(8)) or
- * otherwise added to bootenv.rc.
- */
-static boolean_t
-check_pciide_prop(uchar_t revid, ushort_t venid, ushort_t devid,
-    ushort_t subvenid, ushort_t subdevid)
-{
-	static int prop_exist = -1;
-	static char *pciide_str;
-	char compat[32];
-
-	if (prop_exist == -1) {
-		prop_exist = (ddi_prop_lookup_string(DDI_DEV_T_ANY,
-		    ddi_root_node(), DDI_PROP_DONTPASS, "pci-ide",
-		    &pciide_str) == DDI_SUCCESS);
-	}
-
-	if (!prop_exist)
-		return (B_FALSE);
-
-	/* compare property value against various forms of compatible */
-	if (subvenid) {
-		(void) snprintf(compat, sizeof (compat), "pci%x,%x.%x.%x.%x",
-		    venid, devid, subvenid, subdevid, revid);
-		if (strcmp(pciide_str, compat) == 0)
-			return (B_TRUE);
-
-		(void) snprintf(compat, sizeof (compat), "pci%x,%x.%x.%x",
-		    venid, devid, subvenid, subdevid);
-		if (strcmp(pciide_str, compat) == 0)
-			return (B_TRUE);
-
-		(void) snprintf(compat, sizeof (compat), "pci%x,%x",
-		    subvenid, subdevid);
-		if (strcmp(pciide_str, compat) == 0)
-			return (B_TRUE);
-	}
-	(void) snprintf(compat, sizeof (compat), "pci%x,%x.%x",
-	    venid, devid, revid);
-	if (strcmp(pciide_str, compat) == 0)
-		return (B_TRUE);
-
-	(void) snprintf(compat, sizeof (compat), "pci%x,%x", venid, devid);
-	if (strcmp(pciide_str, compat) == 0)
-		return (B_TRUE);
-
-	return (B_FALSE);
-}
-
-static boolean_t
-is_pciide(const pci_prop_data_t *prop)
-{
-	struct ide_table {
-		ushort_t venid;
-		ushort_t devid;
-	};
-
-	/*
-	 * Devices which need to be matched specially as pci-ide because of
-	 * various device issues.  Commonly their specification as being
-	 * PCI_MASS_OTHER or PCI_MASS_SATA despite our using them in ATA mode.
-	 */
-	static struct ide_table ide_other[] = {
-		{0x1095, 0x3112}, /* Silicon Image 3112 SATALink/SATARaid */
-		{0x1095, 0x3114}, /* Silicon Image 3114 SATALink/SATARaid */
-		{0x1095, 0x3512}, /* Silicon Image 3512 SATALink/SATARaid */
-		{0x1095, 0x680},  /* Silicon Image PCI0680 Ultra ATA-133 */
-		{0x1283, 0x8211} /* Integrated Technology Express 8211F */
-	};
-
-	if (prop->ppd_class != PCI_CLASS_MASS)
-		return (B_FALSE);
-
-	if (prop->ppd_subclass == PCI_MASS_IDE) {
-		return (B_TRUE);
-	}
-
-	if (check_pciide_prop(prop->ppd_rev, prop->ppd_vendid,
-	    prop->ppd_devid, prop->ppd_subvid, prop->ppd_subsys)) {
-		return (B_TRUE);
-	}
-
-	if (prop->ppd_subclass != PCI_MASS_OTHER &&
-	    prop->ppd_subclass != PCI_MASS_SATA) {
-		return (B_FALSE);
-	}
-
-	for (size_t i = 0; i < ARRAY_SIZE(ide_other); i++) {
-		if (ide_other[i].venid == prop->ppd_vendid &&
-		    ide_other[i].devid == prop->ppd_devid)
-			return (B_TRUE);
-	}
-	return (B_FALSE);
-}
-
 static void
 set_devpm_d0(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func)
 {
@@ -652,8 +524,8 @@ set_devpm_d0(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func)
 		cap_id = pci_cfgacc_get8(rcdip, PCI_GETBDF(bus, dev, func),
 		    cap_ptr + PCI_CAP_ID);
 		if (cap_id == PCI_CAP_ID_PM) {
-			pmcsr = pci_cfgacc_get16(rcdip, PCI_GETBDF(bus, dev, func),
-			    cap_ptr + PCI_PMCSR);
+			pmcsr = pci_cfgacc_get16(rcdip,
+			    PCI_GETBDF(bus, dev, func), cap_ptr + PCI_PMCSR);
 			pmcsr &= ~(PCI_PMCSR_STATE_MASK);
 			pmcsr |= PCI_PMCSR_D0; /* D0 state */
 			pci_cfgacc_put16(rcdip, PCI_GETBDF(bus, dev, func),
@@ -667,12 +539,12 @@ set_devpm_d0(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func)
 }
 
 static void
-process_devfunc(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func)
+process_devfunc(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
+    uchar_t bus, uchar_t dev, uchar_t func)
 {
 	pci_prop_data_t prop_data;
 	pci_prop_failure_t prop_ret;
 	dev_info_t *dip;
-	boolean_t pciide = B_FALSE;
 	int power[2] = {1, 1};
 	pcie_req_id_t bdf;
 
@@ -681,11 +553,6 @@ process_devfunc(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func)
 		cmn_err(CE_WARN, MSGHDR "failed to get basic PCI data: 0x%x",
 		    "pci", bus, dev, func, prop_ret);
 		return;
-	}
-
-	if (prop_data.ppd_header == PCI_HEADER_CARDBUS) {
-		/* Record the # of cardbus bridges found on the bus */
-		pci_bus_res[bus].num_cbb++;
 	}
 
 	VERIFY3P(pci_bus_res[bus].dip, !=, NULL);
@@ -738,7 +605,8 @@ process_devfunc(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func)
 		boolean_t pciex = (prop_data.ppd_flags & PCI_PROP_F_PCIE) != 0;
 		boolean_t is_pci_bridge = pciex &&
 		    prop_data.ppd_pcie_type == PCIE_PCIECAP_DEV_TYPE_PCIE2PCI;
-		add_ppb_props(rcdip, dip, bus, dev, func, pciex, is_pci_bridge);
+		add_ppb_props(rcdip, dip, pci_bus_res, bus, dev, func, pciex,
+		    is_pci_bridge);
 	}
 
 	prop_ret = pci_prop_set_compatible(dip, &prop_data);
@@ -748,116 +616,9 @@ process_devfunc(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func)
 		    func, prop_ret);
 	}
 
-	/*
-	 * See if this device is a controller that advertises
-	 * itself to be a standard ATA task file controller, or one that
-	 * has been hard coded.
-	 *
-	 * If it is, check if any other higher precedence driver listed in
-	 * driver_aliases will claim the node by calling
-	 * ddi_compatible_driver_major.  If so, clear pciide and do not
-	 * create a pci-ide node or any other special handling.
-	 *
-	 * If another driver does not bind, set the node name to pci-ide
-	 * and then let the special pci-ide handling for registers and
-	 * child pci-ide nodes proceed below.
-	 */
-	if (is_pciide(&prop_data)) {
-		if (ddi_compatible_driver_major(dip, NULL) == (major_t)-1) {
-			(void) ndi_devi_set_nodename(dip, "pci-ide", 0);
-			pciide = B_TRUE;
-		}
-	}
-
 	DEVI_SET_PCI(dip);
-	add_reg_props(rcdip, dip, bus, dev, func, pciide);
+	add_reg_props(rcdip, dip, pci_bus_res, bus, dev, func);
 	(void) ndi_devi_bind_driver(dip, 0);
-
-	/* special handling for pci-ide */
-	if (pciide) {
-		dev_info_t *cdip;
-
-		/*
-		 * Create properties specified by P1275 Working Group
-		 * Proposal #414 Version 1
-		 */
-		(void) ndi_prop_update_string(DDI_DEV_T_NONE, dip,
-		    OBP_DEVICETYPE, "pci-ide");
-		(void) ndi_prop_update_int(DDI_DEV_T_NONE, dip,
-		    OBP_ADDRESS_CELLS, 1);
-		(void) ndi_prop_update_int(DDI_DEV_T_NONE, dip,
-		    OBP_SIZE_CELLS, 0);
-
-		/* allocate two child nodes */
-		ndi_devi_alloc_sleep(dip, "ide",
-		    (pnode_t)DEVI_SID_NODEID, &cdip);
-		(void) ndi_prop_update_int(DDI_DEV_T_NONE, cdip,
-		    OBP_REG, 0);
-		(void) ndi_devi_bind_driver(cdip, 0);
-		ndi_devi_alloc_sleep(dip, "ide",
-		    (pnode_t)DEVI_SID_NODEID, &cdip);
-		(void) ndi_prop_update_int(DDI_DEV_T_NONE, cdip,
-		    OBP_REG, 1);
-		(void) ndi_devi_bind_driver(cdip, 0);
-	}
-}
-
-/*
- * Adjust the reg properties for a dual channel PCI-IDE device.
- *
- * NOTE: don't do anything that changes the order of the hard-decodes
- * and programmed BARs. The kernel driver depends on these values
- * being in this order regardless of whether they're for a 'native'
- * mode BAR or not.
- */
-/*
- * config info for pci-ide devices
- */
-static struct {
-	uchar_t  native_mask;	/* 0 == 'compatibility' mode, 1 == native */
-	uchar_t  bar_offset;	/* offset for alt status register */
-	ushort_t addr;		/* compatibility mode base address */
-	ushort_t length;	/* number of ports for this BAR */
-} pciide_bar[] = {
-	{ 0x01, 0, 0x1f0, 8 },	/* primary lower BAR */
-	{ 0x01, 2, 0x3f6, 1 },	/* primary upper BAR */
-	{ 0x04, 0, 0x170, 8 },	/* secondary lower BAR */
-	{ 0x04, 2, 0x376, 1 }	/* secondary upper BAR */
-};
-
-static boolean_t
-pciide_adjust_bar(uchar_t progcl, uint_t bar, uint_t *basep, uint_t *lenp)
-{
-	boolean_t hard_decode = B_FALSE;
-
-	/*
-	 * Adjust the base and len for the BARs of the PCI-IDE
-	 * device's primary and secondary controllers. The first
-	 * two BARs are for the primary controller and the next
-	 * two BARs are for the secondary controller. The fifth
-	 * and sixth bars are never adjusted.
-	 */
-	if (bar <= 3) {
-		*lenp = pciide_bar[bar].length;
-
-		if (progcl & pciide_bar[bar].native_mask) {
-			*basep += pciide_bar[bar].bar_offset;
-		} else {
-			*basep = pciide_bar[bar].addr;
-			hard_decode = B_TRUE;
-		}
-	}
-
-	/*
-	 * if either base or len is zero make certain both are zero
-	 */
-	if (*basep == 0 || *lenp == 0) {
-		*basep = 0;
-		*lenp = 0;
-		hard_decode = B_FALSE;
-	}
-
-	return (hard_decode);
 }
 
 /*
@@ -866,11 +627,11 @@ pciide_adjust_bar(uchar_t progcl, uint_t bar, uint_t *basep, uint_t *lenp)
  *	 0	Properties have been assigned
  */
 static int
-add_bar_reg_props(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
-    uint_t bar, ushort_t offset, pci_regspec_t *regs, pci_regspec_t *assigned,
-    ushort_t *bar_sz, boolean_t pciide)
+add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
+    uchar_t bus, uchar_t dev, uchar_t func, uint_t bar, ushort_t offset,
+    pci_regspec_t *regs, pci_regspec_t *assigned, ushort_t *bar_sz)
 {
-	uint8_t baseclass, subclass, progclass;
+	uint8_t baseclass;
 	uint32_t base, devloc;
 	uint16_t command = 0;
 	uint64_t value;
@@ -878,10 +639,6 @@ add_bar_reg_props(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
 	devloc = PCI_REG_MAKE_BDFR(bus, dev, func, 0);
 	baseclass = pci_cfgacc_get8(rcdip, PCI_GETBDF(bus, dev, func),
 	    PCI_CONF_BASCLASS);
-	subclass = pci_cfgacc_get8(rcdip, PCI_GETBDF(bus, dev, func),
-	    PCI_CONF_SUBCLASS);
-	progclass = pci_cfgacc_get8(rcdip, PCI_GETBDF(bus, dev, func),
-	    PCI_CONF_PROGCLASS);
 
 	/*
 	 * Determine the size of the BAR by writing 0xffffffff to the base
@@ -912,7 +669,7 @@ add_bar_reg_props(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
 	}
 
 	/* I/O Space */
-	if ((pciide && bar < 4) || (base & PCI_BASE_SPACE_IO) != 0) {
+	if ((base & PCI_BASE_SPACE_IO) != 0) {
 		struct memlist **io_avail = &pci_bus_res[bus].io_avail;
 		struct memlist **io_used = &pci_bus_res[bus].io_used;
 		boolean_t hard_decode = B_FALSE;
@@ -922,15 +679,7 @@ add_bar_reg_props(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
 		value &= PCI_BASE_IO_ADDR_M;
 		len = BARMASKTOLEN(value);
 
-		/* XXX Adjust first 4 IDE registers */
-		if (pciide) {
-			if (subclass != PCI_MASS_IDE) {
-				progclass = (PCI_IDE_IF_NATIVE_PRI |
-				    PCI_IDE_IF_NATIVE_SEC);
-			}
-			hard_decode = pciide_adjust_bar(progclass, bar,
-			    &base, &len);
-		} else if (value == 0) {
+		if (value == 0) {
 			/* skip base regs with size of 0 */
 			return (-1);
 		}
@@ -1058,8 +807,9 @@ add_bar_reg_props(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
  * Add the "reg" and "assigned-addresses" property
  */
 static void
-add_reg_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev, uchar_t func,
-    boolean_t pciide)
+add_reg_props(dev_info_t *rcdip, dev_info_t *dip,
+    struct pci_bus_resource *pci_bus_res, uchar_t bus, uchar_t dev,
+    uchar_t func)
 {
 	uchar_t baseclass, subclass, progclass, header;
 	uint_t bar, value, devloc, base;
@@ -1080,7 +830,7 @@ add_reg_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev, ucha
 	mem_used = &pci_bus_res[bus].mem_used;
 	pmem_avail = &pci_bus_res[bus].pmem_avail;
 
-	dump_memlists("add_reg_props start", bus);
+	dump_memlists(pci_bus_res, "add_reg_props start", bus);
 
 	devloc = PCI_REG_MAKE_BDFR(bus, dev, func, 0);
 	regs[0].pci_phys_hi = devloc;
@@ -1113,8 +863,8 @@ add_reg_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev, ucha
 	    bar++, offset += bar_sz) {
 		int ret;
 
-		ret = add_bar_reg_props(rcdip, bus, dev, func, bar, offset,
-		    &regs[nreg], &assigned[nasgn], &bar_sz, pciide);
+		ret = add_bar_reg_props(rcdip, pci_bus_res, bus, dev, func, bar,
+		    offset, &regs[nreg], &assigned[nasgn], &bar_sz);
 
 		if (bar_sz == PCI_BAR_SZ_64)
 			bar++;
@@ -1241,7 +991,7 @@ add_reg_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev, ucha
 	}
 
 done:
-	dump_memlists("add_reg_props end", bus);
+	dump_memlists(pci_bus_res, "add_reg_props end", bus);
 
 	(void) ndi_prop_update_int_array(DDI_DEV_T_NONE, dip, OBP_REG,
 	    (int *)regs, nreg * sizeof (pci_regspec_t) / sizeof (int));
@@ -1251,7 +1001,8 @@ done:
 }
 
 static void
-add_ppb_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev,
+add_ppb_props(dev_info_t *rcdip, dev_info_t *dip,
+    struct pci_bus_resource *pci_bus_res, uchar_t bus, uchar_t dev,
     uchar_t func, boolean_t pciex, boolean_t is_pci_bridge)
 {
 	char *dev_type;
@@ -1274,8 +1025,8 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev,
 	pci_bus_res[secbus].dip = dip;
 	pci_bus_res[secbus].par_bus = bus;
 
-	dump_memlists("add_ppb_props start bus", bus);
-	dump_memlists("add_ppb_props start secbus", secbus);
+	dump_memlists(pci_bus_res, "add_ppb_props start bus", bus);
+	dump_memlists(pci_bus_res, "add_ppb_props start secbus", secbus);
 
 	/*
 	 * Check if it's a subtractive PPB.
@@ -1285,32 +1036,23 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev,
 	if (progclass == PCI_BRIDGE_PCI_IF_SUBDECODE)
 		pci_bus_res[secbus].subtractive = B_TRUE;
 
-	/*
-	 * Some firmware lies about max pci busses, we allow for
-	 * such mistakes here
-	 */
-	if (subbus > pci_boot_maxbus) {
-		pci_boot_maxbus = subbus;
-		alloc_res_array();
-	}
-
 	dev_type = (pciex && !is_pci_bridge) ? "pciex" : "pci";
 
 	/* set up bus number hierarchy */
 	pci_bus_res[secbus].sub_bus = subbus;
 	/*
 	 * Keep track of the largest subordinate bus number (this is essential
-	 * for peer busses because there is no other way of determining its
+	 * for peer buses because there is no other way of determining its
 	 * subordinate bus number).
 	 */
 	if (subbus > pci_bus_res[bus].sub_bus)
 		pci_bus_res[bus].sub_bus = subbus;
 	/*
-	 * Loop through subordinate busses, initializing their parent bus
-	 * field to this bridge's parent.  The subordinate busses' parent
+	 * Loop through subordinate buses, initializing their parent bus
+	 * field to this bridge's parent.  The subordinate buses' parent
 	 * fields may very well be further refined later, as child bridges
-	 * are enumerated.  (The value is to note that the subordinate busses
-	 * are not peer busses by changing their par_bus fields to anything
+	 * are enumerated.  (The value is to note that the subordinate buses
+	 * are not peer buses by changing their par_bus fields to anything
 	 * other than -1.)
 	 */
 	for (i = secbus + 1; i <= subbus; i++)
@@ -1403,7 +1145,8 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev,
 	if ((cmd_reg & PCI_COMM_MAE) == 0 || mem.base == 0) {
 		mem.base = PPB_DISABLE_MEMRANGE_BASE;
 		mem.limit = PPB_DISABLE_MEMRANGE_LIMIT;
-		set_ppb_res(rcdip, bus, dev, func, RES_MEM, mem.base, mem.limit);
+		set_ppb_res(rcdip, bus, dev, func, RES_MEM, mem.base,
+		    mem.limit);
 	} else if (mem.base < mem.limit) {
 		uint64_t size = mem.limit - mem.base + 1;
 
@@ -1423,7 +1166,8 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev,
 	if ((cmd_reg & PCI_COMM_MAE) == 0 || pmem.base == 0) {
 		pmem.base = PPB_DISABLE_MEMRANGE_BASE;
 		pmem.limit = PPB_DISABLE_MEMRANGE_LIMIT;
-		set_ppb_res(rcdip, bus, dev, func, RES_PMEM, pmem.base, pmem.limit);
+		set_ppb_res(rcdip, bus, dev, func, RES_PMEM, pmem.base,
+		    pmem.limit);
 	} else if (pmem.base < pmem.limit) {
 		uint64_t size = pmem.limit - pmem.base + 1;
 
@@ -1476,20 +1220,20 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip, uchar_t bus, uchar_t dev,
 			    0xa0000, 0x20000);
 		}
 	}
-	add_bus_range_prop(secbus);
-	add_ranges_prop(secbus, B_TRUE);
+	add_bus_range_prop(pci_bus_res, secbus);
+	add_ranges_prop(pci_bus_res, secbus, B_TRUE);
 
-	dump_memlists("add_ppb_props end bus", bus);
-	dump_memlists("add_ppb_props end secbus", secbus);
+	dump_memlists(pci_bus_res, "add_ppb_props end bus", bus);
+	dump_memlists(pci_bus_res, "add_ppb_props end secbus", secbus);
 }
 
 /*
  *
- * Insert the "bus-range" property, indicating the busses this node is
+ * Insert the "bus-range" property, indicating the buses this node is
  * responsible for.
  */
 static void
-add_bus_range_prop(int bus)
+add_bus_range_prop(struct pci_bus_resource *pci_bus_res, int bus)
 {
 	int bus_range[2];
 
@@ -1555,7 +1299,7 @@ memlist_to_ranges(void **rp, struct memlist *list, const int bus,
 }
 
 static void
-add_ranges_prop(int bus, boolean_t ppb)
+add_ranges_prop(struct pci_bus_resource *pci_bus_res, int bus, boolean_t ppb)
 {
 	int total, alloc_size;
 	void	*rp, *next_rp;
@@ -1565,7 +1309,7 @@ add_ranges_prop(int bus, boolean_t ppb)
 	if (pci_bus_res[bus].dip == NULL)
 		return;
 
-	dump_memlists("add_ranges_prop", bus);
+	dump_memlists(pci_bus_res, "add_ranges_prop", bus);
 
 	iolist = memlist = pmemlist = (struct memlist *)NULL;
 
@@ -1605,79 +1349,10 @@ add_ranges_prop(int bus, boolean_t ppb)
 	pci_memlist_free_all(&pmemlist);
 }
 
-static int
-memlist_to_spec(struct pci_phys_spec *sp, const int bus, struct memlist *list,
-    const uint32_t type)
-{
-	uint_t i = 0;
-
-	while (list != NULL) {
-		uint32_t newtype = type;
-
-		/*
-		 * If this is in fact a 64-bit address, adjust the address
-		 * type code to match.
-		 */
-		if (list->ml_address + (list->ml_size - 1) > UINT32_MAX) {
-			if ((type & PCI_ADDR_MASK) == PCI_ADDR_IO) {
-				cmn_err(CE_WARN, "Found invalid 64-bit I/O "
-				    "space address 0x%lx+0x%lx on bus %x",
-				    list->ml_address, list->ml_size, bus);
-				list = list->ml_next;
-				continue;
-			}
-			newtype &= ~PCI_ADDR_MASK;
-			newtype |= PCI_ADDR_MEM64;
-		}
-
-		sp->pci_phys_hi = newtype;
-		sp->pci_phys_mid = (uint32_t)(list->ml_address >> 32);
-		sp->pci_phys_low = (uint32_t)list->ml_address;
-		sp->pci_size_hi = (uint32_t)(list->ml_size >> 32);
-		sp->pci_size_low = (uint32_t)list->ml_size;
-
-		list = list->ml_next;
-		sp++, i++;
-	}
-	return (i);
-}
-
-static void __unused
-add_bus_available_prop(int bus)
-{
-	int i, count;
-	struct pci_phys_spec *sp;
-
-	/* no devinfo node - unused bus, return */
-	if (pci_bus_res[bus].dip == NULL)
-		return;
-
-	count = pci_memlist_count(pci_bus_res[bus].io_avail) +
-	    pci_memlist_count(pci_bus_res[bus].mem_avail) +
-	    pci_memlist_count(pci_bus_res[bus].pmem_avail);
-
-	if (count == 0)		/* nothing available */
-		return;
-
-	sp = kmem_alloc(count * sizeof (*sp), KM_SLEEP);
-	i = memlist_to_spec(&sp[0], bus, pci_bus_res[bus].io_avail,
-	    PCI_ADDR_IO | PCI_RELOCAT_B);
-	i += memlist_to_spec(&sp[i], bus, pci_bus_res[bus].mem_avail,
-	    PCI_ADDR_MEM32 | PCI_RELOCAT_B);
-	i += memlist_to_spec(&sp[i], bus, pci_bus_res[bus].pmem_avail,
-	    PCI_ADDR_MEM32 | PCI_RELOCAT_B | PCI_PREFETCH_B);
-	ASSERT(i == count);
-
-	(void) ndi_prop_update_int_array(DDI_DEV_T_NONE, pci_bus_res[bus].dip,
-	    "available", (int *)sp,
-	    i * sizeof (struct pci_phys_spec) / sizeof (int));
-	kmem_free(sp, count * sizeof (*sp));
-}
-
 static void
-alloc_res_array(void)
+alloc_res_array(struct pci_bus_resource **pci_bus_res)
 {
-	static uint_t array_size = 0;
+	uint_t array_size = 0;
 	uint_t old_size;
 	void *old_res;
 
@@ -1685,18 +1360,18 @@ alloc_res_array(void)
 		return;	/* array is big enough */
 
 	old_size = array_size;
-	old_res = pci_bus_res;
+	old_res = *pci_bus_res;
 
 	if (array_size == 0)
 		array_size = 16;	/* start with a reasonable number */
 
 	while (array_size <= pci_boot_maxbus + 1)
 		array_size <<= 1;
-	pci_bus_res = (struct pci_bus_resource *)kmem_zalloc(
+	*pci_bus_res = kmem_zalloc(
 	    array_size * sizeof (struct pci_bus_resource), KM_SLEEP);
 
 	if (old_res) {	/* copy content and free old array */
-		bcopy(old_res, pci_bus_res,
+		bcopy(old_res, *pci_bus_res,
 		    old_size * sizeof (struct pci_bus_resource));
 		kmem_free(old_res, old_size * sizeof (struct pci_bus_resource));
 	}

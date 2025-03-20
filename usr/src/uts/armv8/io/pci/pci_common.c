@@ -25,7 +25,7 @@
  */
 
 /*
- *	File that has code which is common between pci(4D) and npe(4D)
+ *	File that has code which is common between pci(4D) and pcierc(4D)
  *	It shares the following:
  *	- interrupt code
  *	- pci_tools ioctl code
@@ -69,15 +69,6 @@ static void	pci_config_wr32(ddi_acc_impl_t *hdlp, uint32_t *addr,
 		    uint32_t value);
 static void	pci_config_wr64(ddi_acc_impl_t *hdlp, uint64_t *addr,
 		    uint64_t value);
-
-static void	pci_config_rep_rd8(ddi_acc_impl_t *hdlp, uint8_t *host_addr,
-		    uint8_t *dev_addr, size_t repcount, uint_t flags);
-static void	pci_config_rep_rd16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
-		    uint16_t *dev_addr, size_t repcount, uint_t flags);
-static void	pci_config_rep_rd32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
-		    uint32_t *dev_addr, size_t repcount, uint_t flags);
-static void	pci_config_rep_rd64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
-		    uint64_t *dev_addr, size_t repcount, uint_t flags);
 
 static void	pci_config_rep_wr8(ddi_acc_impl_t *hdlp, uint8_t *host_addr,
 		    uint8_t *dev_addr, size_t repcount, uint_t flags);
@@ -151,7 +142,7 @@ pci_common_name_child(dev_info_t *child, char *name, int namelen)
 /*
  * Interrupt related code:
  *
- * The following busop is common to npe and pci drivers
+ * The following busop is common to pcierc and pci drivers
  *	bus_introp
  */
 
@@ -218,9 +209,10 @@ pci_common_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	int			rv = DDI_FAILURE;
 
 	DDI_INTR_NEXDBG((CE_CONT,
-	    "pci_common_intr_ops: pdip 0x%p (%s), rdip 0x%p (%s), op %x handle 0x%p\n",
-	    (void *)pdip, ddi_node_name(pdip), (void *)rdip, ddi_node_name(rdip),
-	    intr_op, (void *)hdlp));
+	    "pci_common_intr_ops: pdip 0x%p (%s), rdip 0x%p (%s), "
+	    "op %x handle 0x%p\n",
+	    (void *)pdip, ddi_node_name(pdip), (void *)rdip,
+	    ddi_node_name(rdip), intr_op, (void *)hdlp));
 
 	ASSERT(RW_WRITE_HELD(&hdlp->ih_rwlock));
 
@@ -302,9 +294,9 @@ SUPPORTED_TYPES_OUT:
 		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)); /* XXXPCI */
 
 		/*
-		 * XXXGIC: I hope the flow here is to ask up the tree regardless,
-		 * possibly with some prior processing, but absent MSI there's
-		 * no processing to do.
+		 * XXXGIC: I hope the flow here is to ask up the tree
+		 * regardless, possibly with some prior processing, but absent
+		 * MSI there's no processing to do.
 		 */
 		if (DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)) {
 			if (pci_msi_get_nintrs(hdlp->ih_dip, hdlp->ih_type,
@@ -321,7 +313,8 @@ SUPPORTED_TYPES_OUT:
 		 */
 		if (hdlp->ih_type == DDI_INTR_TYPE_FIXED) {
 			/*
-			 * XXXGIC: longer term, we just just inline hwat this does
+			 * XXXGIC: longer term, we just just inline hwat this
+			 * does
 			 */
 			pci_alloc_intr_fixed(pdip, rdip, hdlp, result);
 			return (i_ddi_intr_ops(pdip, rdip, intr_op,
@@ -472,7 +465,7 @@ SUPPORTED_TYPES_OUT:
 			return (i_ddi_intr_ops(pdip, rdip, intr_op,
 			    hdlp, result));
 		} else {
-			return (DDI_FAILURE );
+			return (DDI_FAILURE);
 		}
 		break;
 	case DDI_INTROP_GETPRI:
@@ -599,7 +592,10 @@ SUPPORTED_TYPES_OUT:
 			break;
 
 		/* For fixed interrupts only: confer with PSM module next */
-		/* XXXGIC: This would happen hen we passed this request up the tree */
+		/*
+		 * XXXGIC: This would happen hen we passed this request up the
+		 * tree
+		 */
 		ASSERT(0 && "XXXPCI PSM_INTR_OP_GET_SHARED");
 #if XXXPCI
 		if (psm_intr_ops != NULL) {
@@ -1342,23 +1338,6 @@ pci_config_rd8(ddi_acc_impl_t *hdlp, uint8_t *addr)
 	return (rval);
 }
 
-static void
-pci_config_rep_rd8(ddi_acc_impl_t *hdlp, uint8_t *host_addr,
-    uint8_t *dev_addr, size_t repcount, uint_t flags)
-{
-	uint8_t *h, *d;
-
-	h = host_addr;
-	d = dev_addr;
-
-	if (flags == DDI_DEV_AUTOINCR)
-		for (; repcount; repcount--)
-			*h++ = pci_config_rd8(hdlp, d++);
-	else
-		for (; repcount; repcount--)
-			*h++ = pci_config_rd8(hdlp, d);
-}
-
 static uint16_t
 pci_config_rd16(ddi_acc_impl_t *hdlp, uint16_t *addr)
 {
@@ -1377,23 +1356,6 @@ pci_config_rd16(ddi_acc_impl_t *hdlp, uint16_t *addr)
 	    reg);
 
 	return (rval);
-}
-
-static void
-pci_config_rep_rd16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
-    uint16_t *dev_addr, size_t repcount, uint_t flags)
-{
-	uint16_t *h, *d;
-
-	h = host_addr;
-	d = dev_addr;
-
-	if (flags == DDI_DEV_AUTOINCR)
-		for (; repcount; repcount--)
-			*h++ = pci_config_rd16(hdlp, d++);
-	else
-		for (; repcount; repcount--)
-			*h++ = pci_config_rd16(hdlp, d);
 }
 
 static uint32_t
@@ -1415,24 +1377,6 @@ pci_config_rd32(ddi_acc_impl_t *hdlp, uint32_t *addr)
 
 	return (rval);
 }
-
-static void
-pci_config_rep_rd32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
-    uint32_t *dev_addr, size_t repcount, uint_t flags)
-{
-	uint32_t *h, *d;
-
-	h = host_addr;
-	d = dev_addr;
-
-	if (flags == DDI_DEV_AUTOINCR)
-		for (; repcount; repcount--)
-			*h++ = pci_config_rd32(hdlp, d++);
-	else
-		for (; repcount; repcount--)
-			*h++ = pci_config_rd32(hdlp, d);
-}
-
 
 static void
 pci_config_wr8(ddi_acc_impl_t *hdlp, uint8_t *addr, uint8_t value)
@@ -1565,19 +1509,6 @@ pci_config_wr64(ddi_acc_impl_t *hdlp, uint64_t *addr, uint64_t value)
 	pci_config_wr32(hdlp, dp, lw_val);
 	dp++;
 	pci_config_wr32(hdlp, dp, hi_val);
-}
-
-static void
-pci_config_rep_rd64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
-    uint64_t *dev_addr, size_t repcount, uint_t flags)
-{
-	if (flags == DDI_DEV_AUTOINCR) {
-		for (; repcount; repcount--)
-			*host_addr++ = pci_config_rd64(hdlp, dev_addr++);
-	} else {
-		for (; repcount; repcount--)
-			*host_addr++ = pci_config_rd64(hdlp, dev_addr);
-	}
 }
 
 static void

@@ -30,8 +30,6 @@
 #include <sys/dditypes.h>
 #include <sys/ddidmareq.h>
 
-#include <sys/ddi_impldefs.h>	/* XXXARM: namespace crimes? */
-
 /*
  * Sun DDI platform implementation subroutines definitions
  */
@@ -48,9 +46,6 @@ extern int i_ddi_convert_dma_attr(ddi_dma_attr_t *, dev_info_t *,
     const ddi_dma_attr_t *);
 extern int i_ddi_update_dma_attr(dev_info_t *, ddi_dma_attr_t *);
 extern uint32_t i_ddi_get_intr_pri(dev_info_t *dip, uint_t inumber);
-
-extern int i_ddi_get_nreg(dev_info_t *);
-extern int i_ddi_get_reg(dev_info_t *, uint_t, struct regspec *);
 
 #endif	/* _KERNEL */
 

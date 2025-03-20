@@ -37,6 +37,9 @@ pci_cfgacc_acc(pci_cfgacc_req_t *req)
 {
 	acc_impl_t acc_impl;
 
+	VERIFY3P(req, !=, NULL);
+	VERIFY3P(req->rcdip, !=, NULL);
+
 	/*
 	 * XXXPCI: This is not how I would like to do this, but everything else
 	 * in my brain is far worse

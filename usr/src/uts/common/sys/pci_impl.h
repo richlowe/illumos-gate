@@ -106,23 +106,27 @@ struct pci_bus_resource {
 	struct memlist *bus_avail;	/* available free bus res */
 			/* bus_space_used not needed; can read from regs */
 	dev_info_t *dip;	/* devinfo node */
-	void *privdata;		/* private data for configuration */
 	uchar_t par_bus;	/* parent bus number */
 	uchar_t sub_bus;	/* highest bus number beyond this bridge */
-	uchar_t root_addr;	/* legacy peer bus address assignment */
-	uchar_t num_cbb;	/* # of CardBus Bridges on the bus */
 	uchar_t num_bridge;	/* number of bridges under this bus */
-	boolean_t io_reprogram;	/* need io reprog on this bus */
-	boolean_t mem_reprogram;	/* need mem reprog on this bus */
 	boolean_t subtractive;	/* subtractive PPB */
 	uint64_t mem_size;	/* existing children required MEM space size */
 	uint64_t pmem_size;	/* existing children required PMEM space size */
+	uint_t io_size;		/* existing children required I/O space size */
+#if defined(__x86)
+	void *privdata;		/* private data for configuration */
+	uchar_t root_addr;	/* legacy peer bus address assignment */
+	uchar_t num_cbb;	/* # of CardBus Bridges on the bus */
+	boolean_t io_reprogram;	/* need io reprog on this bus */
+	boolean_t mem_reprogram;	/* need mem reprog on this bus */
 	uint64_t mem_buffer;	/* memory available for proactively */
 				/* allocating to bridges for hotplug */
-	uint_t io_size;		/* existing children required I/O space size */
+#endif
 };
 
+#if defined(__x86)
 extern struct pci_bus_resource *pci_bus_res;
+#endif
 
 extern struct memlist *pci_memlist_alloc(void);
 extern void pci_memlist_free(struct memlist *);

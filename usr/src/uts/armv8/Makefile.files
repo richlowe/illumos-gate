@@ -119,8 +119,6 @@ ASSYM_DEPS +=			\
 	swtch.o			\
 	vpanic.o
 
-PCI_AUTOCONFIG_OBJS=	pci_autoconfig.o pci_boot.o
-
 PCI_PRD_OBJS += pci_prd_armv8.o pci_memlist.o
 
 PCIE_MISC_OBJS += pcie_armv8.o
@@ -129,7 +127,7 @@ PCIEB_OBJS += pcieb_armv8.o
 
 PCICFG_OBJS += pcicfg.o
 
-PCI_E_NEXUS_OBJS += npe.o npe_misc.o
-PCI_E_NEXUS_OBJS += pci_common.o pci_tools.o
+PCI_E_RC_OBJS += pcierc.o pci_boot.o
+PCI_E_RC_OBJS += pci_common.o pci_tools.o
 
 ECAM_OBJS += ecam.o

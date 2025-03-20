@@ -788,8 +788,9 @@ cleanup:
 
 	/*
 	 * Use private return codes to help identify issues without debugging
-	 * enabled.  Resource limitations and mis-configurations are
-	 * probably the most likely caue of configuration failures on x86.
+	 * enabled.  Resource limitations and mis-configurations are probably
+	 * the most likely caue of configuration failures.
+	 *
 	 * Convert return code back to values expected by the external
 	 * consumer before returning so we will warn only once on the first
 	 * encountered failure.
@@ -2757,17 +2758,6 @@ pcicfg_free_device_resources(dev_info_t *dip)
 		    (assigned[i].pci_size_hi != 0)) {
 			switch (PCI_REG_ADDR_G(assigned[i].pci_phys_hi)) {
 			case PCI_REG_ADDR_G(PCI_ADDR_MEM32):
-				/*
-				 * Check the assigned address for zero.
-				 * (Workaround for Devconf (x86) bug to
-				 * skip bogus entry for ROM base address
-				 * register. If the assigned address is
-				 * zero then ignore the entry
-				 * (see bugid 4281306)).
-				 */
-				if (assigned[i].pci_phys_low == 0)
-					break; /* ignore the entry */
-
 				if (assigned[i].pci_phys_hi & PCI_REG_PF_M)
 					mem_type = NDI_RA_TYPE_PCI_PREFETCH_MEM;
 				else

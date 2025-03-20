@@ -11,7 +11,10 @@ MODULE		= ecam
 OBJECTS		= $(ECAM_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 
-LDFLAGS += -Nmisc/pci_autoconfig -Nmisc/pcie
+LDFLAGS += -Nmisc/pcie -Nmisc/pcierc
+
+INC_PATH += -I$(SRC)/uts/armv8/io/pciex/pcierc/
+
 
 #
 #	Include common rules.

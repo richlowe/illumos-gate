@@ -34,9 +34,13 @@ UTSBASE	= ../..
 #
 #	Define the module and object file sets.
 #
-MODULE		= npe
-OBJECTS		= $(PCI_E_NEXUS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
+MODULE		= pcierc
+OBJECTS		= $(PCI_E_RC_OBJS:%=$(OBJS_DIR)/%)
+ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
+
+INC_PATH += -I$(SRC)/uts/armv8/io/pciex/pcierc/
+
+LDFLAGS += -Nmisc/pcie -Nmisc/pci_prd
 
 #
 #	Include common rules.
@@ -57,21 +61,11 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 LDFLAGS	+= -Nmisc/pcie
 
 #
-# Name of the module is needed by the source, to distinguish from other
-# PCI/PCI-express nexi
-#
-CFLAGS		+= -D_MODULE_NAME="\"$(MODULE)\""
-
-INC_PATH += -I$(UTSBASE)/armv8/io/pciex/npe
-
-#
 # For now, disable these checks; maintainers should endeavor
 # to investigate and remove these for maximum coverage.
 # Please do not carry these forward to new Makefiles.
 #
 CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-unused-function
 
 #
 #	Default build targets.
@@ -93,7 +87,7 @@ install:	$(INSTALL_DEPS)
 #
 include $(UTSBASE)/armv8/Makefile.targ
 
-$(OBJS_DIR)/%.o:		$(SRC)/uts/armv8/io/pciex/npe/%.c
+$(OBJS_DIR)/%.o:		$(SRC)/uts/armv8/io/pciex/pcierc/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 

@@ -1,4 +1,3 @@
-#
 # CDDL HEADER START
 #
 # The contents of this file are subject to the terms of the
@@ -18,59 +17,12 @@
 #
 # CDDL HEADER END
 #
+
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2016 Joyent, Inc.
-# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
+include ../Makefile.com
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= pci_autoconfig
-OBJECTS		= $(PCI_AUTOCONFIG_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/armv8/Makefile.armv8
-
-LDFLAGS	+= -Nmisc/pcie -Nmisc/pci_prd
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/armv8/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/pci/pci_autoconfig/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+install: all $(ROOTUSRSBINPROG)

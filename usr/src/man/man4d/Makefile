@@ -244,9 +244,11 @@ aarch64_MANFILES=	ahci.4d			\
 			audioixp.4d		\
 			audiosolo.4d		\
 			audiovia823x.4d		\
+			bcm2711_pcie.4d		\
 			bcm2711_sensors.4d	\
 			bfe.4d			\
 			devfdt.4d		\
+			ecam.4d			\
 			elxl.4d			\
 			ena.4d			\
 			iprb.4d			\
@@ -255,7 +257,6 @@ aarch64_MANFILES=	ahci.4d			\
 			iwi.4d			\
 			iwn.4d			\
 			mega_sas.4d		\
-			npe.4d			\
 			ntxn.4d			\
 			nvme.4d			\
 			pcn.4d			\

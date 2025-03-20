@@ -31,27 +31,29 @@
  */
 
 /*
- *	npe (Nexus PCIe driver): Host to PCI-Express local bus driver
+ *	pcierc -- PCIE root complex support module
  *
- *	npe serves as the driver for PCIe Root Complexes and as the nexus driver
- *	for PCIe devices. See also: npe(4D). For more information about hotplug,
- *	see the big theory statement at uts/common/os/ddi_hp_impl.c.
+ *	pcierc serves to support the drivers for PCIe Root Complexes
  *
+ *	This was derived from the i86 npe(4D). For more information about
+ *	hotplug, see the big theory statement at uts/common/os/ddi_hp_impl.c.
+ *
+ *	The following comment comes from the original npe(4D) too.
  *
  *	NDI EVENT HANDLING SUPPORT
  *
- *	npe supports NDI event handling. The only available event is surprise
+ *	pcierc supports NDI event handling. The only available event is surprise
  *	removal of a device. Child drivers can register surprise removal event
  *	callbacks by requesting an event cookie using ddi_get_eventcookie for
  *	the DDI_DEVI_REMOVE_EVENT and add their callback using
  *	ddi_add_event_handler. For an example, see the nvme driver in
  *	uts/common/io/nvme/nvme.c.
  *
- *	The NDI events in npe are retrieved using NDI_EVENT_NOPASS, which
- *	prevent them from being propagated up the tree once they reach the npe's
- *	bus_get_eventcookie operations. This is important because npe maintains
- *	the state of PCIe devices and their receptacles, via the PCIe hotplug
- *	controller driver (pciehpc).
+ *	The NDI events in pcierc are retrieved using NDI_EVENT_NOPASS, which
+ *	prevent them from being propagated up the tree once they reach the
+ *	pcierc's bus_get_eventcookie operations. This is important because
+ *	pcierc maintains the state of PCIe devices and their receptacles, via
+ *	the PCIe hotplug controller driver (pciehpc).
  *
  *	Hot removal events are ultimately posted by the PCIe hotplug controller
  *	interrupt handler for hotplug events. Events are posted using the
@@ -75,10 +77,12 @@
 #include <io/pci/pci_common.h>
 #include <sys/obpdefs.h>
 
+#include <pcierc.h>
+
 /*
  * Helper Macros
  */
-#define	NPE_IS_HANDLE_FOR_STDCFG_ACC(hp) \
+#define	PCIERC_IS_HANDLE_FOR_STDCFG_ACC(hp) \
 	((hp) != NULL &&						\
 	((ddi_acc_hdl_t *)(hp))->ah_platform_private != NULL &&		\
 	(((ddi_acc_impl_t *)((ddi_acc_hdl_t *)(hp))->			\
@@ -87,147 +91,36 @@
 		== DDI_ACCATTR_CONFIG_SPACE)
 
 /*
- * Bus Operation functions
- */
-static int	npe_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *,
-		    off_t, off_t, caddr_t *);
-static int	npe_ctlops(dev_info_t *, dev_info_t *, ddi_ctl_enum_t,
-		    void *, void *);
-static int	npe_intr_ops(dev_info_t *, dev_info_t *, ddi_intr_op_t,
-		    ddi_intr_handle_impl_t *, void *);
-static int	npe_fm_init(dev_info_t *, dev_info_t *, int,
-		    ddi_iblock_cookie_t *);
-static int	npe_bus_get_eventcookie(dev_info_t *, dev_info_t *, char *,
-		    ddi_eventcookie_t *);
-static int	npe_bus_add_eventcall(dev_info_t *, dev_info_t *,
-		    ddi_eventcookie_t, void (*)(dev_info_t *,
-		    ddi_eventcookie_t, void *, void *),
-		    void *, ddi_callback_id_t *);
-static int	npe_bus_remove_eventcall(dev_info_t *, ddi_callback_id_t);
-static int	npe_bus_post_event(dev_info_t *, dev_info_t *,
-		    ddi_eventcookie_t, void *);
-
-static int	npe_fm_callback(dev_info_t *, ddi_fm_error_t *, const void *);
-
-/*
  * Disable URs and Received MA for all PCIe devices.  Until x86 SW is changed so
  * that random drivers do not do PIO accesses on devices that it does not own,
  * these error bits must be disabled.  SERR must also be disabled if URs have
  * been masked.
  */
-uint32_t	npe_aer_uce_mask = PCIE_AER_UCE_UR;
-uint32_t	npe_aer_ce_mask = 0;
-uint32_t	npe_aer_suce_mask = PCIE_AER_SUCE_RCVD_MA;
-
-struct bus_ops npe_bus_ops = {
-	BUSO_REV,
-	npe_bus_map,
-	NULL,
-	NULL,
-	NULL,
-	i_ddi_map_fault,
-	NULL,
-	ddi_dma_allochdl,
-	ddi_dma_freehdl,
-	ddi_dma_bindhdl,
-	ddi_dma_unbindhdl,
-	ddi_dma_flush,
-	ddi_dma_win,
-	ddi_dma_mctl,
-	npe_ctlops,
-	ddi_bus_prop_op,
-	npe_bus_get_eventcookie,
-	npe_bus_add_eventcall,
-	npe_bus_remove_eventcall,
-	npe_bus_post_event,
-	0,			/* (*bus_intr_ctl)(); */
-	0,			/* (*bus_config)(); */
-	0,			/* (*bus_unconfig)(); */
-	npe_fm_init,		/* (*bus_fm_init)(); */
-	NULL,			/* (*bus_fm_fini)(); */
-	NULL,			/* (*bus_fm_access_enter)(); */
-	NULL,			/* (*bus_fm_access_exit)(); */
-	NULL,			/* (*bus_power)(); */
-	npe_intr_ops,		/* (*bus_intr_op)(); */
-	pcie_hp_common_ops	/* (*bus_hp_op)(); */
-};
-
-static int	npe_open(dev_t *, int, int, cred_t *);
-static int	npe_close(dev_t, int, int, cred_t *);
-static int	npe_ioctl(dev_t, int, intptr_t, int, cred_t *, int *);
-
-struct cb_ops npe_cb_ops = {
-	npe_open,			/* open */
-	npe_close,			/* close */
-	nodev,				/* strategy */
-	nodev,				/* print */
-	nodev,				/* dump */
-	nodev,				/* read */
-	nodev,				/* write */
-	npe_ioctl,			/* ioctl */
-	nodev,				/* devmap */
-	nodev,				/* mmap */
-	nodev,				/* segmap */
-	nochpoll,			/* poll */
-	pcie_prop_op,			/* cb_prop_op */
-	NULL,				/* streamtab */
-	D_NEW | D_MP | D_HOTPLUG,	/* Driver compatibility flag */
-	CB_REV,				/* rev */
-	nodev,				/* int (*cb_aread)() */
-	nodev				/* int (*cb_awrite)() */
-};
-
+uint32_t	pcierc_aer_uce_mask = PCIE_AER_UCE_UR;
+uint32_t	pcierc_aer_ce_mask = 0;
+uint32_t	pcierc_aer_suce_mask = PCIE_AER_SUCE_RCVD_MA;
 
 /*
- * Device Node Operation functions
+ * Internal routines in support of particular pcierc_ctlops.
  */
-static int	npe_attach(dev_info_t *devi, ddi_attach_cmd_t cmd);
-static int	npe_detach(dev_info_t *devi, ddi_detach_cmd_t cmd);
-static int	npe_info(dev_info_t *, ddi_info_cmd_t, void *, void **);
-
-struct dev_ops npe_ops = {
-	DEVO_REV,		/* devo_rev */
-	0,			/* refcnt  */
-	npe_info,		/* info */
-	nulldev,		/* identify */
-	nulldev,		/* probe */
-	npe_attach,		/* attach */
-	npe_detach,		/* detach */
-	nulldev,		/* reset */
-	&npe_cb_ops,		/* driver operations */
-	&npe_bus_ops,		/* bus operations */
-	NULL,			/* power */
-	ddi_quiesce_not_needed,		/* quiesce */
-};
-
-/*
- * Internal routines in support of particular npe_ctlops.
- */
-static int npe_removechild(dev_info_t *child);
-static int npe_initchild(dev_info_t *child);
-
-/*
- * External support routine
- */
-extern int	npe_disable_empty_bridges_workaround(dev_info_t *child);
+static int pcierc_removechild(dev_info_t *child);
+static int pcierc_initchild(dev_info_t *child);
 
 /*
  * Module linkage information for the kernel.
  */
-static struct modldrv modldrv = {
-	&mod_driverops,				/* Type of module */
-	"Host to PCIe nexus driver",		/* Name of module */
-	&npe_ops,				/* driver ops */
+static struct modlmisc modlmisc = {
+	.misc_modops = &mod_miscops,
+	.misc_linkinfo = "PCIe Root Complex Framework Module",
 };
 
 static struct modlinkage modlinkage = {
-	MODREV_1,
-	(void *)&modldrv,
-	NULL
+	.ml_rev = MODREV_1,
+	.ml_linkage = { &modlmisc, NULL }
 };
 
 /* Save minimal state. */
-void *npe_statep;
+void *pcierc_statep;
 
 int
 _init(void)
@@ -237,12 +130,12 @@ _init(void)
 	/*
 	 * Initialize per-pci bus soft state pointer.
 	 */
-	e = ddi_soft_state_init(&npe_statep, sizeof (pci_state_t), 1);
+	e = ddi_soft_state_init(&pcierc_statep, sizeof (pci_state_t), 1);
 	if (e != 0)
 		return (e);
 
 	if ((e = mod_install(&modlinkage)) != 0)
-		ddi_soft_state_fini(&npe_statep);
+		ddi_soft_state_fini(&pcierc_statep);
 
 	return (e);
 }
@@ -257,7 +150,7 @@ _fini(void)
 	if (rc != 0)
 		return (rc);
 
-	ddi_soft_state_fini(&npe_statep);
+	ddi_soft_state_fini(&pcierc_statep);
 	return (rc);
 }
 
@@ -268,47 +161,24 @@ _info(struct modinfo *modinfop)
 	return (mod_info(&modlinkage, modinfop));
 }
 
-/*ARGSUSED*/
-static int
-npe_info(dev_info_t *dip, ddi_info_cmd_t cmd, void *arg, void **result)
-{
-	minor_t		minor = getminor((dev_t)arg);
-	int		instance = PCI_MINOR_NUM_TO_INSTANCE(minor);
-	pci_state_t	*pcip = ddi_get_soft_state(npe_statep, instance);
-	int		ret = DDI_SUCCESS;
-
-	switch (cmd) {
-	case DDI_INFO_DEVT2INSTANCE:
-		*result = (void *)(intptr_t)instance;
-		break;
-	case DDI_INFO_DEVT2DEVINFO:
-		if (pcip == NULL) {
-			ret = DDI_FAILURE;
-			break;
-		}
-
-		*result = (void *)pcip->pci_dip;
-		break;
-	default:
-		ret = DDI_FAILURE;
-		break;
-	}
-
-	return (ret);
-}
-
 /*
  * See big theory statement at the top of this file for more information about
  * surprise removal events.
  */
-#define	NPE_EVENT_TAG_HOT_REMOVAL	0
-static ndi_event_definition_t npe_ndi_event_defs[1] = {
-	{NPE_EVENT_TAG_HOT_REMOVAL, DDI_DEVI_REMOVE_EVENT, EPL_KERNEL,
-	NDI_EVENT_POST_TO_ALL}
+#define	PCIERC_EVENT_TAG_HOT_REMOVAL	0
+static ndi_event_definition_t pcierc_ndi_event_defs[] = {
+	{
+		.ndi_event_tag = PCIERC_EVENT_TAG_HOT_REMOVAL,
+		.ndi_event_name = DDI_DEVI_REMOVE_EVENT,
+		.ndi_event_plevel = EPL_KERNEL,
+		.ndi_event_attributes = NDI_EVENT_POST_TO_ALL
+	}
 };
 
-static ndi_event_set_t npe_ndi_events = {
-	NDI_EVENTS_REV1, ARRAY_SIZE(npe_ndi_event_defs), npe_ndi_event_defs
+static ndi_event_set_t pcierc_ndi_events = {
+	.ndi_events_version = NDI_EVENTS_REV1,
+	.ndi_n_events = ARRAY_SIZE(pcierc_ndi_event_defs),
+	.ndi_event_defs = pcierc_ndi_event_defs,
 };
 
 /*
@@ -325,7 +195,7 @@ static ndi_event_set_t npe_ndi_events = {
  * XXXPCI: This sucks
  */
 static int
-npe_update_ppd_ranges(dev_info_t *dip)
+pcierc_update_ppd_ranges(dev_info_t *dip)
 {
 	pci_ranges_t *ranges;
 	uint_t rangesln;
@@ -346,52 +216,30 @@ npe_update_ppd_ranges(dev_info_t *dip)
 }
 
 /*ARGSUSED*/
-static int
-npe_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
+int
+pcierc_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 {
 	int		instance = ddi_get_instance(devi);
 	pci_state_t	*pcip = NULL;
 	int		ret;
 
 	if (cmd == DDI_RESUME) {
-		/*
-		 * the system might still be able to resume even if this fails
-		 */
-#if XXXPCI
-		(void) npe_restore_htconfig_children(devi);
-#endif
 		return (DDI_SUCCESS);
 	}
 
-	/*
-	 * We must do this here in order to ensure that all top level devices
-	 * get their HyperTransport MSI mapping regs programmed first.
-	 * "Memory controller" and "hostbridge" class devices are leaf devices
-	 * that may affect MSI translation functionality for devices
-	 * connected to the same link/bus.
-	 *
-	 * This will also program HT MSI mapping registers on root buses
-	 * devices (basically sitting on an HT bus) that are not dependent
-	 * on the aforementioned HT devices for MSI translation.
-	 */
-#if XXXPCI
-	npe_enable_htmsi_children(devi);
-#endif
-
 	if (ddi_prop_update_string(DDI_DEV_T_NONE, devi, OBP_DEVICETYPE,
 	    "pciex") != DDI_PROP_SUCCESS) {
-		cmn_err(CE_WARN, "npe:  'device_type' prop create failed");
+		dev_err(devi, CE_WARN, "'device_type' prop create failed");
 	}
-
 
 	/*
 	 * Update the parent-private range data
 	 * XXXPCI: This sucks, see the implementation for a description of why.
 	 */
-	npe_update_ppd_ranges(devi);
+	pcierc_update_ppd_ranges(devi);
 
-	if (ddi_soft_state_zalloc(npe_statep, instance) == DDI_SUCCESS)
-		pcip = ddi_get_soft_state(npe_statep, instance);
+	if (ddi_soft_state_zalloc(pcierc_statep, instance) == DDI_SUCCESS)
+		pcip = ddi_get_soft_state(pcierc_statep, instance);
 
 	if (pcip == NULL)
 		return (DDI_FAILURE);
@@ -406,14 +254,14 @@ npe_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	    NDI_SLEEP);
 	if (ret == NDI_SUCCESS) {
 		ret = ndi_event_bind_set(pcip->pci_ndi_event_hdl,
-		    &npe_ndi_events, NDI_SLEEP);
+		    &pcierc_ndi_events, NDI_SLEEP);
 		if (ret != NDI_SUCCESS) {
-			dev_err(pcip->pci_dip, CE_WARN, "npe:	failed to bind "
+			dev_err(pcip->pci_dip, CE_WARN, "failed to bind "
 			    "NDI event set (error=%d)", ret);
 			goto fail1;
 		}
 	} else {
-		dev_err(pcip->pci_dip, CE_WARN, "npe:	failed to allocate "
+		dev_err(pcip->pci_dip, CE_WARN, "failed to allocate "
 		    "event handle (error=%d)", ret);
 		goto fail1;
 	}
@@ -427,34 +275,31 @@ npe_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	ddi_fm_init(devi, &pcip->pci_fmcap, &pcip->pci_fm_ibc);
 
 	if (pcip->pci_fmcap & DDI_FM_ERRCB_CAPABLE) {
-		ddi_fm_handler_register(devi, npe_fm_callback, NULL);
+		ddi_fm_handler_register(devi, pcierc_fm_callback, NULL);
 	}
 
 	PCIE_DIP2PFD(devi) = kmem_zalloc(sizeof (pf_data_t), KM_SLEEP);
 	pcie_rc_init_pfd(devi, PCIE_DIP2PFD(devi));
-
-	ddi_report_dev(devi);
-	pcie_fab_init_bus(devi, PCIE_BUS_FINAL);
 
 	return (DDI_SUCCESS);
 fail2:
 	(void) pcie_uninit(devi);
 fail1:
 	pcie_rc_fini_bus(devi);
-	ddi_soft_state_free(npe_statep, instance);
+	ddi_soft_state_free(pcierc_statep, instance);
 
 	return (DDI_FAILURE);
 }
 
 /*ARGSUSED*/
-static int
-npe_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
+int
+pcierc_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
 {
 	int instance = ddi_get_instance(devi);
 	pci_state_t *pcip;
 	int ret;
 
-	pcip = ddi_get_soft_state(npe_statep, ddi_get_instance(devi));
+	pcip = ddi_get_soft_state(pcierc_statep, ddi_get_instance(devi));
 
 	switch (cmd) {
 	case DDI_DETACH:
@@ -464,7 +309,7 @@ npe_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
 		 * oustanding callbacks registered.
 		 */
 		ret = ndi_event_unbind_set(pcip->pci_ndi_event_hdl,
-		    &npe_ndi_events, NDI_SLEEP);
+		    &pcierc_ndi_events, NDI_SLEEP);
 		if (ret == NDI_SUCCESS) {
 			/* ndi_event_free_hdl always succeeds. */
 			(void) ndi_event_free_hdl(pcip->pci_ndi_event_hdl);
@@ -474,10 +319,11 @@ npe_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
 			 * outstanding callbacks registered for it, which
 			 * probably means a child driver still has one
 			 * registered and thus was not cleaned up properly
-			 * before npe's detach routine was called. Consequently,
-			 * we should fail the detach here.
+			 * before pcierc's detach routine was
+			 * called. Consequently, we should fail the detach
+			 * here.
 			 */
-			dev_err(pcip->pci_dip, CE_WARN, "npe:	failed to "
+			dev_err(pcip->pci_dip, CE_WARN, "failed to "
 			    "unbind NDI event set (error=%d)", ret);
 			return (DDI_FAILURE);
 		}
@@ -497,18 +343,11 @@ npe_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
 		kmem_free(PCIE_DIP2PFD(devi), sizeof (pf_data_t));
 
 		ddi_fm_fini(devi);
-		ddi_soft_state_free(npe_statep, instance);
+		ddi_soft_state_free(pcierc_statep, instance);
 
 		return (DDI_SUCCESS);
 
 	case DDI_SUSPEND:
-		/*
-		 * the system might still be able to suspend/resume even if
-		 * this fails
-		 */
-#if XXXPCI
-		(void) npe_save_htconfig_children(devi);
-#endif
 		return (DDI_SUCCESS);
 	default:
 		return (DDI_FAILURE);
@@ -521,7 +360,7 @@ npe_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
  * access-function pointers).
  */
 static int
-npe_setup_std_pcicfg_acc(dev_info_t *rdip, ddi_map_req_t *mp,
+pcierc_setup_std_pcicfg_acc(dev_info_t *rdip, ddi_map_req_t *mp,
     ddi_acc_hdl_t *hp, off_t offset, off_t len)
 {
 	int ret;
@@ -538,8 +377,8 @@ npe_setup_std_pcicfg_acc(dev_info_t *rdip, ddi_map_req_t *mp,
 	return (ret);
 }
 
-static int
-npe_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
+int
+pcierc_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
     off_t offset, off_t len, caddr_t *vaddrp)
 {
 	int		rnumber;
@@ -630,7 +469,7 @@ npe_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 			 * would have the DDI_ACCATTR_CPU_VADDR bit set in the
 			 * acc_attr), undo that setup here.
 			 */
-			if (NPE_IS_HANDLE_FOR_STDCFG_ACC(mp->map_handlep)) {
+			if (PCIERC_IS_HANDLE_FOR_STDCFG_ACC(mp->map_handlep)) {
 
 				if (DDI_FM_ACC_ERR_CAP(ddi_fm_capable(rdip)) &&
 				    mp->map_handlep->ah_acc.devacc_attr_access
@@ -687,7 +526,7 @@ npe_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 	/* check for user mapping request - not legal for Config */
 	if (mp->map_op == DDI_MO_MAP_HANDLE && space == PCI_ADDR_CONFIG) {
-		cmn_err(CE_NOTE, "npe: Config mapping request from user\n");
+		dev_err(dip, CE_NOTE, "Config mapping request from user\n");
 		return (DDI_FAILURE);
 	}
 
@@ -713,7 +552,7 @@ npe_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 		*vaddrp = (caddr_t)offset;
 
-		return (npe_setup_std_pcicfg_acc(rdip, mp, hp, offset, len));
+		return (pcierc_setup_std_pcicfg_acc(rdip, mp, hp, offset, len));
 	}
 
 	/*
@@ -795,8 +634,8 @@ npe_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 
 /*ARGSUSED*/
-static int
-npe_ctlops(dev_info_t *dip, dev_info_t *rdip,
+int
+pcierc_ctlops(dev_info_t *dip, dev_info_t *rdip,
     ddi_ctl_enum_t ctlop, void *arg, void *result)
 {
 	int		totreg;
@@ -804,7 +643,7 @@ npe_ctlops(dev_info_t *dip, dev_info_t *rdip,
 	pci_regspec_t	*drv_regp;
 	struct attachspec *asp;
 	struct detachspec *dsp;
-	pci_state_t	*pci_p = ddi_get_soft_state(npe_statep,
+	pci_state_t	*pci_p = ddi_get_soft_state(pcierc_statep,
 	    ddi_get_instance(dip));
 
 	switch (ctlop) {
@@ -817,10 +656,10 @@ npe_ctlops(dev_info_t *dip, dev_info_t *rdip,
 		return (DDI_SUCCESS);
 
 	case DDI_CTLOPS_INITCHILD:
-		return (npe_initchild((dev_info_t *)arg));
+		return (pcierc_initchild((dev_info_t *)arg));
 
 	case DDI_CTLOPS_UNINITCHILD:
-		return (npe_removechild((dev_info_t *)arg));
+		return (pcierc_removechild((dev_info_t *)arg));
 
 	case DDI_CTLOPS_SIDDEV:
 		return (DDI_SUCCESS);
@@ -936,29 +775,49 @@ npe_ctlops(dev_info_t *dip, dev_info_t *rdip,
 
 
 /*
- * npe_intr_ops
+ * pcierc_intr_ops
  */
-static int
-npe_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
+int
+pcierc_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
     ddi_intr_handle_impl_t *hdlp, void *result)
 {
 	return (pci_common_intr_ops(pdip, rdip, intr_op, hdlp, result));
 }
 
 
+/*
+ * If the bridge is empty, disable it
+ */
 static int
-npe_initchild(dev_info_t *child)
+pcierc_disable_empty_bridges_workaround(dev_info_t *child)
 {
-	char		name[80];
-	pcie_bus_t	*bus_p;
-	uint32_t	regs;
-	ddi_acc_handle_t	cfg_hdl;
+	pcie_bus_t *bus_p = PCIE_DIP2BUS(child);
 
 	/*
 	 * Do not bind drivers to empty bridges.
 	 * Fail above, if the bridge is found to be hotplug capable
 	 */
-	if (npe_disable_empty_bridges_workaround(child) == 1)
+	if (ddi_driver_major(child) == ddi_name_to_major("pcieb") &&
+	    ddi_get_child(child) == NULL && bus_p->bus_hp_sup_modes ==
+	    PCIE_NONE_HP_MODE) {
+		return (1);
+	}
+
+	return (0);
+}
+
+static int
+pcierc_initchild(dev_info_t *child)
+{
+	char		name[80];
+	pcie_bus_t	*bus_p;
+	uint32_t	regs;
+
+	/*
+	 * Do not bind drivers to empty bridges.
+	 * Fail above, if the bridge is found to be hotplug capable
+	 */
+	if (pcierc_disable_empty_bridges_workaround(child) == 1)
 		return (DDI_FAILURE);
 
 	if (pci_common_name_child(child, name, 80) != DDI_SUCCESS)
@@ -1027,28 +886,19 @@ npe_initchild(dev_info_t *child)
 		ddi_set_parent_data(child, NULL);
 
 	/* Disable certain errors on PCIe drivers for x86 platforms */
-	regs = pcie_get_aer_uce_mask() | npe_aer_uce_mask;
+	regs = pcie_get_aer_uce_mask() | pcierc_aer_uce_mask;
 	pcie_set_aer_uce_mask(regs);
-	regs = pcie_get_aer_ce_mask() | npe_aer_ce_mask;
+	regs = pcie_get_aer_ce_mask() | pcierc_aer_ce_mask;
 	pcie_set_aer_ce_mask(regs);
-	regs = pcie_get_aer_suce_mask() | npe_aer_suce_mask;
+	regs = pcie_get_aer_suce_mask() | pcierc_aer_suce_mask;
 	pcie_set_aer_suce_mask(regs);
 
 	/*
 	 * If URs are disabled, mask SERRs as well, otherwise the system will
 	 * still be notified of URs
 	 */
-	if (npe_aer_uce_mask & PCIE_AER_UCE_UR)
+	if (pcierc_aer_uce_mask & PCIE_AER_UCE_UR)
 		pcie_set_serr_mask(1);
-
-	if (pci_config_setup(child, &cfg_hdl) == DDI_SUCCESS) {
-#if XXXPCI
-		npe_ck804_fix_aer_ptr(cfg_hdl);
-		npe_nvidia_error_workaround(cfg_hdl);
-		npe_intel_error_workaround(cfg_hdl);
-#endif
-		pci_config_teardown(&cfg_hdl);
-	}
 
 	bus_p = PCIE_DIP2BUS(child);
 	if (bus_p != NULL) {
@@ -1061,7 +911,7 @@ npe_initchild(dev_info_t *child)
 
 
 static int
-npe_removechild(dev_info_t *dip)
+pcierc_removechild(dev_info_t *dip)
 {
 	pcie_uninitchild(dip);
 
@@ -1077,12 +927,12 @@ npe_removechild(dev_info_t *dip)
 	return (DDI_SUCCESS);
 }
 
-static int
-npe_open(dev_t *devp, int flags, int otyp, cred_t *credp)
+int
+pcierc_open(dev_t *devp, int flags, int otyp, cred_t *credp)
 {
 	minor_t		minor = getminor(*devp);
 	int		instance = PCI_MINOR_NUM_TO_INSTANCE(minor);
-	pci_state_t	*pci_p = ddi_get_soft_state(npe_statep, instance);
+	pci_state_t	*pci_p = ddi_get_soft_state(pcierc_statep, instance);
 	int	rv;
 
 	/*
@@ -1110,14 +960,14 @@ npe_open(dev_t *devp, int flags, int otyp, cred_t *credp)
 	if (flags & FEXCL) {
 		if (pci_p->pci_soft_state != PCI_SOFT_STATE_CLOSED) {
 			mutex_exit(&pci_p->pci_mutex);
-			cmn_err(CE_NOTE, "npe_open: busy");
+			cmn_err(CE_NOTE, "pcierc_open: busy");
 			return (EBUSY);
 		}
 		pci_p->pci_soft_state = PCI_SOFT_STATE_OPEN_EXCL;
 	} else {
 		if (pci_p->pci_soft_state == PCI_SOFT_STATE_OPEN_EXCL) {
 			mutex_exit(&pci_p->pci_mutex);
-			cmn_err(CE_NOTE, "npe_open: busy");
+			cmn_err(CE_NOTE, "pcierc_open: busy");
 			return (EBUSY);
 		}
 		pci_p->pci_soft_state = PCI_SOFT_STATE_OPEN;
@@ -1127,12 +977,12 @@ npe_open(dev_t *devp, int flags, int otyp, cred_t *credp)
 	return (0);
 }
 
-static int
-npe_close(dev_t dev, int flags, int otyp, cred_t *credp)
+int
+pcierc_close(dev_t dev, int flags, int otyp, cred_t *credp)
 {
 	minor_t		minor = getminor(dev);
 	int		instance = PCI_MINOR_NUM_TO_INSTANCE(minor);
-	pci_state_t	*pci_p = ddi_get_soft_state(npe_statep, instance);
+	pci_state_t	*pci_p = ddi_get_soft_state(pcierc_statep, instance);
 	int	rv;
 
 	if (pci_p == NULL)
@@ -1157,12 +1007,13 @@ npe_close(dev_t dev, int flags, int otyp, cred_t *credp)
 	return (0);
 }
 
-static int
-npe_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *credp, int *rvalp)
+int
+pcierc_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *credp,
+    int *rvalp)
 {
 	minor_t		minor = getminor(dev);
 	int		instance = PCI_MINOR_NUM_TO_INSTANCE(minor);
-	pci_state_t	*pci_p = ddi_get_soft_state(npe_statep, instance);
+	pci_state_t	*pci_p = ddi_get_soft_state(pcierc_statep, instance);
 	int		ret = ENOTTY;
 
 	if (pci_p == NULL)
@@ -1186,11 +1037,11 @@ npe_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *credp, int *rvalp)
 }
 
 /*ARGSUSED*/
-static int
-npe_fm_init(dev_info_t *dip, dev_info_t *tdip, int cap,
+int
+pcierc_fm_init(dev_info_t *dip, dev_info_t *tdip, int cap,
     ddi_iblock_cookie_t *ibc)
 {
-	pci_state_t  *pcip = ddi_get_soft_state(npe_statep,
+	pci_state_t  *pcip = ddi_get_soft_state(pcierc_statep,
 	    ddi_get_instance(dip));
 
 	ASSERT(ibc != NULL);
@@ -1199,43 +1050,43 @@ npe_fm_init(dev_info_t *dip, dev_info_t *tdip, int cap,
 	return (pcip->pci_fmcap);
 }
 
-static int
-npe_bus_get_eventcookie(dev_info_t *dip, dev_info_t *rdip, char *eventname,
+int
+pcierc_bus_get_eventcookie(dev_info_t *dip, dev_info_t *rdip, char *eventname,
     ddi_eventcookie_t *cookiep)
 {
-	pci_state_t *pcip = ddi_get_soft_state(npe_statep,
+	pci_state_t *pcip = ddi_get_soft_state(pcierc_statep,
 	    ddi_get_instance(dip));
 
 	return (ndi_event_retrieve_cookie(pcip->pci_ndi_event_hdl, rdip,
 	    eventname, cookiep, NDI_EVENT_NOPASS));
 }
 
-static int
-npe_bus_add_eventcall(dev_info_t *dip, dev_info_t *rdip,
+int
+pcierc_bus_add_eventcall(dev_info_t *dip, dev_info_t *rdip,
     ddi_eventcookie_t cookie, void (*callback)(dev_info_t *dip,
     ddi_eventcookie_t cookie, void *arg, void *bus_impldata),
     void *arg, ddi_callback_id_t *cb_id)
 {
-	pci_state_t *pcip = ddi_get_soft_state(npe_statep,
+	pci_state_t *pcip = ddi_get_soft_state(pcierc_statep,
 	    ddi_get_instance(dip));
 
 	return (ndi_event_add_callback(pcip->pci_ndi_event_hdl, rdip, cookie,
 	    callback, arg, NDI_SLEEP, cb_id));
 }
 
-static int
-npe_bus_remove_eventcall(dev_info_t *dip, ddi_callback_id_t cb_id)
+int
+pcierc_bus_remove_eventcall(dev_info_t *dip, ddi_callback_id_t cb_id)
 {
-	pci_state_t *pcip = ddi_get_soft_state(npe_statep,
+	pci_state_t *pcip = ddi_get_soft_state(pcierc_statep,
 	    ddi_get_instance(dip));
 	return (ndi_event_remove_callback(pcip->pci_ndi_event_hdl, cb_id));
 }
 
-static int
-npe_bus_post_event(dev_info_t *dip, dev_info_t *rdip,
+int
+pcierc_bus_post_event(dev_info_t *dip, dev_info_t *rdip,
     ddi_eventcookie_t cookie, void *impl_data)
 {
-	pci_state_t *pcip = ddi_get_soft_state(npe_statep,
+	pci_state_t *pcip = ddi_get_soft_state(pcierc_statep,
 	    ddi_get_instance(dip));
 	return (ndi_event_do_callback(pcip->pci_ndi_event_hdl, rdip, cookie,
 	    impl_data));
@@ -1243,16 +1094,58 @@ npe_bus_post_event(dev_info_t *dip, dev_info_t *rdip,
 }
 
 /*ARGSUSED*/
-static int
-npe_fm_callback(dev_info_t *dip, ddi_fm_error_t *derr, const void *no_used)
+int
+pcierc_fm_callback(dev_info_t *dip, ddi_fm_error_t *derr, const void *no_used)
 {
 	/*
-	 * On current x86 systems, npe's callback does not get called for failed
-	 * loads.  If in the future this feature is used, the fault PA should be
-	 * logged in the derr->fme_bus_specific field.  The appropriate PCIe
-	 * error handling code should be called and needs to be coordinated with
-	 * safe access handling.
+	 * On current systems, pcierc's callback does not get called for
+	 * failed loads.  If in the future this feature is used, the fault PA
+	 * should be logged in the derr->fme_bus_specific field.  The
+	 * appropriate PCIe error handling code should be called and needs to
+	 * be coordinated with safe access handling.
 	 */
 
 	return (DDI_FM_OK);
+}
+
+int
+pcierc_bus_config(dev_info_t *pdip, uint_t flags, ddi_bus_config_op_t op,
+    void *arg, dev_info_t **rdip)
+{
+	int rval = DDI_SUCCESS;
+	pci_state_t *pcip = NULL;
+
+	pcip = ddi_get_soft_state(pcierc_statep, ddi_get_instance(pdip));
+
+	ASSERT3P(pcip, !=, NULL);
+
+	ndi_devi_enter(pdip);
+
+	/*
+	 * While we enumerate using the old pci_autoconfig derived mechanism
+	 * we must only do it the one time, lest we duplicate every device on
+	 * the bus.
+	 *
+	 * XXXPCI: We could also make that code safe against changes to
+	 * existing devices, which dovetails in with merging FDT properties.
+	 * Maybe.
+	 */
+	if (op == BUS_CONFIG_ALL && !pcip->pci_enumerated) {
+		pcip->pci_enumerated = B_TRUE;
+
+		extern void pci_enumerate(dev_info_t *);
+		pci_enumerate(pdip);
+
+		/*
+		 * Now that this RC has been enumerated, we can finish
+		 * initializing the fabric
+		 */
+		pcie_fab_init_bus(pdip, PCIE_BUS_FINAL);
+	}
+
+	rval = ndi_busop_bus_config(pdip, flags, op, arg, rdip, 0);
+
+	ndi_devi_exit(pdip);
+
+	return (rval);
 }

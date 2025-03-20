@@ -119,18 +119,6 @@ done:
 	return (i_ddi_intr_ops(dip, rdip, intr_op, hdlp, result));
 }
 
-int
-pcieb_plat_pcishpc_probe(dev_info_t *dip, ddi_acc_handle_t config_handle)
-{
-	uint16_t cap_ptr;
-	if ((PCI_CAP_LOCATE(config_handle, PCI_CAP_ID_PCI_HOTPLUG, &cap_ptr)) !=
-	    DDI_FAILURE) {
-		return (DDI_SUCCESS);
-	}
-
-	return (DDI_FAILURE);
-}
-
 /*
  *  Disable PM on PLX. For PLX Transitioning one port on this switch to
  *  low power causes links on other ports on the same station to die.

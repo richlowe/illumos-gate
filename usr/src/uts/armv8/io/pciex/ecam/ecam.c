@@ -17,12 +17,14 @@
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
 #include <sys/sunndi.h>
-#include <sys/sysmacros.h>
 
+#include <sys/hotplug/pci/pcie_hp.h>
+#include <sys/pci_cfgacc.h>
 #include <sys/pci_cfgspace.h>
 #include <sys/pcie.h>
 #include <sys/pcie_impl.h>
-#include <sys/pci_cfgacc.h>
+
+#include <pcierc.h>
 
 typedef struct {
 	dev_info_t *ec_dip;
@@ -98,33 +100,6 @@ ecam_cfgspace_acc(pci_cfgacc_req_t *req)
 	}
 }
 
-/*
- * XXXPCI: This could be in the misc module, and the same for all nexi.
- * This is cut/pated between the two, don't mess that up
- */
-static int
-ecam_bus_config(dev_info_t *pdip, uint_t flags, ddi_bus_config_op_t op,
-    void *arg, dev_info_t **rdip)
-{
-	int rval = DDI_SUCCESS;
-	ndi_devi_enter(pdip);
-
-	/*
-	 * XXXPCI: This is the wrong way to be doing this.  We need to do
-	 * stuff to rdip no doubt?
-	 */
-	if (op == BUS_CONFIG_ALL) {
-		extern void pci_enumerate(dev_info_t *);
-		pci_enumerate(pdip);
-	}
-
-	rval = ndi_busop_bus_config(pdip, flags, op, arg, rdip, 0);
-
-	ndi_devi_exit(pdip);
-
-	return (rval);
-}
-
 static int
 ecam_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
@@ -174,6 +149,16 @@ ecam_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
+	/*
+	 * XXXPCI: Should be in pcierc_attach probably, but historically
+	 * happened logically prior
+	 */
+	pcie_rc_init_bus(dip);
+
+	if ((ret = pcierc_attach(dip, cmd)) != DDI_SUCCESS) {
+		return (ret);
+	}
+
 	ddi_report_dev(dip);
 
 	return (DDI_SUCCESS);
@@ -182,6 +167,8 @@ ecam_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 static int
 ecam_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 {
+	int ret;
+
 	if (cmd != DDI_DETACH)
 		return (DDI_SUCCESS);
 
@@ -189,6 +176,10 @@ ecam_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	    ddi_get_instance(dip));
 
 	VERIFY3P(softc, !=, NULL);
+
+	if ((ret = pcierc_detach(dip, cmd)) != DDI_SUCCESS) {
+		return (ret);
+	}
 
 	ddi_prop_remove(DDI_DEV_T_NONE, dip, OBP_CFGSPACE_HOOK);
 
@@ -199,20 +190,83 @@ ecam_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	return (DDI_SUCCESS);
 }
 
+static int
+ecam_info(dev_info_t *dip, ddi_info_cmd_t cmd, void *arg, void **result)
+{
+	int instance = ddi_get_instance(dip);
+	ecam_softc_t *softc = ddi_get_soft_state(ecam_soft_state,
+	    instance);
+
+	VERIFY3P(softc, !=, NULL);
+
+	switch (cmd) {
+	case DDI_INFO_DEVT2INSTANCE:
+		*result = (void *)(intptr_t)instance;
+		return (DDI_SUCCESS);
+	case DDI_INFO_DEVT2DEVINFO:
+		if (softc == NULL) {
+			return (DDI_FAILURE);
+		}
+		*result = softc->ec_dip;
+		return (DDI_SUCCESS);
+	default:
+		return (DDI_FAILURE);
+	}
+}
+
 static struct bus_ops ecam_bus_ops = {
 	.busops_rev = BUSO_REV,
-	.bus_config = ecam_bus_config,
+	.bus_map = pcierc_bus_map,
+	.bus_map_fault = i_ddi_map_fault,
+	.bus_dma_allochdl = ddi_dma_allochdl,
+	.bus_dma_freehdl = ddi_dma_freehdl,
+	.bus_dma_bindhdl = ddi_dma_bindhdl,
+	.bus_dma_unbindhdl = ddi_dma_unbindhdl,
+	.bus_dma_flush = ddi_dma_flush,
+	.bus_dma_win = ddi_dma_win,
+	.bus_dma_ctl = ddi_dma_mctl,
+	.bus_ctl = pcierc_ctlops,
+	.bus_prop_op = ddi_bus_prop_op,
+	.bus_get_eventcookie = pcierc_bus_get_eventcookie,
+	.bus_add_eventcall = pcierc_bus_add_eventcall,
+	.bus_remove_eventcall = pcierc_bus_remove_eventcall,
+	.bus_post_event = pcierc_bus_post_event,
+	.bus_config = pcierc_bus_config,
+	.bus_fm_init = pcierc_fm_init,
+	.bus_intr_op = pcierc_intr_ops,
+	.bus_hp_op = pcie_hp_common_ops,
+};
+
+static struct cb_ops ecam_cb_ops = {
+	.cb_open = pcierc_open,
+	.cb_close = pcierc_close,
+	.cb_strategy = nodev,
+	.cb_print = nodev,
+	.cb_dump = nodev,
+	.cb_read = nodev,
+	.cb_write = nodev,
+	.cb_ioctl = pcierc_ioctl,
+	.cb_devmap = nodev,
+	.cb_mmap = nodev,
+	.cb_segmap = nodev,
+	.cb_chpoll = nochpoll,
+	.cb_prop_op = pcie_prop_op,
+	.cb_flag = D_NEW | D_MP | D_HOTPLUG,
+	.cb_rev = CB_REV,
+	.cb_aread = nodev,
+	.cb_awrite = nodev,
 };
 
 static struct dev_ops ecam_ops = {
 	.devo_rev = DEVO_REV,
 	.devo_refcnt = 0,
-	.devo_getinfo = ddi_no_info,
+	.devo_getinfo = ecam_info,
 	.devo_identify = nulldev,
 	.devo_probe = nulldev,
 	.devo_attach = ecam_attach,
 	.devo_detach = ecam_detach,
 	.devo_reset = nodev,
+	.devo_cb_ops = &ecam_cb_ops,
 	.devo_bus_ops = &ecam_bus_ops,
 	.devo_quiesce = ddi_quiesce_not_needed,
 };

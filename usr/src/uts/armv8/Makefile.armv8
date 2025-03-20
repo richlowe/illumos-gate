@@ -227,13 +227,12 @@ DRV_KMODS += gictwo
 DRV_KMODS += gicthree
 DRV_KMODS += pl03one
 
-MISC_KMODS += pci_autoconfig
 MISC_KMODS += pci_prd
 MISC_KMODS += pcicfg
 MISC_KMODS += pcie
 
 DRV_KMODS += pcieb
-DRV_KMODS += npe
+DRV_KMODS += pcierc
 DRV_KMODS += ecam
 
 #
