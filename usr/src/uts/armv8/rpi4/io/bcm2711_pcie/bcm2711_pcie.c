@@ -427,6 +427,16 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
+	/*
+	 * XXXPCI: Should be in pcierc_attach probably, but historically
+	 * happened logically prior
+	 */
+	pcie_rc_init_bus(dip);
+
+	if ((ret = pcierc_attach(dip, cmd)) != DDI_SUCCESS) {
+		return (ret);
+	}
+
 	ddi_report_dev(dip);
 
 	return (DDI_SUCCESS);
@@ -435,6 +445,8 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 static int
 bcm2711_pcie_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 {
+	int ret;
+
 	if (cmd != DDI_DETACH)
 		return (DDI_SUCCESS);
 
@@ -442,6 +454,10 @@ bcm2711_pcie_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	    ddi_get_soft_state(bcm2711_pcie_soft_state, ddi_get_instance(dip));
 
 	VERIFY3P(softc, !=, NULL);
+
+	if ((ret = pcierc_detach(dip, cmd)) != DDI_SUCCESS) {
+		return (ret);
+	}
 
 	ddi_prop_remove(DDI_DEV_T_NONE, dip, OBP_CFGSPACE_HOOK);
 
