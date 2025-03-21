@@ -48,6 +48,7 @@
 #include <sys/pci_impl.h>
 #include <sys/pci_cap.h>
 #include <sys/obpdefs.h>
+#include <sys/plat/pci_prd.h>
 
 /*
  * Function prototypes
@@ -91,6 +92,7 @@ pci_common_name_child(dev_info_t *child, char *name, int namelen)
 	char		**unit_addr;
 	uint_t		n;
 	pci_regspec_t	*pci_rp;
+	pci_prd_compat_flags_t flags = pci_prd_compat_flags();
 
 	if (ndi_dev_is_persistent_node(child) == 0) {
 		/*
@@ -130,7 +132,7 @@ pci_common_name_child(dev_info_t *child, char *name, int namelen)
 	 */
 	ddi_prop_free(pci_rp);
 
-	if (func != 0) {
+	if ((func != 0) || (flags & PCI_PRD_COMPAT_1275)) {
 		(void) snprintf(name, namelen, "%x,%x", dev, func);
 	} else {
 		(void) snprintf(name, namelen, "%x", dev);

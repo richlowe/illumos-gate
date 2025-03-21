@@ -51,7 +51,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 #
 # depends on misc/pcie
 #
-LDFLAGS		+= -Nmisc/pcie
+LDFLAGS		+= -Nmisc/pcie -Nmisc/pci_prd
 
 #
 #	Default build targets.

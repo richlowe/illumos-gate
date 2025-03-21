@@ -48,7 +48,10 @@ pci_prd_multi_root_ok(void)
 pci_prd_compat_flags_t
 pci_prd_compat_flags(void)
 {
-	return (PCI_PRD_COMPAT_NONE);
+	/*
+	 * On systems using devicetree, we need IEEE 1275 compatible naming.
+	 */
+	return (PCI_PRD_COMPAT_1275);
 }
 
 static struct modlmisc pci_prd_modlmisc_armv8 = {

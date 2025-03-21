@@ -820,7 +820,7 @@ pcierc_initchild(dev_info_t *child)
 	if (pcierc_disable_empty_bridges_workaround(child) == 1)
 		return (DDI_FAILURE);
 
-	if (pci_common_name_child(child, name, 80) != DDI_SUCCESS)
+	if (pci_common_name_child(child, name, sizeof (name)) != DDI_SUCCESS)
 		return (DDI_FAILURE);
 
 	ddi_set_name_addr(child, name);
