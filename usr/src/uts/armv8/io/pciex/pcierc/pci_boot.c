@@ -551,7 +551,7 @@ process_devfunc(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	prop_ret = pci_prop_data_fill(rcdip, NULL, bus, dev, func, &prop_data);
 	if (prop_ret != PCI_PROP_OK) {
 		cmn_err(CE_WARN, MSGHDR "failed to get basic PCI data: 0x%x",
-		    "pci", bus, dev, func, prop_ret);
+		    ddi_node_name(rcdip), bus, dev, func, prop_ret);
 		return;
 	}
 
@@ -562,8 +562,8 @@ process_devfunc(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	prop_ret = pci_prop_name_node(dip, &prop_data);
 	if (prop_ret != PCI_PROP_OK) {
 		cmn_err(CE_WARN, MSGHDR "failed to set node name: 0x%x; "
-		    "devinfo node not created", "pci", bus, dev, func,
-		    prop_ret);
+		    "devinfo node not created", ddi_node_name(rcdip), bus, dev,
+		    func, prop_ret);
 		(void) ndi_devi_free(dip);
 		return;
 	}
@@ -586,8 +586,8 @@ process_devfunc(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	prop_ret = pci_prop_set_common_props(dip, &prop_data);
 	if (prop_ret != PCI_PROP_OK) {
 		cmn_err(CE_WARN, MSGHDR "failed to set properties: 0x%x; "
-		    "devinfo node not created", "pci", bus, dev, func,
-		    prop_ret);
+		    "devinfo node not created", ddi_node_name(rcdip), bus, dev,
+		    func, prop_ret);
 		if (pcie_get_rc_dip(dip) != NULL) {
 			pcie_fini_bus(dip, PCIE_BUS_FINAL);
 		}
@@ -612,8 +612,8 @@ process_devfunc(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	prop_ret = pci_prop_set_compatible(dip, &prop_data);
 	if (prop_ret != PCI_PROP_OK) {
 		cmn_err(CE_WARN, MSGHDR "failed to set compatible property: "
-		    "0x%x;  device may not bind to a driver", "pci", bus, dev,
-		    func, prop_ret);
+		    "0x%x;  device may not bind to a driver",
+		    ddi_node_name(rcdip), bus, dev, func, prop_ret);
 	}
 
 	DEVI_SET_PCI(dip);
@@ -714,7 +714,7 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 
 		dcmn_err(CE_NOTE,
 		    MSGHDR "BAR%u  I/O FWINIT 0x%x ~ 0x%x",
-		    "pci", bus, dev, func, bar, base, len);
+		    ddi_node_name(rcdip), bus, dev, func, bar, base, len);
 		pci_bus_res[bus].io_size += len;
 		assigned->pci_phys_low = base;
 
@@ -766,7 +766,7 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 
 		dcmn_err(CE_NOTE,
 		    MSGHDR "BAR%u %sMEM FWINIT 0x%lx ~ 0x%lx%s",
-		    "pci", bus, dev, func, bar,
+		    ddi_node_name(rcdip), bus, dev, func, bar,
 		    (phys_hi & PCI_PREFETCH_B) ? "P" : " ",
 		    fbase, len,
 		    *bar_sz == PCI_BAR_SZ_64 ? " (64-bit)" : "");
@@ -793,7 +793,7 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	}
 
 	dcmn_err(CE_NOTE, MSGHDR "BAR%u ---- %08x.%x.%x.%x.%x",
-	    "pci", bus, dev, func, bar,
+	    ddi_node_name(rcdip), bus, dev, func, bar,
 	    assigned->pci_phys_hi,
 	    assigned->pci_phys_mid,
 	    assigned->pci_phys_low,
