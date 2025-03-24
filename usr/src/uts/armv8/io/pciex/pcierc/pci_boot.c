@@ -544,7 +544,7 @@ process_devfunc(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 {
 	pci_prop_data_t prop_data;
 	pci_prop_failure_t prop_ret;
-	dev_info_t *dip;
+	dev_info_t *dip = NULL;
 	int power[2] = {1, 1};
 	pcie_req_id_t bdf;
 
@@ -557,15 +557,53 @@ process_devfunc(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 
 	VERIFY3P(pci_bus_res[bus].dip, !=, NULL);
 
-	ndi_devi_alloc_sleep(pci_bus_res[bus].dip, DEVI_PSEUDO_NEXNAME,
-	    DEVI_SID_NODEID, &dip);
-	prop_ret = pci_prop_name_node(dip, &prop_data);
-	if (prop_ret != PCI_PROP_OK) {
-		cmn_err(CE_WARN, MSGHDR "failed to set node name: 0x%x; "
-		    "devinfo node not created", ddi_node_name(rcdip), bus, dev,
-		    func, prop_ret);
-		(void) ndi_devi_free(dip);
-		return;
+	/*
+	 * There may be be nodes below the root complex in the device tree
+	 * already, passed to us from firmware.  However, these nodes are not
+	 * necessarily complete, we are expected to merge information from the
+	 * bus with the information from firmware.
+	 *
+	 * We do this matching based on PCI unit address, matching device and
+	 * function (we search below the parent dip, so we know bus must
+	 * match).
+	 */
+	ndi_devi_enter(pci_bus_res[bus].dip);
+	for (dev_info_t *firmdip = ddi_get_child(pci_bus_res[bus].dip);
+	     firmdip != NULL;
+	     firmdip = ddi_get_next_sibling(firmdip)) {
+		pci_regspec_t *regs;
+		uint_t regsz;
+		uint16_t child_dev = 0;
+		uint16_t child_func = 0;
+
+		if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, firmdip,
+		    DDI_PROP_DONTPASS, OBP_REG,
+		    (int **)&regs, &regsz) == DDI_SUCCESS) {
+			child_dev = (regs->pci_phys_hi & PCI_REG_DEV_M) >>
+			    PCI_REG_DEV_SHIFT;
+			child_func = (regs->pci_phys_hi & PCI_REG_FUNC_M) >>
+			    PCI_REG_FUNC_SHIFT;
+
+			ddi_prop_free(regs);
+		}
+
+		if ((child_dev == dev) && (child_func == func)) {
+			dip = firmdip;
+		}
+	}
+	ndi_devi_exit(pci_bus_res[bus].dip);
+
+	if (dip == NULL) {
+		ndi_devi_alloc_sleep(pci_bus_res[bus].dip, DEVI_PSEUDO_NEXNAME,
+		    DEVI_SID_NODEID, &dip);
+		prop_ret = pci_prop_name_node(dip, &prop_data);
+		if (prop_ret != PCI_PROP_OK) {
+			cmn_err(CE_WARN, MSGHDR "failed to set node name: 0x%x; "
+			    "devinfo node not created", ddi_node_name(rcdip),
+			    bus, dev, func, prop_ret);
+			(void) ndi_devi_free(dip);
+			return;
+		}
 	}
 
 	bdf = PCI_GETBDF(bus, dev, func);
