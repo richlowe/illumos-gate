@@ -40,7 +40,7 @@
 #include <sys/pci_impl.h>
 #include <sys/debug.h>
 
-int pci_memlist_debug;
+int pci_memlist_debug = 1;
 #define	dprintf if (pci_memlist_debug) printf
 
 void
@@ -58,8 +58,7 @@ pci_memlist_dump(struct memlist *listp)
 struct memlist *
 pci_memlist_alloc()
 {
-	return ((struct memlist *)kmem_zalloc(sizeof (struct memlist),
-	    KM_SLEEP));
+	return (kmem_zalloc(sizeof (struct memlist), KM_SLEEP));
 }
 
 void

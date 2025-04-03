@@ -186,7 +186,7 @@ extern void prom_printf(const char *, ...);
  * 2 = dump generic debug data only (no config header dumped)
  * 3 = dump everything (both 1 and 2)
  */
-int pcicfg_debug = 0;
+int pcicfg_debug = 3;
 
 static void debug(char *, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t);
@@ -1947,11 +1947,10 @@ pcicfg_device_assign(dev_info_t *dip)
 	uint64_t		answer;
 	uint64_t		alen;
 
-	DEBUG1("%llx now under configuration\n", dip);
+	DEBUG1("%p now under configuration\n", dip);
 
 	/* request.ra_len = PCICFG_ROUND_UP(request.ra_len, PCICFG_IOGRAN); */
 	if (pcicfg_ntbridge_child(dip) == DDI_SUCCESS) {
-
 		return (pcicfg_ntbridge_program_child(dip));
 	}
 	/*
@@ -2805,7 +2804,7 @@ pcicfg_update_ranges_prop(dev_info_t *dip, ppb_ranges_t *addition)
 	(void) ndi_prop_update_int_array(DDI_DEV_T_NONE, dip, OBP_RANGES,
 	    (int *)newreg, (rlen + sizeof (ppb_ranges_t))/sizeof (int));
 
-	DEBUG1("Updating ranges property for %d entries",
+	DEBUG1("Updating ranges property for %d entries\n",
 	    rlen / sizeof (ppb_ranges_t) + 1);
 
 	kmem_free(newreg, rlen + sizeof (ppb_ranges_t));
@@ -3225,6 +3224,7 @@ pcicfg_probe_children(dev_info_t *parent, uint_t bus, uint_t device,
 	 */
 	(void) pcicfg_device_off(config_handle);
 
+	/* XXXPCI: We should be able to provide an rc dip here */
 	prop_ret = pci_prop_data_fill(NULL, config_handle, bus, device, func,
 	    &prop_data);
 	if (prop_ret != PCI_PROP_OK) {
@@ -3656,7 +3656,7 @@ pcicfg_probe_bridge(dev_info_t *new_child, ddi_acc_handle_t h, uint_t bus,
 	 * Take the first one for this bridge to use and don't give
 	 * to child.
 	 */
-	(void) ndi_ra_free(new_child, pcibus_base+1, pcibus_alen-1,
+	(void) ndi_ra_free(new_child, pcibus_base + 1, pcibus_alen - 1,
 	    NDI_RA_TYPE_PCI_BUSNUM, NDI_RA_PASS);
 
 	next_bus = pcibus_base;
@@ -4108,6 +4108,7 @@ next:
 	 */
 	VERIFY(ndi_devi_offline(new_child, NDI_NO_EVENT|NDI_UNCONFIG)
 	    == NDI_SUCCESS);
+
 	if (is_pcie)
 		pcie_fini_bus(new_child, PCIE_BUS_INITIAL);
 
@@ -4497,7 +4498,7 @@ pcicfg_config_setup(dev_info_t *dip, ddi_acc_handle_t *handle)
 	uint_t		rlen;
 	pci_regspec_t	*reg;
 	int		ret = DDI_SUCCESS;
-	int16_t		tmp;
+	uint16_t	tmp;
 
 	/*
 	 * Get the pci register spec from the node
@@ -4531,12 +4532,8 @@ pcicfg_config_setup(dev_info_t *dip, ddi_acc_handle_t *handle)
 		return (PCICFG_FAILURE);
 	}
 
-	/*
-	 * need to use DDI interfaces as the conf space is
-	 * cannot be directly accessed by the host.
-	 */
-	tmp = (int16_t)ddi_get16(*handle, (uint16_t *)cfgaddr);
-	if ((tmp == (int16_t)0xffff) || (tmp == -1)) {
+	tmp = ddi_get16(*handle, (uint16_t *)cfgaddr);
+	if (tmp == (uint16_t)-1) {
 		DEBUG1("NO DEVICEFOUND, read %x\n", tmp);
 		ret = PCICFG_NODEVICE;
 	} else {
@@ -4554,7 +4551,6 @@ pcicfg_config_setup(dev_info_t *dip, ddi_acc_handle_t *handle)
 	ddi_prop_free(reg);
 
 	return (ret);
-
 }
 
 static void

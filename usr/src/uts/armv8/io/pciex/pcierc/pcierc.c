@@ -72,6 +72,7 @@
 #include <sys/ddifm.h>
 #include <sys/ndifm.h>
 #include <sys/fm/util.h>
+#include <sys/hotplug/pci/pcicfg.h>
 #include <sys/hotplug/pci/pcie_hp.h>
 #include <io/pci/pci_tools_ext.h>
 #include <io/pci/pci_common.h>
@@ -105,6 +106,8 @@ uint32_t	pcierc_aer_suce_mask = PCIE_AER_SUCE_RCVD_MA;
  */
 static int pcierc_removechild(dev_info_t *child);
 static int pcierc_initchild(dev_info_t *child);
+
+static void pcierc_add_root_available_prop(dev_info_t *);
 
 /*
  * Module linkage information for the kernel.
@@ -215,6 +218,119 @@ pcierc_update_ppd_ranges(dev_info_t *dip)
 	return (DDI_SUCCESS);
 }
 
+
+
+static int
+memlist_to_spec(dev_info_t *rcdip, struct pci_phys_spec *sp,
+    struct memlist *list, const uint32_t type)
+{
+	uint_t i = 0;
+
+	while (list != NULL) {
+		uint32_t newtype = type;
+
+		/*
+		 * If this is in fact a 64-bit address, adjust the address
+		 * type code to match.
+		 */
+		if (list->ml_address + (list->ml_size - 1) > UINT32_MAX) {
+			if ((type & PCI_ADDR_MASK) == PCI_ADDR_IO) {
+				dev_err(rcdip, CE_WARN, "Found invalid "
+				    "64-bit I/O space address 0x%lx+0x%lx",
+				    list->ml_address, list->ml_size);
+				list = list->ml_next;
+				continue;
+			}
+			newtype &= ~PCI_ADDR_MASK;
+			newtype |= PCI_ADDR_MEM64;
+		}
+
+		sp->pci_phys_hi = newtype;
+		sp->pci_phys_mid = (uint32_t)(list->ml_address >> 32);
+		sp->pci_phys_low = (uint32_t)list->ml_address;
+		sp->pci_size_hi = (uint32_t)(list->ml_size >> 32);
+		sp->pci_size_low = (uint32_t)list->ml_size;
+
+		list = list->ml_next;
+		sp++, i++;
+	}
+	return (i);
+}
+
+static void
+pcierc_add_root_available_prop(dev_info_t *rcdip)
+{
+	pci_ranges_t *ranges;
+	uint_t rangelen;
+
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rcdip, DDI_PROP_DONTPASS,
+	    OBP_RANGES, (int **)&ranges,
+	    &rangelen) != DDI_PROP_SUCCESS) {
+		dev_err(rcdip, CE_WARN, "no ranges property on PCIe "
+		    "root complex");
+		return;
+	}
+
+	uint_t nranges = CELLS_1275_TO_BYTES(rangelen) / sizeof (pci_ranges_t);
+
+	VERIFY3U(nranges, >, 0);
+
+	struct memlist *io_res, *mem_res, *pmem_res;
+	struct memlist **mlp = NULL;
+
+	io_res = mem_res = pmem_res = NULL;
+
+	for (int i = 0; i < nranges; i++) {
+		if ((ranges[i].child_high & PCI_ADDR_MASK) == PCI_ADDR_IO) {
+			mlp = &io_res;
+		} else if ((((ranges[i].child_high & PCI_ADDR_MASK) == PCI_ADDR_MEM32) ||
+		    ((ranges[i].child_high & PCI_ADDR_MASK) == PCI_ADDR_MEM64)) &&
+		    ((ranges[i].child_high & PCI_PREFETCH_B) == 0)) {
+			mlp = &mem_res;
+		} else if ((((ranges[i].child_high & PCI_ADDR_MASK) == PCI_ADDR_MEM32) ||
+		    ((ranges[i].child_high & PCI_ADDR_MASK) == PCI_ADDR_MEM64)) &&
+		    ((ranges[i].child_high & PCI_PREFETCH_B) != 0)) {
+			mlp = &pmem_res;
+		} else if ((ranges[i].child_high & PCI_ADDR_MASK) == PCI_ADDR_CONFIG) {
+			continue;
+		} else {
+			dev_err(rcdip, CE_WARN, "unknown PCI resource %x in "
+			    "ranges", ranges[i].child_high);
+			continue;
+		}
+
+		pci_memlist_insert(mlp,
+		    ((uint64_t)ranges[i].child_mid << 32) | ranges[i].child_low,
+		    ((uint64_t)ranges[i].size_high << 32) | ranges[i].size_low);
+	}
+
+	ddi_prop_free(ranges);
+
+	uint_t count = pci_memlist_count(io_res) + pci_memlist_count(mem_res) +
+	    pci_memlist_count(pmem_res);
+
+	if (count == 0)		/* nothing available */
+		return;
+
+	pci_regspec_t *sp = kmem_alloc(count * sizeof (pci_regspec_t),
+	    KM_SLEEP);
+
+	int i = memlist_to_spec(rcdip, &sp[0], io_res,
+	    PCI_ADDR_IO | PCI_RELOCAT_B);
+	i += memlist_to_spec(rcdip, &sp[i], mem_res,
+	    PCI_ADDR_MEM32 | PCI_RELOCAT_B);
+	i += memlist_to_spec(rcdip, &sp[i], pmem_res,
+	    PCI_ADDR_MEM32 | PCI_RELOCAT_B | PCI_PREFETCH_B);
+
+	ASSERT(i == count);
+
+	(void) ndi_prop_update_int_array(DDI_DEV_T_NONE, rcdip,
+	    OBP_AVAILABLE, (int *)sp,
+	    BYTES_TO_1275_CELLS(i * sizeof (pci_regspec_t)));
+
+	kmem_free(sp, count * sizeof (pci_regspec_t));
+}
+
 /*ARGSUSED*/
 int
 pcierc_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
@@ -280,6 +396,13 @@ pcierc_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 
 	PCIE_DIP2PFD(devi) = kmem_zalloc(sizeof (pf_data_t), KM_SLEEP);
 	pcie_rc_init_pfd(devi, PCIE_DIP2PFD(devi));
+
+	pcierc_add_root_available_prop(devi);
+
+	if ((ret = pci_resource_setup(devi)) != NDI_SUCCESS) {
+		dev_err(devi, CE_WARN, "failed to setup resources");
+		return (ret);
+	}
 
 	return (DDI_SUCCESS);
 fail2:
@@ -1133,8 +1256,8 @@ pcierc_bus_config(dev_info_t *pdip, uint_t flags, ddi_bus_config_op_t op,
 	if (op == BUS_CONFIG_ALL && !pcip->pci_enumerated) {
 		pcip->pci_enumerated = B_TRUE;
 
-		extern void pci_enumerate(dev_info_t *);
-		pci_enumerate(pdip);
+		for (int i = 0; i < PCI_MAX_DEVICES; i++)
+			pcicfg_configure(pdip, i, PCICFG_ALL_FUNC, 0);
 
 		/*
 		 * Now that this RC has been enumerated, we can finish

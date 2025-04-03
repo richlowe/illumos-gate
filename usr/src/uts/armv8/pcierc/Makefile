@@ -40,7 +40,7 @@ ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 
 INC_PATH += -I$(SRC)/uts/armv8/io/pciex/pcierc/
 
-LDFLAGS += -Nmisc/pcie -Nmisc/pci_prd
+LDFLAGS += -Nmisc/pcie -Nmisc/pci_prd -Nmisc/pcicfg -Nmisc/busra
 
 #
 #	Include common rules.

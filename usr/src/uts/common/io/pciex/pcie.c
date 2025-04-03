@@ -2167,8 +2167,10 @@ pcie_fini_bus(dev_info_t *dip, uint8_t flags)
 			bus_p->bus_fab = NULL;
 		}
 
-		ddi_prop_free(bus_p->bus_assigned_addr);
-		ddi_prop_free(bus_p->bus_addr_ranges);
+		if (bus_p->bus_assigned_addr != NULL)
+			ddi_prop_free(bus_p->bus_assigned_addr);
+		if (bus_p->bus_addr_ranges != NULL)
+			ddi_prop_free(bus_p->bus_addr_ranges);
 		/* zero out the fields that have been destroyed */
 		bus_p->bus_assigned_addr = NULL;
 		bus_p->bus_addr_ranges = NULL;

@@ -56,7 +56,7 @@
 #include <sys/autoconf.h>
 
 #if defined(BUSRA_DEBUG)
-int busra_debug = 0;
+int busra_debug = 1;
 #define	DEBUGPRT \
 	if (busra_debug) cmn_err
 
