@@ -474,7 +474,7 @@ pcicfg_configure(dev_info_t *devi, uint_t device, uint_t function,
 	uint_t bus, len;
 	int func;
 	dev_info_t *attach_point;
-	pci_bus_range_t *pci_bus_range;
+	pci_bus_range_t *pci_bus_range_prop;
 	int rv = PCICFG_SUCCESS;
 	uint_t highest_bus, visited = 0;
 	int ari_mode = B_FALSE;
@@ -487,19 +487,18 @@ pcicfg_configure(dev_info_t *devi, uint_t device, uint_t function,
 		return (pcicfg_ari_configure(devi));
 
 	/*
-	 * Start probing at the device specified in "device" on the
-	 * "bus" specified.
+	 * Start probing at the device specified in "device" on the device's
+	 * bus.
 	 */
-	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, devi, 0, "bus-range",
-	    (int **)&pci_bus_range, &len) != DDI_SUCCESS) {
-		DEBUG0("no bus-range property\n");
-		return (PCICFG_FAILURE);
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, devi, 0, OBP_BUS_RANGE,
+	    (int **)&pci_bus_range_prop, &len) == DDI_SUCCESS) {
+		DEBUG0("Using bus from bus-range property");
+		bus = pci_bus_range_prop[0].lo;
+		ddi_prop_free(pci_bus_range_prop);
+	} else {
+		DEBUG0("Using default bus 0\n");
+		bus = 0;
 	}
-
-	len = CELLS_1275_TO_BYTES(len);
-
-	bus = pci_bus_range->lo; /* primary bus number of this bus node */
-	ddi_prop_free(pci_bus_range);
 
 	attach_point = devi;
 
@@ -791,7 +790,7 @@ pcicfg_configure_ntbridge(dev_info_t *new_device, uint_t bus, uint_t device)
 	bus_range[0] = (int)next_bus;
 	bus_range[1] = (int)next_bus;
 
-	if (ndi_prop_update_int_array(DDI_DEV_T_NONE, new_device, "bus-range",
+	if (ndi_prop_update_int_array(DDI_DEV_T_NONE, new_device, OBP_BUS_RANGE,
 	    bus_range, 2) != DDI_SUCCESS) {
 		DEBUG0("Cannot set ntbridge bus-range property");
 		return (rc);
@@ -888,8 +887,12 @@ pcicfg_configure_ntbridge(dev_info_t *new_device, uint_t bus, uint_t device)
 		int			*bus;
 		uint_t			k;
 
+		/*
+		 * This should be from where we ourselves set it, and so it
+		 * need not default
+		 */
 		if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, new_device,
-		    DDI_PROP_DONTPASS, "bus-range", &bus, &k)
+		    DDI_PROP_DONTPASS, OBP_BUS_RANGE, &bus, &k)
 		    != DDI_PROP_SUCCESS) {
 			DEBUG0("Failed to read bus-range property\n");
 			rc = PCICFG_FAILURE;
@@ -1080,8 +1083,11 @@ pcicfg_ntbridge_configure_done(dev_info_t *dip)
 	range[2].child_low = range[2].parent_low =
 	    (uint32_t)entry->pf_memory_base;
 
+	/*
+	 * This should be where we ourselves set it, it does not need to default
+	 */
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "bus-range", (int **)&bus_range, &len) != DDI_SUCCESS) {
+	    OBP_BUS_RANGE, (int **)&bus_range, &len) != DDI_SUCCESS) {
 		DEBUG0("no bus-range property\n");
 		return (PCICFG_FAILURE);
 	}
@@ -1106,7 +1112,7 @@ pcicfg_ntbridge_configure_done(dev_info_t *dip)
 	DEBUG2("ntbridge: bus range lo=%x, hi=%x\n", new_bus_range[0],
 	    new_bus_range[1]);
 
-	if (ndi_prop_update_int_array(DDI_DEV_T_NONE, dip, "bus-range",
+	if (ndi_prop_update_int_array(DDI_DEV_T_NONE, dip, OBP_BUS_RANGE,
 	    new_bus_range, 2) != DDI_SUCCESS) {
 		DEBUG0("Failed to set bus-range property");
 		entry->error = PCICFG_FAILURE;
@@ -1204,8 +1210,9 @@ pcicfg_ntbridge_unconfigure_child(dev_info_t *new_device, uint_t devno)
 	ddi_acc_handle_t	config_handle;
 	pci_bus_range_t *pci_bus_range;
 
+	/* Should be set by us, and does not need to default */
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, new_device, DDI_PROP_DONTPASS,
-	    "bus-range", (int **)&pci_bus_range, &len) != DDI_SUCCESS) {
+	    OBP_BUS_RANGE, (int **)&pci_bus_range, &len) != DDI_SUCCESS) {
 		DEBUG0("no bus-range property\n");
 		return (PCICFG_FAILURE);
 	}
@@ -1255,7 +1262,8 @@ pcicfg_ntbridge_unconfigure(dev_info_t *dip)
 	uint_t			k;
 	int			rc = DDI_FAILURE;
 
-	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "bus-range",
+	/* Should be set by us, and does not need to default */
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, OBP_BUS_RANGE,
 	    &bus, &k) != DDI_PROP_SUCCESS) {
 		DEBUG0("ntbridge: Failed to read bus-range property\n");
 		return (rc);
@@ -1744,7 +1752,7 @@ pcicfg_bridge_assign(dev_info_t *dip, void *hdl)
 		bus_range[1] = pci_config_get8(handle, PCI_BCNF_SUBBUS);
 
 		if (ndi_prop_update_int_array(DDI_DEV_T_NONE, dip,
-		    "bus-range", bus_range, 2) != DDI_SUCCESS) {
+		    OBP_BUS_RANGE, bus_range, 2) != DDI_SUCCESS) {
 			DEBUG0("Failed to set bus-range property");
 			entry->error = PCICFG_FAILURE;
 			(void) pcicfg_config_teardown(&handle);
@@ -2487,8 +2495,9 @@ pcicfg_free_bridge_resources(dev_info_t *dip)
 	if (ranges != NULL)
 		ddi_prop_free(ranges);
 
+	/* Should be set by us, and does not need to default */
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "bus-range", &bus, &k) != DDI_PROP_SUCCESS) {
+	    OBP_BUS_RANGE, &bus, &k) != DDI_PROP_SUCCESS) {
 		DEBUG0("Failed to read bus-range property\n");
 		return (PCICFG_FAILURE);
 	}
@@ -3956,7 +3965,7 @@ pf_setup_end:
 	bus_range[0] = new_bus;
 	bus_range[1] = max_bus;
 	(void) ndi_prop_update_int_array(DDI_DEV_T_NONE, new_child,
-	    "bus-range", bus_range, 2);
+	    OBP_BUS_RANGE, bus_range, 2);
 
 	/*
 	 * Reset the secondary bus
@@ -4354,7 +4363,7 @@ next:
 	DEBUG1("End of bridge probe: bus_range[1] =  %d\n", bus_range[1]);
 
 	(void) ndi_prop_update_int_array(DDI_DEV_T_NONE, new_child,
-	    "bus-range", bus_range, 2);
+	    OBP_BUS_RANGE, bus_range, 2);
 
 	rval = PCICFG_SUCCESS;
 

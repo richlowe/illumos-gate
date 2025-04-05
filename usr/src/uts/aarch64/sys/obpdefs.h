@@ -89,6 +89,8 @@ typedef	phandle_t pnode_t;
 #define	OBP_INTERRUPT_MAP		"interrupt-map"
 #define	OBP_INTERRUPT_MAP_MASK		"interrupt-map-mask"
 
+#define	OBP_BUS_RANGE			"bus-range"
+
 /*
  * OBP status values defines
  */
