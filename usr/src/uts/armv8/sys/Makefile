@@ -21,7 +21,7 @@
 
 #
 # Copyright 2017 Hayashi Naoyuki
-# Copyright 2025 Michael van der Westhuizen
+# Copyright 2026 Michael van der Westhuizen
 #
 
 UTSBASE=../..
@@ -31,6 +31,7 @@ include ../Makefile.armv8
 FILEMODE = 644
 
 HDRS= \
+	acpidev.h \
 	clock.h \
 	gic.h \
 	syspic.h \
