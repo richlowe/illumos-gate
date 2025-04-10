@@ -1211,6 +1211,30 @@ process_boot_environment(struct boot_modules *benv, char *space)
 			continue;
 		}
 
+#if defined(_SBBR)
+		/*
+		 * Loader populates the `acpi-root-tab' property.  The
+		 * kernel expects this to be an unsigned 64-bit integer (a
+		 * physical address), so do the conversion here.
+		 *
+		 * Older versions populate `acpi.rsdp' - so handle both
+		 * names until upstream stabilises.
+		 */
+		if (strcmp(name, "acpi-root-tab") == 0 ||
+		    strcmp(name, "acpi.rsdp") == 0) {
+			uint64_t ui64val;
+
+			if (parse_value(value, &ui64val) == 0) {
+				bsetprop64("acpi-root-tab", ui64val);
+			} else {
+				PUT_STRING("fakebop: "
+				    "failed to parse acpi-root-tab\n");
+			}
+
+			continue;
+		}
+#endif
+
 		if (name_is_blocklisted(name) == B_TRUE)
 			continue;
 
