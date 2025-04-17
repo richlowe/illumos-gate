@@ -113,7 +113,7 @@
 	    (bus) <= pci_debug_bus_end)
 #define	dump_memlists(pbr, tag, bus)				\
 	if (bus_debug((bus))) dump_memlists_impl(pbr, (tag), (bus))
-#define	MSGHDR		"!%s[%02x/%02x/%x]: "
+#define	MSGHDR		"pci_boot: %s[%02x/%02x/%x]: "
 
 /*
  * Determining the size of a PCI BAR is done by writing all 1s to the base
@@ -145,9 +145,9 @@ typedef enum {
 static uchar_t max_dev_pci = PCI_MAX_DEVICES;
 int pci_boot_maxbus;
 
-int pci_boot_debug = 0;
+int pci_boot_debug = 1;
 int pci_debug_bus_start = 0;
-int pci_debug_bus_end = 0xff;
+int pci_debug_bus_end = 0x2;
 
 extern dev_info_t *pcie_get_rc_dip(dev_info_t *);
 
@@ -249,95 +249,6 @@ pci_enumerate(dev_info_t *dip)
 {
 	pci_boot_maxbus = pci_prd_max_bus();
 	pci_setup_tree(dip);
-}
-
-static void
-set_ppb_res(dev_info_t *rcdip, uchar_t bus, uchar_t dev, uchar_t func,
-    mem_res_t type, uint64_t base, uint64_t limit)
-{
-	char *tag;
-
-	switch (type) {
-	case RES_IO: {
-		VERIFY0(base >> 32);
-		VERIFY0(limit >> 32);
-
-		pci_cfgacc_put8(rcdip, PCI_GETBDF(bus, dev, func),
-		    PCI_BCNF_IO_BASE_LOW,
-		    (uint8_t)((base >> PCI_BCNF_IO_SHIFT) & PCI_BCNF_IO_MASK));
-		pci_cfgacc_put8(rcdip, PCI_GETBDF(bus, dev, func),
-		    PCI_BCNF_IO_LIMIT_LOW,
-		    (uint8_t)((limit >> PCI_BCNF_IO_SHIFT) & PCI_BCNF_IO_MASK));
-
-		uint8_t val = pci_cfgacc_get8(rcdip, PCI_GETBDF(bus, dev, func),
-		    PCI_BCNF_IO_BASE_LOW);
-		if ((val & PCI_BCNF_ADDR_MASK) == PCI_BCNF_IO_32BIT) {
-			pci_cfgacc_put16(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_IO_BASE_HI, base >> 16);
-			pci_cfgacc_put16(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_IO_LIMIT_HI, limit >> 16);
-		} else {
-			VERIFY0(base >> 16);
-			VERIFY0(limit >> 16);
-		}
-
-		tag = "I/O";
-		break;
-	}
-
-	case RES_MEM:
-		VERIFY0(base >> 32);
-		VERIFY0(limit >> 32);
-
-		pci_cfgacc_put16(rcdip, PCI_GETBDF(bus, dev, func),
-		    PCI_BCNF_MEM_BASE, (uint16_t)((base >> PCI_BCNF_MEM_SHIFT) &
-		    PCI_BCNF_MEM_MASK));
-		pci_cfgacc_put16(rcdip, PCI_GETBDF(bus, dev, func),
-		    PCI_BCNF_MEM_LIMIT,
-		    (uint16_t)((limit >> PCI_BCNF_MEM_SHIFT) &
-		    PCI_BCNF_MEM_MASK));
-
-		tag = "MEM";
-		break;
-
-	case RES_PMEM: {
-		pci_cfgacc_put16(rcdip, PCI_GETBDF(bus, dev, func),
-		    PCI_BCNF_PF_BASE_LOW,
-		    (uint16_t)((base >> PCI_BCNF_MEM_SHIFT) &
-		    PCI_BCNF_MEM_MASK));
-		pci_cfgacc_put16(rcdip, PCI_GETBDF(bus, dev, func),
-		    PCI_BCNF_PF_LIMIT_LOW,
-		    (uint16_t)((limit >> PCI_BCNF_MEM_SHIFT) &
-		    PCI_BCNF_MEM_MASK));
-
-		uint16_t val = pci_cfgacc_get16(rcdip,
-		    PCI_GETBDF(bus, dev, func), PCI_BCNF_PF_BASE_LOW);
-		if ((val & PCI_BCNF_ADDR_MASK) == PCI_BCNF_PF_MEM_64BIT) {
-			pci_cfgacc_put32(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_PF_BASE_HIGH, base >> 32);
-			pci_cfgacc_put32(rcdip, PCI_GETBDF(bus, dev, func),
-			    PCI_BCNF_PF_LIMIT_HIGH, limit >> 32);
-		} else {
-			VERIFY0(base >> 32);
-			VERIFY0(limit >> 32);
-		}
-
-		tag = "PMEM";
-		break;
-	}
-
-	default:
-		panic("Invalid resource type %d", type);
-	}
-
-	if (base > limit) {
-		cmn_err(CE_NOTE, MSGHDR "DISABLE %4s range",
-		    "ppb", bus, dev, func, tag);
-	} else {
-		cmn_err(CE_NOTE,
-		    MSGHDR "PROGRAM %4s range 0x%lx ~ 0x%lx",
-		    "ppb", bus, dev, func, tag, base, limit);
-	}
 }
 
 static void
@@ -1045,7 +956,6 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip,
 {
 	char *dev_type;
 	int i;
-	uint_t cmd_reg;
 	struct {
 		uint64_t base;
 		uint64_t limit;
@@ -1126,8 +1036,6 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip,
 	 * prefetchable memory.
 	 */
 
-	cmd_reg = pci_cfgacc_get16(rcdip, PCI_GETBDF(bus, dev, func),
-	    PCI_CONF_COMM);
 	fetch_ppb_res(rcdip, bus, dev, func, RES_IO, &io.base, &io.limit);
 	fetch_ppb_res(rcdip, bus, dev, func, RES_MEM, &mem.base, &mem.limit);
 	fetch_ppb_res(rcdip, bus, dev, func, RES_PMEM, &pmem.base, &pmem.limit);
@@ -1153,11 +1061,7 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip,
 	 * to indicate there are there are no initial resources available and
 	 * to trigger later reconfiguration.
 	 */
-	if ((cmd_reg & PCI_COMM_IO) == 0) {
-		io.base = PPB_DISABLE_IORANGE_BASE;
-		io.limit = PPB_DISABLE_IORANGE_LIMIT;
-		set_ppb_res(rcdip, bus, dev, func, RES_IO, io.base, io.limit);
-	} else if (io.base < io.limit) {
+	if (io.base < io.limit) {
 		uint64_t size = io.limit - io.base + 1;
 
 		pci_memlist_insert(&pci_bus_res[secbus].io_avail, io.base,
@@ -1180,12 +1084,7 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip,
 	 * 0, indicating that it is still at PCIe defaults. While 0 technically
 	 * could be a valid base address, it is unlikely.
 	 */
-	if ((cmd_reg & PCI_COMM_MAE) == 0 || mem.base == 0) {
-		mem.base = PPB_DISABLE_MEMRANGE_BASE;
-		mem.limit = PPB_DISABLE_MEMRANGE_LIMIT;
-		set_ppb_res(rcdip, bus, dev, func, RES_MEM, mem.base,
-		    mem.limit);
-	} else if (mem.base < mem.limit) {
+	if (mem.base < mem.limit) {
 		uint64_t size = mem.limit - mem.base + 1;
 
 		pci_memlist_insert(&pci_bus_res[secbus].mem_avail, mem.base,
@@ -1201,12 +1100,7 @@ add_ppb_props(dev_info_t *rcdip, dev_info_t *dip,
 	/*
 	 * Prefetchable range - as per MEM range above.
 	 */
-	if ((cmd_reg & PCI_COMM_MAE) == 0 || pmem.base == 0) {
-		pmem.base = PPB_DISABLE_MEMRANGE_BASE;
-		pmem.limit = PPB_DISABLE_MEMRANGE_LIMIT;
-		set_ppb_res(rcdip, bus, dev, func, RES_PMEM, pmem.base,
-		    pmem.limit);
-	} else if (pmem.base < pmem.limit) {
+	if (pmem.base < pmem.limit) {
 		uint64_t size = pmem.limit - pmem.base + 1;
 
 		pci_memlist_insert(&pci_bus_res[secbus].pmem_avail,
