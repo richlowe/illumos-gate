@@ -162,6 +162,9 @@ typedef enum {
 
 extern pci_prd_compat_flags_t pci_prd_compat_flags(void);
 
+/* vet the address against platform specific rules */
+extern boolean_t pci_prd_valid_busaddr(uintptr_t, size_t);
+
 #ifdef __cplusplus
 }
 #endif

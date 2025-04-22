@@ -837,6 +837,19 @@ pci_prd_compat_flags(void)
 	    PCI_PRD_COMPAT_SUBSYS);
 }
 
+/*
+ * On x86 platforms PCI bus addresses are directly system physical addresses.
+ * 0 is invalid.
+ */
+boolean_t
+pci_prd_valid_busaddr(uintptr_t addr, size_t size __unused)
+{
+	if (addr == 0)
+		return (B_FALSE);
+
+	return (B_TRUE);
+}
+
 int
 pci_prd_init(pci_prd_upcalls_t *upcalls)
 {

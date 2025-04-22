@@ -54,6 +54,13 @@ pci_prd_compat_flags(void)
 	return (PCI_PRD_COMPAT_1275);
 }
 
+/* Any bus address is valid */
+boolean_t
+pci_prd_valid_busaddr(uintptr_t addr __unused, size_t size __unused)
+{
+	return (B_TRUE);
+}
+
 static struct modlmisc pci_prd_modlmisc_armv8 = {
 	.misc_modops = &mod_miscops,
 	.misc_linkinfo = "armv8 PCI Resource Discovery"
