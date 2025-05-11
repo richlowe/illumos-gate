@@ -54,6 +54,8 @@ pci_prd_compat_flags(void)
 	return (PCI_PRD_COMPAT_1275);
 }
 
+
+
 static struct modlmisc pci_prd_modlmisc_armv8 = {
 	.misc_modops = &mod_miscops,
 	.misc_linkinfo = "armv8 PCI Resource Discovery"

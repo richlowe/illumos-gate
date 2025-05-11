@@ -113,14 +113,14 @@ struct pci_bus_resource {
 	uint64_t mem_size;	/* existing children required MEM space size */
 	uint64_t pmem_size;	/* existing children required PMEM space size */
 	uint_t io_size;		/* existing children required I/O space size */
-#if defined(__x86)
-	void *privdata;		/* private data for configuration */
-	uchar_t root_addr;	/* legacy peer bus address assignment */
-	uchar_t num_cbb;	/* # of CardBus Bridges on the bus */
-	boolean_t io_reprogram;	/* need io reprog on this bus */
-	boolean_t mem_reprogram;	/* need mem reprog on this bus */
 	uint64_t mem_buffer;	/* memory available for proactively */
 				/* allocating to bridges for hotplug */
+	void *privdata;		/* private data for configuration */
+#if defined(__x86)
+	boolean_t io_reprogram;	/* need io reprog on this bus */
+	boolean_t mem_reprogram;	/* need mem reprog on this bus */
+	uchar_t root_addr;	/* legacy peer bus address assignment */
+	uchar_t num_cbb;	/* # of CardBus Bridges on the bus */
 #endif
 };
 

@@ -138,9 +138,8 @@ type/ops-vector/registration-type interface seems premature.
 The mechanics of device enumeration are a strict subset of what happens on
 x86, we check each possible device on each possible bus creating devinfo
 nodes.  We do not have to discover root complexes as they're given to us
-explicitly by firmware.  We do not have to reprogram devices as we assume that
-firmware has done correct device initialization via the PCIe Firmware
-specification (which we do not have a copy of).
+explicitly by firmware.  Unlike i86pc (but like Oxide), we ignore any
+configuration from firmware and reprogram the buses ourselves.
 
 What is different from x86 (and SPARC) however, is that our PCIe root
 complex drivers are expected to perform self-enumeration as described in
