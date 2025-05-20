@@ -39,6 +39,7 @@ usr/src/uts/common/io/igc/core/*
 usr/src/uts/common/io/ixgbe/core/*
 usr/src/uts/common/sys/scsi/adapters/mpi/*
 usr/src/contrib/*
+usr/src/common/sqlite3/*
 usr/src/cmd/ast/libshell/misc/shell_styleguide.docbook
 
 usr/src/data/ucode/amd/*

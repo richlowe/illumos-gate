@@ -12,7 +12,7 @@ CSTD = $(CSTD_GNU99)
 
 SRCDIR=$(SRC)/common/sqlite3
 
-$(DYNLIB) := LDLIBS += -lm -lc 
+$(DYNLIB) := LDLIBS += -lm -lc
 
 LIBS = $(DYNLIB)
 
@@ -37,6 +37,8 @@ CPPFLAGS += $(MYCPPFLAGS)
 
 MAPFILES = $(SRC)/lib/libsqlite3/mapfile-sqlite3
 
+# unclean
+SMATCH= off
 
 # This is the default Makefile target.  The objects listed here
 # are what get build when you type just "make" with no arguments.

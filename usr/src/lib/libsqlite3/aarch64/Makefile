@@ -23,11 +23,11 @@
 # Use is subject to license terms.
 #
 
-TARGET_ARCH=    amd64
+TARGET_ARCH=    aarch64
 
 include ../Makefile.com
 include ../../Makefile.lib.64
 
-install: all $(ROOTLIBS64) $(ROOTLINKS64)
+install: all $(ROOTLIBS) $(ROOTLINKS)
 
 include ../Makefile.targ

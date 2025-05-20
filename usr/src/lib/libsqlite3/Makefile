@@ -3,7 +3,10 @@
 # Use is subject to license terms.
 #
 
-SUBDIRS	=	$(MACH) $(MACH64)
+include $(SRC)/Makefile.master
+
+SUBDIRS	=	$(MACH64)
+$(BUILD32)SUBDIRS += $(MACH)
 
 VERS = .1
 

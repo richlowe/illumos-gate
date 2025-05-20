@@ -480,6 +480,9 @@ usr/include/sys/ilstr.h
 #
 usr/include/sqlite-sys
 lib/libsqlite-sys.so
+lib/libsqlite3-sys.so
+lib/amd64/libsqlite3-sys.so	i386
+
 #
 # Private/Internal kiconv header files. Do not ship.
 #

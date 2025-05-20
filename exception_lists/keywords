@@ -29,6 +29,7 @@ syntax: glob
 usr/src/cmd/boot/common/bblk_einfo.c
 usr/src/cmd/zonestat/zonestat/zonestat.c
 usr/src/contrib/*
+usr/src/common/sqlite3/*
 usr/src/data/locale/data/zh_CN.UTF-8.src
 usr/src/data/locale/data/zh_HK.UTF-8.src
 usr/src/data/locale/data/zh_MO.UTF-8.src
