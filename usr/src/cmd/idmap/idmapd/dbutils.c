@@ -46,20 +46,22 @@
 #include <alloca.h>
 #include <libuutil.h>
 #include <note.h>
+#include <sys/debug.h>
+#include <sys/ilstr.h>
+#include <sys/kmem.h>
 
 #include "idmapd.h"
 #include "adutils.h"
 #include "string.h"
 #include "idmap_priv.h"
-#include "schema.h"
 #include "nldaputils.h"
 #include "idmap_lsa.h"
 
 
-static idmap_retcode sql_compile_n_step_once(sqlite *, char *,
-		sqlite_vm **, int *, int, const char ***);
+static idmap_retcode sql_compile_n_step_once(sqlite3 *, char *,
+		sqlite3_stmt **, int *, int, const char ***);
 static idmap_retcode lookup_localsid2pid(idmap_mapping *, idmap_id_res *);
-static idmap_retcode lookup_cache_name2sid(sqlite *, const char *,
+static idmap_retcode lookup_cache_name2sid(sqlite3 *, const char *,
 	    const char *, char **, char **, idmap_rid_t *, idmap_id_type *);
 
 #define	EMPTY_NAME(name)	(*name == 0 || strcmp(name, "\"\"") == 0)
@@ -94,8 +96,8 @@ struct idmap_busy {
 
 
 typedef struct idmap_tsd {
-	sqlite *db_db;
-	sqlite *cache_db;
+	sqlite3 *db_db;
+	sqlite3 *cache_db;
 	struct idmap_busy cache_busy;
 	struct idmap_busy db_busy;
 } idmap_tsd_t;
@@ -124,9 +126,9 @@ idmap_tsd_destroy(void *key)
 	idmap_tsd_t	*tsd = (idmap_tsd_t *)key;
 	if (tsd) {
 		if (tsd->db_db)
-			(void) sqlite_close(tsd->db_db);
+			(void) sqlite3_close(tsd->db_db);
 		if (tsd->cache_db)
-			(void) sqlite_close(tsd->cache_db);
+			(void) sqlite3_close(tsd->cache_db);
 		free(tsd);
 	}
 }
@@ -170,7 +172,7 @@ idmap_get_tsd(void)
  * A simple wrapper around u8_textprep_str() that returns the Unicode
  * lower-case version of some string.  The result must be freed.
  */
-char *
+static char *
 tolower_u8(const char *s)
 {
 	char *res = NULL;
@@ -216,114 +218,192 @@ tolower_u8(const char *s)
 	return (res);
 }
 
-static int sql_exec_tran_no_cb(sqlite *db, char *sql, const char *dbname,
-	const char *while_doing);
+static const char *db_altroot = NULL;
 
+void
+db_set_altroot(const char *ar)
+{
+	db_altroot = ar;
+}
+
+void
+db_altroot_path(const char *path, char *out, size_t outlen)
+{
+	if (db_altroot == NULL) {
+		strlcpy(out, path, outlen);
+		return;
+	} else {
+		snprintf(out, outlen, "%s%s", db_altroot, path);
+	}
+}
+
+static int
+db_get_user_version(sqlite3 *db, int *version)
+{
+	sqlite3_stmt *stmt;
+	const char *tail;
+	const char *query = "PRAGMA user_version;";
+
+	sqlite3_mutex_enter(sqlite3_db_mutex(db));
+
+	if (sqlite3_prepare_v2(db, query, strlen(query), &stmt, &tail) !=
+	    SQLITE_OK) {
+		idmapdlog(LOG_ERR, "Database error checking user_version: %s",
+		    sqlite3_errmsg(db));
+		return (1);
+	}
+
+	int res = sqlite3_step(stmt);
+
+	if (res != SQLITE_ROW) {
+		idmapdlog(LOG_ERR, "Database does not contain user_version");
+		sqlite3_finalize(stmt);
+		return (-1);
+	}
+
+	*version = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
+
+	sqlite3_mutex_leave(sqlite3_db_mutex(db));
+
+	return (0);
+}
+
+static int
+db_load_sql(sqlite3 *db, const char *sql_path)
+{
+	ilstr_t ils;
+	FILE *f;
+	char buf[4096];
+
+	ilstr_init(&ils, KM_SLEEP);
+
+	if ((f = fopen(sql_path, "r")) == NULL) {
+		idmapdlog(LOG_ERR, "Failed to open %s: %s",
+		    sql_path, strerror(errno));
+		ilstr_fini(&ils);
+		return (-1);
+	}
+
+	while (fgets(buf, sizeof (buf), f) != NULL) {
+		ilstr_append_str(&ils, buf);
+	}
+
+	if (!feof(f)) {
+		idmapdlog(LOG_ERR, "Read error on %s: %s",
+		    sql_path, strerror(errno));
+		ilstr_fini(&ils);
+		return (-1);
+	}
+
+	fclose(f);
+
+	if (ilstr_errno(&ils) != ILSTR_ERROR_OK) {
+		idmapdlog(LOG_ERR, "Out of memory reading SQL");
+		ilstr_fini(&ils);
+		return (-1);
+	}
+
+	char *errmsg = NULL;
+	if (sqlite3_exec(db, ilstr_cstr(&ils), NULL, NULL, &errmsg) !=
+	    SQLITE_OK) {
+		idmapdlog(LOG_ERR, "Failed loading %s: %s", sql_path, errmsg);
+		sqlite3_free(errmsg);
+		ilstr_fini(&ils);
+		return (-1);
+	}
+
+	ilstr_fini(&ils);
+
+	return (0);
+}
 
 /*
- * Initialize 'dbname' using 'sql'
+ * Initialize 'dbpath' using 'sql'
+ *
+ * sql is a path to a SQL file in the filesystem to use to create the
+ * database.  There is at present no need for schema evolution, but the
+ * intention is that this could in future be a path to the _directory_
+ * containing the schema, expecting file names <NNN>_<name>.sql where NNN is
+ * the schema version number.
+ *
+ * A DB reading back with current_version 1 could then load 2_*.sql 3_*.sql to
+ * come up to schema version 3.
  */
-static
-int
-init_db_instance(const char *dbname, int version,
-    const char *detect_version_sql, char * const *sql,
-    init_db_option_t opt, int *created, int *upgraded)
+static int
+init_db_instance(const char *dbpath, int expected_version, const char *sql,
+    init_db_option_t opt, boolean_t *created)
 {
-	int rc, curr_version;
+	int curr_version;
 	int tries = 1;
 	int prio = LOG_NOTICE;
-	sqlite *db = NULL;
-	char *errmsg = NULL;
+	sqlite3 *db = NULL;
+	char fullpath[MAXPATHLEN];
 
-	*created = 0;
-	*upgraded = 0;
+	*created = B_FALSE;
 
 	if (opt == REMOVE_IF_CORRUPT)
 		tries = 3;
 
-rinse_repeat:
+	db_altroot_path(dbpath, fullpath, MAXPATHLEN);
+
+again:
 	if (tries == 0) {
-		idmapdlog(LOG_ERR, "Failed to initialize db %s", dbname);
+		idmapdlog(LOG_ERR, "Failed to initialize db %s", fullpath);
 		return (-1);
 	}
-	if (tries-- == 1)
+
+	if (tries-- == 1) {
 		/* Last try, log errors */
 		prio = LOG_ERR;
-
-	db = sqlite_open(dbname, 0600, &errmsg);
-	if (db == NULL) {
-		idmapdlog(prio, "Error creating database %s (%s)",
-		    dbname, CHECK_NULL(errmsg));
-		sqlite_freemem(errmsg);
-		if (opt == REMOVE_IF_CORRUPT)
-			(void) unlink(dbname);
-		goto rinse_repeat;
 	}
 
-	sqlite_busy_timeout(db, 3000);
+	if (sqlite3_open(fullpath, &db) != SQLITE_OK) {
+		idmapdlog(prio, "Error opening database %s (%s)",
+		    fullpath, sqlite3_errmsg(db));
+		sqlite3_close(db);
+		if (opt == REMOVE_IF_CORRUPT)
+			(void) unlink(fullpath);
+		goto again;
+	}
+
+	sqlite3_busy_timeout(db, 3000);
 
 	/* Detect current version of schema in the db, if any */
 	curr_version = 0;
-	if (detect_version_sql != NULL) {
-		char *end, **results;
-		int nrow;
+	if (db_get_user_version(db, &curr_version) != 0) {
+		idmapdlog(prio, "%s: couldn't read current user_version",
+		    fullpath);
+		if (opt == REMOVE_IF_CORRUPT)
+			(void) unlink(fullpath);
+		goto again;
+	}
 
-#ifdef	IDMAPD_DEBUG
-		(void) fprintf(stderr, "Schema version detection SQL: %s\n",
-		    detect_version_sql);
-#endif	/* IDMAPD_DEBUG */
-		rc = sqlite_get_table(db, detect_version_sql, &results,
-		    &nrow, NULL, &errmsg);
-		if (rc != SQLITE_OK) {
-			idmapdlog(prio,
-			    "Error detecting schema version of db %s (%s)",
-			    dbname, errmsg);
-			sqlite_freemem(errmsg);
-			sqlite_free_table(results);
-			sqlite_close(db);
+	idmapdlog(LOG_INFO, "%s current schema version: %d", fullpath,
+	    curr_version);
+
+	if (curr_version == 0) { /* Fresh database */
+		idmapdlog(LOG_INFO, "%s creating afresh", fullpath);
+		char path[MAXPATHLEN];
+
+		db_altroot_path(sql, path, MAXPATHLEN);
+
+		if (db_load_sql(db, path) != 0) {
+			idmapdlog(LOG_ERR, "%s: failed to load "
+			    "database schema: %s", fullpath, path);
+			sqlite3_close(db);
 			return (-1);
 		}
-		if (nrow != 1) {
-			idmapdlog(prio,
-			    "Error detecting schema version of db %s", dbname);
-			sqlite_close(db);
-			sqlite_free_table(results);
-			return (-1);
-		}
-		curr_version = strtol(results[1], &end, 10);
-		sqlite_free_table(results);
+
+		*created = B_TRUE;
+	} else if (curr_version != expected_version) {
+		idmapdlog(LOG_ERR, "%s current schema is downrev, expected %d",
+		    fullpath, expected_version);
+		sqlite3_close(db);
+		return (-1);
 	}
 
-	if (curr_version < 0) {
-		if (opt == REMOVE_IF_CORRUPT)
-			(void) unlink(dbname);
-		goto rinse_repeat;
-	}
-
-	if (curr_version == version)
-		goto done;
-
-	/* Install or upgrade schema */
-#ifdef	IDMAPD_DEBUG
-	(void) fprintf(stderr, "Schema init/upgrade SQL: %s\n",
-	    sql[curr_version]);
-#endif	/* IDMAPD_DEBUG */
-	rc = sql_exec_tran_no_cb(db, sql[curr_version], dbname,
-	    (curr_version == 0) ? "installing schema" : "upgrading schema");
-	if (rc != 0) {
-		idmapdlog(prio, "Error %s schema for db %s", dbname,
-		    (curr_version == 0) ? "installing schema" :
-		    "upgrading schema");
-		if (opt == REMOVE_IF_CORRUPT)
-			(void) unlink(dbname);
-		goto rinse_repeat;
-	}
-
-	*upgraded = (curr_version > 0);
-	*created = (curr_version == 0);
-
-done:
-	(void) sqlite_close(db);
+	(void) sqlite3_close(db);
 	return (0);
 }
 
@@ -333,7 +413,7 @@ done:
  * operation until it is successful.
  */
 int
-idmap_sqlite_busy_handler(void *arg, const char *table_name, int count)
+idmap_sqlite_busy_handler(void *arg, int count)
 {
 	struct idmap_busy	*busy = arg;
 	int			delay;
@@ -367,9 +447,8 @@ idmap_sqlite_busy_handler(void *arg, const char *table_name, int count)
  * Get the database handle
  */
 idmap_retcode
-get_db_handle(sqlite **db)
+get_db_handle(sqlite3 **db)
 {
-	char		*errmsg;
 	idmap_tsd_t	*tsd;
 
 	/*
@@ -383,11 +462,14 @@ get_db_handle(sqlite **db)
 	}
 
 	if (tsd->db_db == NULL) {
-		tsd->db_db = sqlite_open(IDMAP_DBNAME, 0, &errmsg);
-		if (tsd->db_db == NULL) {
+		char path[MAXPATHLEN];
+
+		db_altroot_path(IDMAP_DBNAME, path, MAXPATHLEN);
+
+		if (sqlite3_open(path, &tsd->db_db) != SQLITE_OK) {
 			idmapdlog(LOG_ERR, "Error opening database %s (%s)",
-			    IDMAP_DBNAME, CHECK_NULL(errmsg));
-			sqlite_freemem(errmsg);
+			    IDMAP_DBNAME, sqlite3_errmsg(tsd->db_db));
+			sqlite3_close(tsd->db_db);
 			return (IDMAP_ERR_DB);
 		}
 
@@ -395,7 +477,7 @@ get_db_handle(sqlite **db)
 		tsd->db_busy.delays = db_delay_table;
 		tsd->db_busy.delay_size = sizeof (db_delay_table) /
 		    sizeof (int);
-		sqlite_busy_handler(tsd->db_db, idmap_sqlite_busy_handler,
+		sqlite3_busy_handler(tsd->db_db, idmap_sqlite_busy_handler,
 		    &tsd->db_busy);
 	}
 	*db = tsd->db_db;
@@ -407,10 +489,10 @@ get_db_handle(sqlite **db)
  * Called after DB errors.
  */
 void
-kill_db_handle(sqlite *db)
+kill_db_handle(sqlite3 *db)
 {
 	idmap_tsd_t	*tsd;
-	sqlite		*t;
+	sqlite3		*t;
 
 	if (db == NULL)
 		return;
@@ -422,16 +504,15 @@ kill_db_handle(sqlite *db)
 		return;
 	assert(t == db);
 	tsd->db_db = NULL;
-	(void) sqlite_close(t);
+	(void) sqlite3_close(t);
 }
 
 /*
  * Get the cache handle
  */
 idmap_retcode
-get_cache_handle(sqlite **cache)
+get_cache_handle(sqlite3 **cache)
 {
-	char		*errmsg;
 	idmap_tsd_t	*tsd;
 
 	/*
@@ -445,11 +526,14 @@ get_cache_handle(sqlite **cache)
 	}
 
 	if (tsd->cache_db == NULL) {
-		tsd->cache_db = sqlite_open(IDMAP_CACHENAME, 0, &errmsg);
-		if (tsd->cache_db == NULL) {
+		char path[MAXPATHLEN];
+
+		db_altroot_path(IDMAP_CACHENAME, path, MAXPATHLEN);
+
+		if (sqlite3_open(path, &tsd->cache_db) != SQLITE_OK) {
 			idmapdlog(LOG_ERR, "Error opening database %s (%s)",
-			    IDMAP_CACHENAME, CHECK_NULL(errmsg));
-			sqlite_freemem(errmsg);
+			    IDMAP_CACHENAME, sqlite3_errmsg(tsd->cache_db));
+			sqlite3_close(tsd->cache_db);
 			return (IDMAP_ERR_DB);
 		}
 
@@ -457,7 +541,7 @@ get_cache_handle(sqlite **cache)
 		tsd->cache_busy.delays = cache_delay_table;
 		tsd->cache_busy.delay_size = sizeof (cache_delay_table) /
 		    sizeof (int);
-		sqlite_busy_handler(tsd->cache_db, idmap_sqlite_busy_handler,
+		sqlite3_busy_handler(tsd->cache_db, idmap_sqlite_busy_handler,
 		    &tsd->cache_busy);
 	}
 	*cache = tsd->cache_db;
@@ -469,10 +553,10 @@ get_cache_handle(sqlite **cache)
  * Called after DB errors.
  */
 void
-kill_cache_handle(sqlite *db)
+kill_cache_handle(sqlite3 *db)
 {
 	idmap_tsd_t	*tsd;
-	sqlite		*t;
+	sqlite3		*t;
 
 	if (db == NULL)
 		return;
@@ -484,7 +568,7 @@ kill_cache_handle(sqlite *db)
 		return;
 	assert(t == db);
 	tsd->cache_db = NULL;
-	(void) sqlite_close(t);
+	(void) sqlite3_close(t);
 }
 
 /*
@@ -493,27 +577,19 @@ kill_cache_handle(sqlite *db)
 int
 init_dbs(void)
 {
-	char *sql[4];
-	int created, upgraded;
+	boolean_t created;
 
-	/* name-based mappings; probably OK to blow away in a pinch(?) */
-	sql[0] = DB_INSTALL_SQL;
-	sql[1] = DB_UPGRADE_FROM_v1_SQL;
-	sql[2] = NULL;
-
-	if (init_db_instance(IDMAP_DBNAME, DB_VERSION, DB_VERSION_SQL, sql,
-	    FAIL_IF_CORRUPT, &created, &upgraded) < 0)
+	/* rules, not ok to blow away */
+	if (init_db_instance(IDMAP_DBNAME, IDMAP_DBVERSION, IDMAP_DBSCHEMA_FILE,
+	    FAIL_IF_CORRUPT, &created) < 0) {
 		return (-1);
+	}
 
 	/* mappings, name/SID lookup cache + ephemeral IDs; OK to blow away */
-	sql[0] = CACHE_INSTALL_SQL;
-	sql[1] = CACHE_UPGRADE_FROM_v1_SQL;
-	sql[2] = CACHE_UPGRADE_FROM_v2_SQL;
-	sql[3] = NULL;
-
-	if (init_db_instance(IDMAP_CACHENAME, CACHE_VERSION, CACHE_VERSION_SQL,
-	    sql, REMOVE_IF_CORRUPT, &created, &upgraded) < 0)
+	if (init_db_instance(IDMAP_CACHENAME, IDMAP_CACHEVERSION,
+	    IDMAP_CACHESCHEMA_FILE, REMOVE_IF_CORRUPT, &created) < 0) {
 		return (-1);
+	}
 
 	/*
 	 * TODO: If cache DB NOT created, get MAX PID for allocids(), eg.
@@ -526,7 +602,7 @@ init_dbs(void)
 	 */
 
 	/* This becomes the "flush" flag for allocids() */
-	_idmapdstate.new_eph_db = (created || upgraded) ? 1 : 0;
+	_idmapdstate.new_eph_db = created;
 
 	return (0);
 }
@@ -544,13 +620,24 @@ fini_dbs(void)
  * client when a SQL command fails with the corresponding error message.
  */
 static msg_table_t sqlmsgtable[] = {
-	{IDMAP_ERR_U2W_NAMERULE_CONFLICT,
-	"columns unixname, is_user, u2w_order are not unique"},
-	{IDMAP_ERR_W2U_NAMERULE_CONFLICT,
-	"columns winname, windomain, is_user, is_wuser, w2u_order are not"
-	" unique"},
-	{IDMAP_ERR_W2U_NAMERULE_CONFLICT, "Conflicting w2u namerules"},
-	{-1, NULL}
+	{
+		.retcode = IDMAP_ERR_U2W_NAMERULE_CONFLICT,
+		.msg = "UNIQUE constraint failed: "
+		    "namerules.unixname, namerules.is_user, "
+		    "namerules.u2w_order",
+	},
+	{
+		.retcode = IDMAP_ERR_W2U_NAMERULE_CONFLICT,
+		.msg = "UNIQUE constraint failed: "
+		    "namerules.winname, namerules.windomain, "
+		    "namerules.is_user, namerules.is_wuser, "
+		    "namerules.w2u_order",
+	},
+	{
+		.retcode = IDMAP_ERR_W2U_NAMERULE_CONFLICT,
+		.msg = "Conflicting w2u namerules"
+	},
+	{-1, NULL},
 };
 
 /*
@@ -569,71 +656,16 @@ idmapd_string2stat(const char *msg)
 }
 
 /*
- * Executes some SQL in a transaction.
- *
- * Returns 0 on success, -1 if it failed but the rollback succeeded, -2
- * if the rollback failed.
- */
-static
-int
-sql_exec_tran_no_cb(sqlite *db, char *sql, const char *dbname,
-    const char *while_doing)
-{
-	char		*errmsg = NULL;
-	int		rc;
-
-	rc = sqlite_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &errmsg);
-	if (rc != SQLITE_OK) {
-		idmapdlog(LOG_ERR, "Begin transaction failed (%s) "
-		    "while %s (%s)", errmsg, while_doing, dbname);
-		sqlite_freemem(errmsg);
-		return (-1);
-	}
-
-	rc = sqlite_exec(db, sql, NULL, NULL, &errmsg);
-	if (rc != SQLITE_OK) {
-		idmapdlog(LOG_ERR, "Database error (%s) while %s (%s)", errmsg,
-		    while_doing, dbname);
-		sqlite_freemem(errmsg);
-		errmsg = NULL;
-		goto rollback;
-	}
-
-	rc = sqlite_exec(db, "COMMIT TRANSACTION", NULL, NULL, &errmsg);
-	if (rc == SQLITE_OK) {
-		sqlite_freemem(errmsg);
-		return (0);
-	}
-
-	idmapdlog(LOG_ERR, "Database commit error (%s) while s (%s)",
-	    errmsg, while_doing, dbname);
-	sqlite_freemem(errmsg);
-	errmsg = NULL;
-
-rollback:
-	rc = sqlite_exec(db, "ROLLBACK TRANSACTION", NULL, NULL, &errmsg);
-	if (rc != SQLITE_OK) {
-		idmapdlog(LOG_ERR, "Rollback failed (%s) while %s (%s)",
-		    errmsg, while_doing, dbname);
-		sqlite_freemem(errmsg);
-		return (-2);
-	}
-	sqlite_freemem(errmsg);
-
-	return (-1);
-}
-
-/*
  * Execute the given SQL statment without using any callbacks
  */
 idmap_retcode
-sql_exec_no_cb(sqlite *db, const char *dbname, char *sql)
+sql_exec_no_cb(sqlite3 *db, const char *dbname, char *sql)
 {
 	char		*errmsg = NULL;
 	int		r;
 	idmap_retcode	retcode;
 
-	r = sqlite_exec(db, sql, NULL, NULL, &errmsg);
+	r = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
 	if (r != SQLITE_OK) {
 		idmapdlog(LOG_ERR, "Database error on %s while executing %s "
 		    "(%s)", dbname, sql, CHECK_NULL(errmsg));
@@ -659,7 +691,7 @@ sql_exec_no_cb(sqlite *db, const char *dbname, char *sql)
 		}
 
 		if (errmsg != NULL)
-			sqlite_freemem(errmsg);
+			sqlite3_free(errmsg);
 		return (retcode);
 	}
 
@@ -686,7 +718,7 @@ gen_sql_expr_from_rule(idmap_namerule *rule, char **out)
 
 
 	if (!EMPTY_STRING(rule->windomain)) {
-		s_windomain =  sqlite_mprintf("AND windomain = %Q ",
+		s_windomain =  sqlite3_mprintf("AND windomain = %Q ",
 		    rule->windomain);
 		if (s_windomain == NULL) {
 			retcode = IDMAP_ERR_MEMORY;
@@ -697,7 +729,7 @@ gen_sql_expr_from_rule(idmap_namerule *rule, char **out)
 	if (!EMPTY_STRING(rule->winname)) {
 		if ((lower_winname = tolower_u8(rule->winname)) == NULL)
 			lower_winname = rule->winname;
-		s_winname = sqlite_mprintf(
+		s_winname = sqlite3_mprintf(
 		    "AND winname = %Q AND is_wuser = %d ",
 		    lower_winname, rule->is_wuser ? 1 : 0);
 		if (lower_winname != rule->winname)
@@ -709,7 +741,7 @@ gen_sql_expr_from_rule(idmap_namerule *rule, char **out)
 	}
 
 	if (!EMPTY_STRING(rule->unixname)) {
-		s_unixname = sqlite_mprintf(
+		s_unixname = sqlite3_mprintf(
 		    "AND unixname = %Q AND is_user = %d ",
 		    rule->unixname, rule->is_user ? 1 : 0);
 		if (s_unixname == NULL) {
@@ -735,7 +767,7 @@ gen_sql_expr_from_rule(idmap_namerule *rule, char **out)
 		break;
 	}
 
-	*out = sqlite_mprintf("%s %s %s %s",
+	*out = sqlite3_mprintf("%s %s %s %s",
 	    s_windomain ? s_windomain : "",
 	    s_winname ? s_winname : "",
 	    s_unixname ? s_unixname : "",
@@ -749,11 +781,11 @@ gen_sql_expr_from_rule(idmap_namerule *rule, char **out)
 
 out:
 	if (s_windomain != NULL)
-		sqlite_freemem(s_windomain);
+		sqlite3_free(s_windomain);
 	if (s_winname != NULL)
-		sqlite_freemem(s_winname);
+		sqlite3_free(s_winname);
 	if (s_unixname != NULL)
-		sqlite_freemem(s_unixname);
+		sqlite3_free(s_unixname);
 
 	return (retcode);
 }
@@ -764,7 +796,7 @@ out:
  * Generate and execute SQL statement for LIST RPC calls
  */
 idmap_retcode
-process_list_svc_sql(sqlite *db, const char *dbname, char *sql, uint64_t limit,
+process_list_svc_sql(sqlite3 *db, const char *dbname, char *sql, uint64_t limit,
     int flag, list_svc_cb cb, void *result)
 {
 	list_cb_data_t	cb_data;
@@ -778,7 +810,7 @@ process_list_svc_sql(sqlite *db, const char *dbname, char *sql, uint64_t limit,
 	cb_data.flag = flag;
 
 
-	r = sqlite_exec(db, sql, cb, &cb_data, &errmsg);
+	r = sqlite3_exec(db, sql, cb, &cb_data, &errmsg);
 	assert(r != SQLITE_LOCKED && r != SQLITE_BUSY);
 	switch (r) {
 	case SQLITE_OK:
@@ -792,7 +824,7 @@ process_list_svc_sql(sqlite *db, const char *dbname, char *sql, uint64_t limit,
 		break;
 	}
 	if (errmsg != NULL)
-		sqlite_freemem(errmsg);
+		sqlite3_free(errmsg);
 	return (retcode);
 }
 
@@ -947,7 +979,7 @@ get_namerule_order(char *winname, char *windomain, char *unixname,
  * Generate and execute SQL statement to add name-based mapping rule
  */
 idmap_retcode
-add_namerule(sqlite *db, idmap_namerule *rule)
+add_namerule(sqlite3 *db, idmap_namerule *rule)
 {
 	char		*sql = NULL;
 	idmap_stat	retcode;
@@ -990,7 +1022,7 @@ add_namerule(sqlite *db, idmap_namerule *rule)
 		else
 			dom = "";
 	}
-	sql = sqlite_mprintf("INSERT into namerules "
+	sql = sqlite3_mprintf("INSERT into namerules "
 	    "(is_user, is_wuser, windomain, winname_display, is_nt4, "
 	    "unixname, w2u_order, u2w_order) "
 	    "VALUES(%d, %d, %Q, %Q, %d, %Q, %q, %q);",
@@ -1014,7 +1046,7 @@ out:
 	free(canonname);
 	free(canondomain);
 	if (sql != NULL)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 	return (retcode);
 }
 
@@ -1022,7 +1054,7 @@ out:
  * Flush name-based mapping rules
  */
 idmap_retcode
-flush_namerules(sqlite *db)
+flush_namerules(sqlite3 *db)
 {
 	idmap_stat	retcode;
 
@@ -1035,7 +1067,7 @@ flush_namerules(sqlite *db)
  * Generate and execute SQL statement to remove a name-based mapping rule
  */
 idmap_retcode
-rm_namerule(sqlite *db, idmap_namerule *rule)
+rm_namerule(sqlite3 *db, idmap_namerule *rule)
 {
 	char		*sql = NULL;
 	idmap_stat	retcode;
@@ -1049,7 +1081,7 @@ rm_namerule(sqlite *db, idmap_namerule *rule)
 	if (retcode != IDMAP_SUCCESS)
 		goto out;
 
-	sql = sqlite_mprintf("DELETE FROM namerules WHERE 1 %s;", expr);
+	sql = sqlite3_mprintf("DELETE FROM namerules WHERE 1 %s;", expr);
 
 	if (sql == NULL) {
 		retcode = IDMAP_ERR_INTERNAL;
@@ -1062,9 +1094,9 @@ rm_namerule(sqlite *db, idmap_namerule *rule)
 
 out:
 	if (expr != NULL)
-		sqlite_freemem(expr);
+		sqlite3_free(expr);
 	if (sql != NULL)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 	return (retcode);
 }
 
@@ -1086,43 +1118,60 @@ out:
  * IDMAP_ERR_INTERNAL
  */
 
-static
-idmap_retcode
-sql_compile_n_step_once(sqlite *db, char *sql, sqlite_vm **vm, int *ncol,
+static idmap_retcode
+sql_compile_n_step_once(sqlite3 *db, char *sql, sqlite3_stmt **stmt, int *ncol,
     int reqcol, const char ***values)
 {
-	char		*errmsg = NULL;
+	const char	*tail = NULL;
 	int		r;
+	int		colcount;
 
-	if ((r = sqlite_compile(db, sql, NULL, vm, &errmsg)) != SQLITE_OK) {
-		idmapdlog(LOG_ERR, "Database error during %s (%s)", sql,
-		    CHECK_NULL(errmsg));
-		sqlite_freemem(errmsg);
+	if ((r = sqlite3_prepare_v2(db, sql, strlen(sql), stmt, &tail))
+	    != SQLITE_OK) {
+		idmapdlog(LOG_ERR, "Database error during '%s' (%s)", sql,
+		    sqlite3_errmsg(db));
 		return (IDMAP_ERR_INTERNAL);
 	}
 
-	r = sqlite_step(*vm, ncol, values, NULL);
+	if (tail != NULL && tail[0] != '\0') {
+		idmapdlog(LOG_ERR, "SQL parse error during '%s': "
+		    "unparsed tail: '%s'", sql, tail);
+		return (IDMAP_ERR_INTERNAL);
+	}
+
+	r = sqlite3_step(*stmt);
+	colcount = sqlite3_data_count(*stmt);
+	if (ncol != NULL)
+		*ncol = colcount;
 	assert(r != SQLITE_LOCKED && r != SQLITE_BUSY);
 
 	if (r == SQLITE_ROW) {
 		if (ncol != NULL && *ncol < reqcol) {
-			(void) sqlite_finalize(*vm, NULL);
-			*vm = NULL;
+			(void) sqlite3_finalize(*stmt);
+			*stmt = NULL;
 			return (IDMAP_ERR_INTERNAL);
 		}
+
+		*values = calloc(colcount, sizeof (char *));
+		for (int i = 0; i < colcount; i++) {
+			if (sqlite3_column_type(*stmt, i) == SQLITE_NULL)
+				continue;
+			(*values)[i] =
+			    (const char *)sqlite3_column_text(*stmt, i);
+		}
+
 		/* Caller will call finalize after using the results */
 		return (IDMAP_SUCCESS);
 	} else if (r == SQLITE_DONE) {
-		(void) sqlite_finalize(*vm, NULL);
-		*vm = NULL;
+		(void) sqlite3_finalize(*stmt);
+		*stmt = NULL;
 		return (IDMAP_ERR_NOTFOUND);
 	}
 
-	(void) sqlite_finalize(*vm, &errmsg);
-	*vm = NULL;
-	idmapdlog(LOG_ERR, "Database error during %s (%s)", sql,
-	    CHECK_NULL(errmsg));
-	sqlite_freemem(errmsg);
+	(void) sqlite3_finalize(*stmt);
+	*stmt = NULL;
+	idmapdlog(LOG_ERR, "Database error during '%s' (%s)", sql,
+	    sqlite3_errmsg(db));
 	return (IDMAP_ERR_INTERNAL);
 }
 
@@ -1574,12 +1623,12 @@ nomem:
 
 static
 idmap_retcode
-lookup_cache_sid2pid(sqlite *cache, idmap_mapping *req, idmap_id_res *res)
+lookup_cache_sid2pid(sqlite3 *cache, idmap_mapping *req, idmap_id_res *res)
 {
 	char		*end;
 	char		*sql = NULL;
-	const char	**values;
-	sqlite_vm	*vm = NULL;
+	const char	**values = NULL;
+	sqlite3_stmt	*stmt = NULL;
 	int		ncol, is_user;
 	uid_t		pid;
 	time_t		curtime, exp;
@@ -1614,7 +1663,7 @@ lookup_cache_sid2pid(sqlite *cache, idmap_mapping *req, idmap_id_res *res)
 	/* SQL to lookup the cache */
 
 	if (req->id1.idmap_id_u.sid.prefix != NULL) {
-		sql = sqlite_mprintf("SELECT pid, is_user, expiration, "
+		sql = sqlite3_mprintf("SELECT pid, is_user, expiration, "
 		    "unixname, u2w, is_wuser, "
 		    "map_type, map_dn, map_attr, map_value, "
 		    "map_windomain, map_winname, map_unixname, map_is_nt4 "
@@ -1628,7 +1677,7 @@ lookup_cache_sid2pid(sqlite *cache, idmap_mapping *req, idmap_id_res *res)
 	} else if (req->id1name != NULL) {
 		if ((lower_name = tolower_u8(req->id1name)) == NULL)
 			lower_name = req->id1name;
-		sql = sqlite_mprintf("SELECT pid, is_user, expiration, "
+		sql = sqlite3_mprintf("SELECT pid, is_user, expiration, "
 		    "unixname, u2w, is_wuser, "
 		    "map_type, map_dn, map_attr, map_value, "
 		    "map_windomain, map_winname, map_unixname, map_is_nt4 "
@@ -1650,9 +1699,14 @@ lookup_cache_sid2pid(sqlite *cache, idmap_mapping *req, idmap_id_res *res)
 		retcode = IDMAP_ERR_MEMORY;
 		goto out;
 	}
-	retcode = sql_compile_n_step_once(cache, sql, &vm, &ncol,
+
+	sqlite3_mutex_enter(sqlite3_db_mutex(cache));
+
+	retcode = sql_compile_n_step_once(cache, sql, &stmt, &ncol,
 	    14, &values);
-	sqlite_freemem(sql);
+	sqlite3_free(sql);
+
+	sqlite3_mutex_leave(sqlite3_db_mutex(cache));
 
 	if (retcode == IDMAP_ERR_NOTFOUND) {
 		goto out;
@@ -1781,8 +1835,9 @@ out:
 			}
 		}
 	}
-	if (vm != NULL)
-		(void) sqlite_finalize(vm, NULL);
+	if (stmt != NULL)
+		(void) sqlite3_finalize(stmt);
+	sqlite3_mutex_leave(sqlite3_db_mutex(cache));
 	return (retcode);
 }
 
@@ -1814,13 +1869,13 @@ xlate_legacy_type(int type)
 
 static
 idmap_retcode
-lookup_cache_sid2name(sqlite *cache, const char *sidprefix, idmap_rid_t rid,
+lookup_cache_sid2name(sqlite3 *cache, const char *sidprefix, idmap_rid_t rid,
     char **canonname, char **canondomain, idmap_id_type *type)
 {
 	char		*end;
 	char		*sql = NULL;
-	const char	**values;
-	sqlite_vm	*vm = NULL;
+	const char	**values = NULL;
+	sqlite3_stmt	*stmt = NULL;
 	int		ncol;
 	time_t		curtime;
 	idmap_retcode	retcode = IDMAP_SUCCESS;
@@ -1835,7 +1890,7 @@ lookup_cache_sid2name(sqlite *cache, const char *sidprefix, idmap_rid_t rid,
 	}
 
 	/* SQL to lookup the cache */
-	sql = sqlite_mprintf("SELECT canon_name, domain, type "
+	sql = sqlite3_mprintf("SELECT canon_name, domain, type "
 	    "FROM name_cache WHERE "
 	    "sidprefix = %Q AND rid = %u AND "
 	    "(expiration = 0 OR expiration ISNULL OR "
@@ -1846,8 +1901,13 @@ lookup_cache_sid2name(sqlite *cache, const char *sidprefix, idmap_rid_t rid,
 		retcode = IDMAP_ERR_MEMORY;
 		goto out;
 	}
-	retcode = sql_compile_n_step_once(cache, sql, &vm, &ncol, 3, &values);
-	sqlite_freemem(sql);
+
+	sqlite3_mutex_enter(sqlite3_db_mutex(cache));
+
+	retcode = sql_compile_n_step_once(cache, sql, &stmt, &ncol, 3, &values);
+	sqlite3_free(sql);
+
+	sqlite3_mutex_leave(sqlite3_db_mutex(cache));
 
 	if (retcode == IDMAP_SUCCESS) {
 		if (type != NULL) {
@@ -1880,8 +1940,8 @@ lookup_cache_sid2name(sqlite *cache, const char *sidprefix, idmap_rid_t rid,
 	}
 
 out:
-	if (vm != NULL)
-		(void) sqlite_finalize(vm, NULL);
+	if (stmt != NULL)
+		(void) sqlite3_finalize(stmt);
 	return (retcode);
 }
 
@@ -1893,7 +1953,7 @@ out:
  */
 static
 idmap_retcode
-lookup_name_cache(sqlite *cache, idmap_mapping *req, idmap_id_res *res)
+lookup_name_cache(sqlite3 *cache, idmap_mapping *req, idmap_id_res *res)
 {
 	idmap_id_type	type = -1;
 	idmap_retcode	retcode;
@@ -3085,12 +3145,12 @@ idmap_retcode
 name_based_mapping_sid2pid(lookup_state_t *state,
     idmap_mapping *req, idmap_id_res *res)
 {
-	const char	*unixname, *windomain;
-	char		*sql = NULL, *errmsg = NULL, *lower_winname = NULL;
+	const char	*unixname, *windomain, *tail;
+	char		*sql = NULL, *lower_winname = NULL;
 	idmap_retcode	retcode;
 	char		*end, *lower_unixname, *winname;
-	const char	**values;
-	sqlite_vm	*vm = NULL;
+	const char	**values = NULL;
+	sqlite3_stmt	*stmt = NULL;
 	int		ncol, r, is_user, is_wuser;
 	idmap_namerule	*rule = &res->info.how.idmap_how_u.rule;
 	int		direction;
@@ -3133,7 +3193,8 @@ name_based_mapping_sid2pid(lookup_state_t *state,
 
 	if ((lower_winname = tolower_u8(winname)) == NULL)
 		lower_winname = winname;    /* hope for the best */
-	sql = sqlite_mprintf(
+
+	sql = sqlite3_mprintf(
 	    "SELECT unixname, u2w_order, winname_display, windomain, is_nt4 "
 	    "FROM namerules WHERE "
 	    "w2u_order > 0 AND is_user = %d AND is_wuser = %d AND "
@@ -3141,22 +3202,31 @@ name_based_mapping_sid2pid(lookup_state_t *state,
 	    "(windomain = %Q OR windomain = '*') "
 	    "ORDER BY w2u_order ASC;",
 	    is_user, is_wuser, lower_winname, windomain);
+
 	if (sql == NULL) {
 		idmapdlog(LOG_ERR, "Out of memory");
 		retcode = IDMAP_ERR_MEMORY;
 		goto out;
 	}
 
-	if (sqlite_compile(state->db, sql, NULL, &vm, &errmsg) != SQLITE_OK) {
+	sqlite3_mutex_enter(sqlite3_db_mutex(state->db));
+
+	if (sqlite3_prepare_v2(state->db, sql, strlen(sql), &stmt, &tail) !=
+	    SQLITE_OK) {
 		retcode = IDMAP_ERR_INTERNAL;
 		idmapdlog(LOG_ERR, "%s: database error (%s)", me,
-		    CHECK_NULL(errmsg));
-		sqlite_freemem(errmsg);
+		    sqlite3_errmsg(state->db));
 		goto out;
 	}
 
+	if (tail != NULL && tail[0] != '\0') {
+		idmapdlog(LOG_ERR, "SQL parse error during '%s': "
+		    "unparsed tail: '%s'", sql, tail);
+		return (IDMAP_ERR_INTERNAL);
+	}
+
 	for (;;) {
-		r = sqlite_step(vm, &ncol, &values, NULL);
+		r = sqlite3_step(stmt);
 		assert(r != SQLITE_LOCKED && r != SQLITE_BUSY);
 
 		if (r == SQLITE_ROW) {
@@ -3232,15 +3302,15 @@ name_based_mapping_sid2pid(lookup_state_t *state,
 			retcode = IDMAP_ERR_NOTFOUND;
 			goto out;
 		} else {
-			(void) sqlite_finalize(vm, &errmsg);
-			vm = NULL;
+			(void) sqlite3_finalize(stmt);
 			idmapdlog(LOG_ERR, "%s: database error (%s)", me,
-			    CHECK_NULL(errmsg));
-			sqlite_freemem(errmsg);
+			    sqlite3_errmsg(state->db));
 			retcode = IDMAP_ERR_INTERNAL;
 			goto out;
 		}
 	}
+
+	sqlite3_mutex_leave(sqlite3_db_mutex(state->db));
 
 	/* Found */
 
@@ -3270,7 +3340,7 @@ out:
 	}
 
 	if (sql != NULL)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 
 	if (retcode != IDMAP_ERR_NOTFOUND) {
 		res->info.how.map_type = IDMAP_MAP_TYPE_RULE_BASED;
@@ -3279,8 +3349,8 @@ out:
 
 	if (lower_winname != NULL && lower_winname != winname)
 		free(lower_winname);
-	if (vm != NULL)
-		(void) sqlite_finalize(vm, NULL);
+	if (stmt != NULL)
+		(void) sqlite3_finalize(stmt);
 	return (retcode);
 }
 
@@ -3746,7 +3816,7 @@ update_cache_pid2sid(lookup_state_t *state,
 	 * Using NULL for u2w instead of 0 so that our trigger allows
 	 * the same pid to be the destination in multiple entries
 	 */
-	sql = sqlite_mprintf("INSERT OR REPLACE into idmap_cache "
+	sql = sqlite3_mprintf("INSERT OR REPLACE into idmap_cache "
 	    "(sidprefix, rid, windomain, canon_winname, pid, unixname, "
 	    "is_user, is_wuser, expiration, w2u, u2w, "
 	    "map_type, map_dn, map_attr, map_value, map_windomain, "
@@ -3774,7 +3844,7 @@ update_cache_pid2sid(lookup_state_t *state,
 		goto out;
 
 	state->pid2sid_done = FALSE;
-	sqlite_freemem(sql);
+	sqlite3_free(sql);
 	sql = NULL;
 
 	/* Check if we need to update namecache */
@@ -3784,7 +3854,7 @@ update_cache_pid2sid(lookup_state_t *state,
 	if (req->id2name == NULL)
 		goto out;
 
-	sql = sqlite_mprintf("INSERT OR REPLACE into name_cache "
+	sql = sqlite3_mprintf("INSERT OR REPLACE into name_cache "
 	    "(sidprefix, rid, canon_name, domain, type, expiration) "
 	    "VALUES(%Q, %u, %Q, %Q, %d, strftime('%%s','now') + %u); ",
 	    res->id.idmap_id_u.sid.prefix, res->id.idmap_id_u.sid.rid,
@@ -3801,7 +3871,7 @@ update_cache_pid2sid(lookup_state_t *state,
 
 out:
 	if (sql != NULL)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 	return (retcode);
 }
 
@@ -3837,7 +3907,7 @@ update_cache_sid2pid(lookup_state_t *state,
 
 	if (is_eph_user >= 0 &&
 	    !IDMAP_ID_IS_EPHEMERAL(res->id.idmap_id_u.uid)) {
-		sql = sqlite_mprintf("UPDATE idmap_cache "
+		sql = sqlite3_mprintf("UPDATE idmap_cache "
 		    "SET w2u = 0 WHERE "
 		    "sidprefix = %Q AND rid = %u AND w2u = 1 AND "
 		    "pid >= 2147483648 AND is_user = %d;",
@@ -3854,7 +3924,7 @@ update_cache_sid2pid(lookup_state_t *state,
 		if (retcode != IDMAP_SUCCESS)
 			goto out;
 
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 		sql = NULL;
 	}
 
@@ -3895,7 +3965,7 @@ update_cache_sid2pid(lookup_state_t *state,
 		assert(FALSE);
 	}
 
-	sql = sqlite_mprintf("INSERT OR REPLACE into idmap_cache "
+	sql = sqlite3_mprintf("INSERT OR REPLACE into idmap_cache "
 	    "(sidprefix, rid, windomain, canon_winname, pid, unixname, "
 	    "is_user, is_wuser, expiration, w2u, u2w, "
 	    "map_type, map_dn, map_attr, map_value, map_windomain, "
@@ -3924,7 +3994,7 @@ update_cache_sid2pid(lookup_state_t *state,
 		goto out;
 
 	state->sid2pid_done = FALSE;
-	sqlite_freemem(sql);
+	sqlite3_free(sql);
 	sql = NULL;
 
 	/* Check if we need to update namecache */
@@ -3934,7 +4004,7 @@ update_cache_sid2pid(lookup_state_t *state,
 	if (EMPTY_STRING(req->id1name))
 		goto out;
 
-	sql = sqlite_mprintf("INSERT OR REPLACE into name_cache "
+	sql = sqlite3_mprintf("INSERT OR REPLACE into name_cache "
 	    "(sidprefix, rid, canon_name, domain, type, expiration) "
 	    "VALUES(%Q, %u, %Q, %Q, %d, strftime('%%s','now') + %u); ",
 	    req->id1.idmap_id_u.sid.prefix, req->id1.idmap_id_u.sid.rid,
@@ -3951,19 +4021,19 @@ update_cache_sid2pid(lookup_state_t *state,
 
 out:
 	if (sql != NULL)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 	return (retcode);
 }
 
 static
 idmap_retcode
-lookup_cache_pid2sid(sqlite *cache, idmap_mapping *req, idmap_id_res *res,
+lookup_cache_pid2sid(sqlite3 *cache, idmap_mapping *req, idmap_id_res *res,
     int is_user)
 {
 	char		*end;
 	char		*sql = NULL;
-	const char	**values;
-	sqlite_vm	*vm = NULL;
+	const char	**values = NULL;
+	sqlite3_stmt	*stmt = NULL;
 	int		ncol;
 	idmap_retcode	retcode = IDMAP_SUCCESS;
 	time_t		curtime;
@@ -3980,7 +4050,7 @@ lookup_cache_pid2sid(sqlite *cache, idmap_mapping *req, idmap_id_res *res,
 
 	/* SQL to lookup the cache by pid or by unixname */
 	if (req->id1.idmap_id_u.uid != IDMAP_SENTINEL_PID) {
-		sql = sqlite_mprintf("SELECT sidprefix, rid, "
+		sql = sqlite3_mprintf("SELECT sidprefix, rid, "
 		    "canon_winname, windomain, w2u, is_wuser, "
 		    "map_type, map_dn, map_attr, map_value, map_windomain, "
 		    "map_winname, map_unixname, map_is_nt4 "
@@ -3991,7 +4061,7 @@ lookup_cache_pid2sid(sqlite *cache, idmap_mapping *req, idmap_id_res *res,
 		    "expiration > %d));",
 		    req->id1.idmap_id_u.uid, is_user, curtime);
 	} else if (req->id1name != NULL) {
-		sql = sqlite_mprintf("SELECT sidprefix, rid, "
+		sql = sqlite3_mprintf("SELECT sidprefix, rid, "
 		    "canon_winname, windomain, w2u, is_wuser, "
 		    "map_type, map_dn, map_attr, map_value, map_windomain, "
 		    "map_winname, map_unixname, map_is_nt4 "
@@ -4011,9 +4081,14 @@ lookup_cache_pid2sid(sqlite *cache, idmap_mapping *req, idmap_id_res *res,
 		retcode = IDMAP_ERR_MEMORY;
 		goto out;
 	}
+
+	sqlite3_mutex_enter(sqlite3_db_mutex(cache));
+
 	retcode = sql_compile_n_step_once(
-	    cache, sql, &vm, &ncol, 14, &values);
-	sqlite_freemem(sql);
+	    cache, sql, &stmt, &ncol, 14, &values);
+	sqlite3_free(sql);
+
+	sqlite3_mutex_leave(sqlite3_db_mutex(cache));
 
 	if (retcode == IDMAP_ERR_NOTFOUND)
 		goto out;
@@ -4144,8 +4219,8 @@ lookup_cache_pid2sid(sqlite *cache, idmap_mapping *req, idmap_id_res *res,
 	}
 
 out:
-	if (vm != NULL)
-		(void) sqlite_finalize(vm, NULL);
+	if (stmt != NULL)
+		(void) sqlite3_finalize(stmt);
 	return (retcode);
 }
 
@@ -4167,7 +4242,7 @@ out:
 static
 idmap_retcode
 lookup_cache_name2sid(
-    sqlite *cache,
+    sqlite3 *cache,
     const char *name,
     const char *domain,
     char **canonname,
@@ -4177,8 +4252,8 @@ lookup_cache_name2sid(
 {
 	char		*end, *lower_name;
 	char		*sql;
-	const char	**values;
-	sqlite_vm	*vm = NULL;
+	const char	**values = NULL;
+	sqlite3_stmt	*stmt = NULL;
 	int		ncol;
 	time_t		curtime;
 	idmap_retcode	retcode;
@@ -4199,7 +4274,7 @@ lookup_cache_name2sid(
 	/* SQL to lookup the cache */
 	if ((lower_name = tolower_u8(name)) == NULL)
 		lower_name = (char *)name;
-	sql = sqlite_mprintf("SELECT sidprefix, rid, type, canon_name "
+	sql = sqlite3_mprintf("SELECT sidprefix, rid, type, canon_name "
 	    "FROM name_cache WHERE name = %Q AND domain = %Q AND "
 	    "(expiration = 0 OR expiration ISNULL OR "
 	    "expiration > %d);", lower_name, domain, curtime);
@@ -4210,9 +4285,13 @@ lookup_cache_name2sid(
 		retcode = IDMAP_ERR_MEMORY;
 		goto out;
 	}
-	retcode = sql_compile_n_step_once(cache, sql, &vm, &ncol, 4, &values);
 
-	sqlite_freemem(sql);
+	sqlite3_mutex_enter(sqlite3_db_mutex(cache));
+
+	retcode = sql_compile_n_step_once(cache, sql, &stmt, &ncol, 4, &values);
+
+	sqlite3_free(sql);
+	sqlite3_mutex_leave(sqlite3_db_mutex(cache));
 
 	if (retcode != IDMAP_SUCCESS)
 		goto out;
@@ -4251,8 +4330,8 @@ lookup_cache_name2sid(
 	retcode = IDMAP_SUCCESS;
 
 out:
-	if (vm != NULL)
-		(void) sqlite_finalize(vm, NULL);
+	if (stmt != NULL)
+		(void) sqlite3_finalize(stmt);
 
 	if (retcode != IDMAP_SUCCESS) {
 		free(*sidprefix);
@@ -4373,7 +4452,7 @@ retry:
  */
 idmap_retcode
 lookup_name2sid(
-    sqlite *cache,
+    sqlite3 *cache,
     const char *name,
     const char *domain,
     int want_wuser,
@@ -4490,14 +4569,14 @@ idmap_retcode
 name_based_mapping_pid2sid(lookup_state_t *state, const char *unixname,
     int is_user, idmap_mapping *req, idmap_id_res *res)
 {
-	const char	*winname, *windomain;
+	const char	*winname, *windomain, *tail;
 	char		*canonname;
 	char		*canondomain;
-	char		*sql = NULL, *errmsg = NULL;
+	char		*sql = NULL;
 	idmap_retcode	retcode;
 	char		*end;
-	const char	**values;
-	sqlite_vm	*vm = NULL;
+	const char	**values = NULL;
+	sqlite3_stmt	*stmt = NULL;
 	int		ncol, r;
 	int		want_wuser;
 	const char	*me = "name_based_mapping_pid2sid";
@@ -4508,7 +4587,7 @@ name_based_mapping_pid2sid(lookup_state_t *state, const char *unixname,
 	assert(req->id2name == NULL); /* We don't have winname */
 	assert(res->id.idmap_id_u.sid.prefix == NULL); /* No SID either */
 
-	sql = sqlite_mprintf(
+	sql = sqlite3_mprintf(
 	    "SELECT winname_display, windomain, w2u_order, "
 	    "is_wuser, unixname, is_nt4 "
 	    "FROM namerules WHERE "
@@ -4521,16 +4600,24 @@ name_based_mapping_pid2sid(lookup_state_t *state, const char *unixname,
 		goto out;
 	}
 
-	if (sqlite_compile(state->db, sql, NULL, &vm, &errmsg) != SQLITE_OK) {
+	sqlite3_mutex_enter(sqlite3_db_mutex(state->db));
+
+	if (sqlite3_prepare(state->db, sql, strlen(sql), &stmt,
+	    &tail) != SQLITE_OK) {
 		retcode = IDMAP_ERR_INTERNAL;
 		idmapdlog(LOG_ERR, "%s: database error (%s)", me,
-		    CHECK_NULL(errmsg));
-		sqlite_freemem(errmsg);
+		    sqlite3_errmsg(state->db));
 		goto out;
 	}
 
+	if (tail != NULL && tail[0] != '\0') {
+		idmapdlog(LOG_ERR, "SQL parse error during '%s': "
+		    "unparsed tail: '%s'", sql, tail);
+		return (IDMAP_ERR_INTERNAL);
+	}
+
 	for (;;) {
-		r = sqlite_step(vm, &ncol, &values, NULL);
+		r = sqlite3_step(stmt);
 		assert(r != SQLITE_LOCKED && r != SQLITE_BUSY);
 		if (r == SQLITE_ROW) {
 			if (ncol < 6) {
@@ -4631,15 +4718,16 @@ name_based_mapping_pid2sid(lookup_state_t *state, const char *unixname,
 			retcode = IDMAP_ERR_NOTFOUND;
 			goto out;
 		} else {
-			(void) sqlite_finalize(vm, &errmsg);
-			vm = NULL;
+			(void) sqlite3_finalize(stmt);
+			stmt = NULL;
 			idmapdlog(LOG_ERR, "%s: database error (%s)", me,
-			    CHECK_NULL(errmsg));
-			sqlite_freemem(errmsg);
+			    sqlite3_errmsg(state->db));
 			retcode = IDMAP_ERR_INTERNAL;
 			goto out;
 		}
 	}
+
+	sqlite3_mutex_leave(sqlite3_db_mutex(state->db));
 
 	if (values[2] != NULL)
 		res->direction =
@@ -4659,15 +4747,15 @@ name_based_mapping_pid2sid(lookup_state_t *state, const char *unixname,
 
 out:
 	if (sql != NULL)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 
 	if (retcode != IDMAP_ERR_NOTFOUND) {
 		res->info.how.map_type = IDMAP_MAP_TYPE_RULE_BASED;
 		res->info.src = IDMAP_MAP_SRC_NEW;
 	}
 
-	if (vm != NULL)
-		(void) sqlite_finalize(vm, NULL);
+	if (stmt != NULL)
+		(void) sqlite3_finalize(stmt);
 	return (retcode);
 }
 
@@ -4979,7 +5067,7 @@ idmap_retcode
 idmap_cache_flush(idmap_flush_op op)
 {
 	idmap_retcode	rc;
-	sqlite *cache = NULL;
+	sqlite3 *cache = NULL;
 	char *sql1;
 	char *sql2;
 

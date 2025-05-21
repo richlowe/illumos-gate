@@ -36,10 +36,12 @@
 #include <thread.h>
 #include <libintl.h>
 #include <strings.h>
-#include <sqlite-sys/sqlite.h>
+#include <sqlite3.h>
 #include <syslog.h>
 #include <inttypes.h>
 #include <rpcsvc/idmap_prot.h>
+#include <sys/ccompile.h>
+
 #include "adutils.h"
 #include "idmap_priv.h"
 #include "idmap_config.h"
@@ -149,8 +151,8 @@ typedef struct lookup_state {
 	char			*ad_unixgroup_attr;
 	char			*nldap_winname_attr;
 	char			*defdom;
-	sqlite			*cache;
-	sqlite			*db;
+	sqlite3			*cache;
+	sqlite3			*db;
 } lookup_state_t;
 
 #define	NLDAP_OR_MIXED(nm) \
@@ -243,12 +245,20 @@ typedef struct wksids_table {
  */
 #define	ARE_WE_DONE(f)	((f & _IDMAP_F_NOTDONE) == 0)
 
-#define	SIZE_INCR	5
-#define	MAX_TRIES	5
-#define	IDMAP_DBDIR	"/var/idmap"
-#define	IDMAP_CACHEDIR	"/var/run/idmap"
-#define	IDMAP_DBNAME	IDMAP_DBDIR "/idmap.db"
-#define	IDMAP_CACHENAME	IDMAP_CACHEDIR "/cache.db"
+#define	SIZE_INCR		5
+#define	MAX_TRIES		5
+
+#define	IDMAP_DBDIR		"/var/idmap"
+#define	IDMAP_DBNAME		IDMAP_DBDIR "/idmap.db3"
+#define	IDMAP_DBVERSION		1
+#define	IDMAP_DBSCHEMA_DIR	"/usr/share/lib/idmap/schema/db"
+#define	IDMAP_DBSCHEMA_FILE	IDMAP_DBSCHEMA_DIR "/1_db.sql"
+
+#define	IDMAP_CACHEDIR		"/var/run/idmap"
+#define	IDMAP_CACHENAME		IDMAP_CACHEDIR "/cache.db3"
+#define	IDMAP_CACHEVERSION	1
+#define	IDMAP_CACHESCHEMA_DIR	"/usr/share/lib/idmap/schema/cache"
+#define	IDMAP_CACHESCHEMA_FILE	IDMAP_CACHESCHEMA_DIR "/1_cache.sql"
 
 #define	IS_ID_NONE(id)	\
 	((id).idtype == IDMAP_NONE)
@@ -307,7 +317,7 @@ typedef idmap_retcode (*update_list_res_cb)(void *, const char **, uint64_t);
 typedef int (*list_svc_cb)(void *, int, char **, char **);
 
 extern void	idmap_prog_1(struct svc_req *, register SVCXPRT *);
-extern void	idmapdlog(int, const char *, ...);
+extern void	idmapdlog(int, const char *, ...) __PRINTFLIKE(2);
 extern int	init_mapping_system(void);
 extern void	fini_mapping_system(void);
 extern void	print_idmapdstate(void);
@@ -323,21 +333,21 @@ extern void	notify_dc_changed(void);
 
 extern int		init_dbs(void);
 extern void		fini_dbs(void);
-extern idmap_retcode	get_db_handle(sqlite **);
-extern idmap_retcode	get_cache_handle(sqlite **);
-extern void		kill_db_handle(sqlite *);
-extern void		kill_cache_handle(sqlite *);
-extern idmap_retcode	sql_exec_no_cb(sqlite *, const char *, char *);
-extern idmap_retcode	add_namerule(sqlite *, idmap_namerule *);
-extern idmap_retcode	rm_namerule(sqlite *, idmap_namerule *);
-extern idmap_retcode	flush_namerules(sqlite *);
-
-extern char		*tolower_u8(const char *);
+extern idmap_retcode	get_db_handle(sqlite3 **);
+extern idmap_retcode	get_cache_handle(sqlite3 **);
+extern void		kill_db_handle(sqlite3 *);
+extern void		kill_cache_handle(sqlite3 *);
+extern idmap_retcode	sql_exec_no_cb(sqlite3 *, const char *, char *);
+extern idmap_retcode	add_namerule(sqlite3 *, idmap_namerule *);
+extern idmap_retcode	rm_namerule(sqlite3 *, idmap_namerule *);
+extern idmap_retcode	flush_namerules(sqlite3 *);
+extern void		db_set_altroot(const char *);
+extern void		db_altroot_path(const char *, char *, size_t);
 
 extern idmap_retcode	gen_sql_expr_from_rule(idmap_namerule *, char **);
 extern idmap_retcode	validate_list_cb_data(list_cb_data_t *, int,
 				char **, int, uchar_t **, size_t);
-extern idmap_retcode	process_list_svc_sql(sqlite *, const char *, char *,
+extern idmap_retcode	process_list_svc_sql(sqlite3 *, const char *, char *,
 				uint64_t, int, list_svc_cb, void *);
 extern idmap_retcode	sid2pid_first_pass(lookup_state_t *,
 				idmap_mapping *, idmap_id_res *);
@@ -351,16 +361,16 @@ extern idmap_retcode	update_cache_sid2pid(lookup_state_t *,
 				idmap_mapping *, idmap_id_res *);
 extern idmap_retcode	update_cache_pid2sid(lookup_state_t *,
 				idmap_mapping *, idmap_id_res *);
-extern idmap_retcode	get_u2w_mapping(sqlite *, sqlite *, idmap_mapping *,
+extern idmap_retcode	get_u2w_mapping(sqlite3 *, sqlite3 *, idmap_mapping *,
 				idmap_mapping *, int);
-extern idmap_retcode	get_w2u_mapping(sqlite *, sqlite *, idmap_mapping *,
+extern idmap_retcode	get_w2u_mapping(sqlite3 *, sqlite3 *, idmap_mapping *,
 				idmap_mapping *);
 extern idmap_retcode	load_cfg_in_state(lookup_state_t *);
 extern void		cleanup_lookup_state(lookup_state_t *);
 
 extern idmap_retcode	ad_lookup_batch(lookup_state_t *,
 				idmap_mapping_batch *, idmap_ids_res *);
-extern idmap_retcode	lookup_name2sid(sqlite *, const char *, const char *,
+extern idmap_retcode	lookup_name2sid(sqlite3 *, const char *, const char *,
 				int, char **, char **, char **,
 				idmap_rid_t *, idmap_id_type *,
 				idmap_mapping *, int);

@@ -1479,6 +1479,12 @@ file path=usr/sbin/zdump mode=0555
 file path=usr/sbin/zic mode=0555
 dir  path=usr/share
 dir  path=usr/share/lib
+dir  path=usr/share/lib/idmap
+dir  path=usr/share/lib/idmap/schema
+dir  path=usr/share/lib/idmap/schema/cache
+file path=usr/share/lib/idmap/schema/cache/1_cache.sql
+dir  path=usr/share/lib/idmap/schema/db
+file path=usr/share/lib/idmap/schema/db/1_db.sql
 dir  path=usr/share/lib/mailx
 file path=usr/share/lib/mailx/mailx.help
 file path=usr/share/lib/mailx/mailx.help.~

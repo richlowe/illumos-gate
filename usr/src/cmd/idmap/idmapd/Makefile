@@ -44,15 +44,17 @@ SERVEROBJS =				\
 	server.o			\
 	wksids.o
 
+# ilstr is not generated, but similarly exempt  from gettext
 GENOBJS =				\
 	adspriv_srv.o			\
+	ilstr.o				\
 	rpc_svc.o
 
 SERVERSRCS =	$(SERVEROBJS:%.o=%.c)
 GENSRCS =	$(GENOBJS:%.o=%.c)
 OBJS =		$(SERVEROBJS) $(GENOBJS)
 SRCS =		$(SERVERSRCS)
-POFILES =	$(OBJS:%.o=%.po)
+POFILES =	$(SERVEROBJS:%.o=%.po)
 
 all :=		TARGET = all
 install :=	TARGET = install
@@ -82,14 +84,21 @@ RPC_MSGOUT_OPT = -DRPC_MSGOUT=idmap_rpc_msgout
 
 ROOTMANIFESTDIR = $(ROOTSVCSYSTEM)
 $(ROOTMANIFEST) := FILEMODE= 444
+
+ROOTIDMAPDIR = $(ROOTSHLIB)/idmap
+ROOTSCHEMADIR = $(ROOTIDMAPDIR)/schema
+ROOTCACHESCHEMA = $(ROOTSCHEMADIR)/cache
+ROOTDBSCHEMA = $(ROOTSCHEMADIR)/db
+
 RPCSVC= ../../../uts/common/rpcsvc
 ADS_CMN=../../../lib/libads/common
 
-INCS += -I. -I../../../lib/libidmap/common \
-	 -I../../../lib/libsldap/common \
-	 -I../../../lib/libadutils/common \
-	 -I $(ADS_CMN) \
-	 -I../../../lib/smbsrv/libsmb/common
+INCS += -I. -I../../../lib/libidmap/common	\
+	 -I../../../lib/libsldap/common		\
+	 -I../../../lib/libadutils/common	\
+	 -I $(ADS_CMN)				\
+	 -I../../../lib/smbsrv/libsmb/common	\
+	-I$(SRC)/common/sqlite3/
 
 # Should not have to do this, but the Kerberos includes are a mess.
 INCS += -I $(ROOT)/usr/include/kerberosv5
@@ -100,7 +109,7 @@ $(POFILE) := CPPFLAGS += $(INCS)
 CFLAGS += $(CCVERBOSE)
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DIDMAPD_DEBUG
 LDLIBS +=				\
-	-lsqlite-sys			\
+	-lsqlite3-sys			\
 	-lsecdb				\
 	-lsocket			\
 	-lnsl				\
@@ -139,7 +148,8 @@ $(POFILE): $(POFILES)
 	$(RM) $(POFILE)
 	cat $(POFILES) > $(POFILE)
 
-install: all $(ROOTLIBPROG) $(ROOTMANIFEST)
+install: all $(ROOTLIBPROG) $(ROOTMANIFEST) $(ROOTCACHESCHEMA)/1_cache.sql \
+	$(ROOTDBSCHEMA)/1_db.sql
 
 check: $(CHKMANIFEST)
 
@@ -150,12 +160,30 @@ RPCGENFLAGS = -CMN
 
 adspriv_srv.o : adspriv_srv.c
 
-adspriv_srv.c:
+adspriv_srv.c: $(ADS_CMN)/ads_priv.x
 	$(RPCGEN) $(RPCGENFLAGS) -m $(ADS_CMN)/ads_priv.x > $@
+
+ilstr.o: $(SRC)/common/ilstr/ilstr.c
+	$(COMPILE.c) $(SRC)/common/ilstr/ilstr.c -o $@
+	$(CTFCONVERT_O)
 
 rpc_svc.o : rpc_svc.c
 
 rpc_svc.c : $(RPCSVC)/idmap_prot.x
 	$(RPCGEN) $(RPCGENFLAGS) -m $(RPCSVC)/idmap_prot.x > $@
+
+$(ROOTDBSCHEMA):
+	$(INS.dir)
+$(ROOTCACHESCHEMA):
+	$(INS.dir)
+
+$(ROOTDBSCHEMA)/% := FILEMODE = 0444
+$(ROOTCACHESCHEMA)/% := FILEMODE = 0444
+
+$(ROOTDBSCHEMA)/%: schema/db/% $(ROOTDBSCHEMA)
+	$(INS.file)
+
+$(ROOTCACHESCHEMA)/%: schema/cache/% $(ROOTCACHESCHEMA)
+	$(INS.file)
 
 include ../../Makefile.targ

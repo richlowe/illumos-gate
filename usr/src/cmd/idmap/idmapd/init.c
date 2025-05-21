@@ -347,8 +347,9 @@ print_idmapdstate(void)
 
 	pgcfg = &_idmapdstate.cfg->pgcfg;
 
-	idmapdlog(LOG_DEBUG, "list_size_limit=%llu", pgcfg->list_size_limit);
-	idmapdlog(LOG_DEBUG, "max_threads=%llu", pgcfg->max_threads);
+	idmapdlog(LOG_DEBUG, "list_size_limit=%" PRIu64,
+	    pgcfg->list_size_limit);
+	idmapdlog(LOG_DEBUG, "max_threads=%" PRIu64, pgcfg->max_threads);
 	idmapdlog(LOG_DEBUG, "default_domain=%s",
 	    CHECK_NULL(pgcfg->default_domain));
 	idmapdlog(LOG_DEBUG, "domain_name=%s", CHECK_NULL(pgcfg->domain_name));

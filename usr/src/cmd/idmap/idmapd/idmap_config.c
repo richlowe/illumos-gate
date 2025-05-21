@@ -749,7 +749,7 @@ set_val(
 	if ((prop = scf_property_create(handles->main)) == NULL ||
 	    (tx = scf_transaction_create(handles->main)) == NULL ||
 	    (ent = scf_entry_create(handles->main)) == NULL) {
-		idmapdlog(LOG_ERR, "Unable to set property %s",
+		idmapdlog(LOG_ERR, "Unable to set property %s: %s",
 		    name, scf_strerror(scf_error()));
 		goto destruction;
 	}
@@ -845,7 +845,7 @@ set_val_integer(
 	int			rc;
 
 	if ((value = scf_value_create(handles->main)) == NULL) {
-		idmapdlog(LOG_ERR, "Unable to set property %s",
+		idmapdlog(LOG_ERR, "Unable to set property %s: %s",
 		    name, scf_strerror(scf_error()));
 		return (-1);
 	}
@@ -871,7 +871,7 @@ set_val_astring(
 	int			rc = -1;
 
 	if ((value = scf_value_create(handles->main)) == NULL) {
-		idmapdlog(LOG_ERR, "Unable to set property %s",
+		idmapdlog(LOG_ERR, "Unable to set property %s: %s",
 		    name, scf_strerror(scf_error()));
 		goto out;
 	}
@@ -922,7 +922,7 @@ update_uint64(uint64_t *value, uint64_t *new, char *name)
 		return (0);
 
 	if (DBG(CONFIG, 1))
-		idmapdlog(LOG_INFO, "change %s=%llu", name, *new);
+		idmapdlog(LOG_INFO, "change %s=%" PRIu64, name, *new);
 
 	*value = *new;
 	return (1);
