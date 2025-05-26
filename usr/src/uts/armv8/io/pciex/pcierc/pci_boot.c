@@ -144,7 +144,7 @@
 	    (bus) <= pci_debug_bus_end)
 #define	dump_memlists(pbr, tag, bus)				\
 	if (bus_debug((bus))) dump_memlists_impl(pbr, (tag), (bus))
-#define	MSGHDR		"pci_boot: %s[%02x/%02x/%x]: "
+#define	MSGHDR		"!pci_boot: %s[%02x/%02x/%x]: "
 
 typedef enum {
 	CONFIG_INFO,
