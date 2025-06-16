@@ -206,8 +206,18 @@ pcierc_update_ppd_ranges(dev_info_t *dip)
 	}
 
 	for (int i = 0; i < i_ddi_pd_getnrng(dip); i++) {
-		if ((ranges[i].child_high & PCI_REG_ADDR_M) == PCI_ADDR_IO) {
+		switch (ranges[i].child_high & PCI_REG_ADDR_M) {
+		case PCI_ADDR_IO:
 			i_ddi_pd_getrng(dip, i)->rng_cbustype = 1;
+			break;
+		case PCI_ADDR_CONFIG:	/* fallthrough */
+		case PCI_ADDR_MEM32:	/* fallthrough */
+		case PCI_ADDR_MEM64:
+			i_ddi_pd_getrng(dip, i)->rng_cbustype = 0;
+			break;
+		default:
+			dev_err(dip, CE_PANIC, "unhandled bus type 0x%x",
+			    ranges[i].child_high & PCI_REG_ADDR_M);
 		}
 	}
 
