@@ -30,20 +30,22 @@
 #define	ELF_TARGET_ALL
 #include <elf.h>
 
-#include <sys/types.h>
 #include <sys/sysmacros.h>
+#include <sys/types.h>
 
-#include <unistd.h>
-#include <strings.h>
 #include <alloca.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <fcntl.h>
-#include <errno.h>
+#include <stdlib.h>
+#include <strings.h>
+#include <unistd.h>
+#include <upanic.h>
 #include <wait.h>
-#include <assert.h>
+#include <upanic.h>
 #include <sys/ipc.h>
 
 #include <dt_impl.h>
@@ -70,11 +72,7 @@ static const char DTRACE_SHSTRTAB32[] = "\0"
 ".SUNW_dof\0"		/* 11 */
 ".strtab\0"		/* 21 */
 ".symtab\0"		/* 29 */
-#ifdef __sparc
-".rela.SUNW_dof";	/* 37 */
-#else
 ".rel.SUNW_dof";	/* 37 */
-#endif
 
 static const char DTRACE_SHSTRTAB64[] = "\0"
 ".shstrtab\0"		/* 1 */
@@ -94,11 +92,7 @@ typedef struct dt_link_pair {
 
 typedef struct dof_elf32 {
 	uint32_t de_nrel;		/* relocation count */
-#ifdef __sparc
-	Elf32_Rela *de_rel;		/* array of relocations for sparc */
-#else
 	Elf32_Rel *de_rel;		/* array of relocations for x86 */
-#endif
 	uint32_t de_nsym;		/* symbol count */
 	Elf32_Sym *de_sym;		/* array of symbols */
 	uint32_t de_strlen;		/* size of of string table */
@@ -107,7 +101,8 @@ typedef struct dof_elf32 {
 } dof_elf32_t;
 
 static int
-prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
+prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep,
+    int mach)
 {
 	dof_sec_t *dofs, *s;
 	dof_relohdr_t *dofrh;
@@ -118,11 +113,7 @@ prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
 	uint32_t count = 0;
 	size_t base;
 	Elf32_Sym *sym;
-#ifdef __sparc
-	Elf32_Rela *rel;
-#else
 	Elf32_Rel *rel;
-#endif
 
 	/*LINTED*/
 	dofs = (dof_sec_t *)((char *)dof + dof->dofh_secoff);
@@ -215,25 +206,15 @@ prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
 		s = &dofs[dofrh->dofr_tgtsec];
 
 		for (j = 0; j < nrel; j++) {
-#if defined(__i386) || defined(__amd64)
-			rel->r_offset = s->dofs_offset +
-			    dofr[j].dofr_offset;
-			rel->r_info = ELF32_R_INFO(count + dep->de_global,
-			    R_386_32);
-#elif defined(__sparc)
-			/*
-			 * Add 4 bytes to hit the low half of this 64-bit
-			 * big-endian address.
-			 */
-			rel->r_offset = s->dofs_offset +
-			    dofr[j].dofr_offset + 4;
-			rel->r_info = ELF32_R_INFO(count + dep->de_global,
-			    R_SPARC_32);
-/* XXXARM: No actual 32bit ISA here */
-#elif defined(__aarch64__)
-#else
-#error unknown ISA
-#endif
+			if ((mach == EM_386) || (mach == EM_AMD64)) {
+				rel->r_offset = s->dofs_offset +
+				    dofr[j].dofr_offset;
+				rel->r_info = ELF32_R_INFO(count +
+				    dep->de_global, R_386_32);
+			} else {
+				const char *msg = "unknown target machine";
+				upanic(msg, strlen(msg));
+			}
 
 			sym->st_name = base + dofr[j].dofr_name - 1;
 			sym->st_value = 0;
@@ -289,7 +270,8 @@ typedef struct dof_elf64 {
 } dof_elf64_t;
 
 static int
-prepare_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf64_t *dep)
+prepare_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf64_t *dep,
+    int mach)
 {
 	dof_sec_t *dofs, *s;
 	dof_relohdr_t *dofrh;
@@ -393,24 +375,20 @@ prepare_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf64_t *dep)
 		s = &dofs[dofrh->dofr_tgtsec];
 
 		for (j = 0; j < nrel; j++) {
-#if defined(__i386) || defined(__amd64)
+			if ((mach == EM_386) || (mach == EM_AMD64)) {
 			rel->r_offset = s->dofs_offset +
 			    dofr[j].dofr_offset;
 			rel->r_info = ELF64_R_INFO(count + dep->de_global,
 			    R_AMD64_64);
-#elif defined(__sparc)
-			rel->r_offset = s->dofs_offset +
-			    dofr[j].dofr_offset;
-			rel->r_info = ELF64_R_INFO(count + dep->de_global,
-			    R_SPARC_64);
-#elif defined(__aarch64__)
+			} else if (mach == EM_AARCH64) {
 			rel->r_offset = s->dofs_offset +
 			    dofr[j].dofr_offset;
 			rel->r_info = ELF64_R_INFO(count + dep->de_global,
 			    R_AARCH64_ABS64);
-#else
-#error unknown ISA
-#endif
+			} else {
+				const char *msg = "unknown target mach";
+				upanic(msg, strlen(msg));
+			}
 
 			sym->st_name = base + dofr[j].dofr_name - 1;
 			sym->st_value = 0;
@@ -458,7 +436,8 @@ prepare_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf64_t *dep)
  * and complete the contents of the given ELF file.
  */
 static int
-dump_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
+dump_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int mach, int datamodel,
+    int fd)
 {
 	struct {
 		Elf32_Ehdr ehdr;
@@ -471,8 +450,9 @@ dump_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 	int ret = 0;
 	uint_t nshdr;
 
-	if (prepare_elf32(dtp, dof, &de) != 0)
+	if (prepare_elf32(dtp, dof, &de, mach) != 0) {
 		return (-1); /* errno is set for us */
+	}
 
 	/*
 	 * If there are no relocations, we only need enough sections for
@@ -488,20 +468,9 @@ dump_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 	elf_file.ehdr.e_ident[EI_MAG3] = ELFMAG3;
 	elf_file.ehdr.e_ident[EI_VERSION] = EV_CURRENT;
 	elf_file.ehdr.e_ident[EI_CLASS] = ELFCLASS32;
-#if defined(_BIG_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2MSB;
-#elif defined(_LITTLE_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2LSB;
-#endif
+	elf_file.ehdr.e_ident[EI_DATA] = datamodel;
 	elf_file.ehdr.e_type = ET_REL;
-#if defined(__sparc)
-	elf_file.ehdr.e_machine = EM_SPARC;
-#elif defined(__i386) || defined(__amd64)
-	elf_file.ehdr.e_machine = EM_386;
-#elif defined(__aarch64__)	/* XXXARM: Not actually 32bit */
-#else
-#error Unknown platform
-#endif
+	elf_file.ehdr.e_machine = mach;
 	elf_file.ehdr.e_version = EV_CURRENT;
 	elf_file.ehdr.e_shoff = sizeof (Elf32_Ehdr);
 	elf_file.ehdr.e_ehsize = sizeof (Elf32_Ehdr);
@@ -562,11 +531,7 @@ dump_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 		shp = &elf_file.shdr[ESHDR_REL];
 		shp->sh_name = 37; /* DTRACE_SHSTRTAB32[37] = ".rel.SUNW_dof" */
 		shp->sh_flags = SHF_ALLOC;
-#ifdef __sparc
-		shp->sh_type = SHT_RELA;
-#else
 		shp->sh_type = SHT_REL;
-#endif
 		shp->sh_entsize = sizeof (de.de_rel[0]);
 		shp->sh_link = ESHDR_SYMTAB;
 		shp->sh_info = ESHDR_DOF;
@@ -598,7 +563,8 @@ dump_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
  * and complete the contents of the given ELF file.
  */
 static int
-dump_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
+dump_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int mach, int datamodel,
+    int fd)
 {
 	struct {
 		Elf64_Ehdr ehdr;
@@ -611,8 +577,9 @@ dump_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 	int ret = 0;
 	uint_t nshdr;
 
-	if (prepare_elf64(dtp, dof, &de) != 0)
+	if (prepare_elf64(dtp, dof, &de, mach) != 0) {
 		return (-1); /* errno is set for us */
+	}
 
 	/*
 	 * If there are no relocations, we only need enough sections for
@@ -628,21 +595,9 @@ dump_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 	elf_file.ehdr.e_ident[EI_MAG3] = ELFMAG3;
 	elf_file.ehdr.e_ident[EI_VERSION] = EV_CURRENT;
 	elf_file.ehdr.e_ident[EI_CLASS] = ELFCLASS64;
-#if defined(_BIG_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2MSB;
-#elif defined(_LITTLE_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2LSB;
-#endif
+	elf_file.ehdr.e_ident[EI_DATA] = datamodel;
 	elf_file.ehdr.e_type = ET_REL;
-#if defined(__sparc)
-	elf_file.ehdr.e_machine = EM_SPARCV9;
-#elif defined(__i386) || defined(__amd64)
-	elf_file.ehdr.e_machine = EM_AMD64;
-#elif defined(__aarch64__)
-	elf_file.ehdr.e_machine = EM_AARCH64;
-#else
-#error Unknown platform
-#endif
+	elf_file.ehdr.e_machine = mach;
 	elf_file.ehdr.e_version = EV_CURRENT;
 	elf_file.ehdr.e_shoff = sizeof (Elf64_Ehdr);
 	elf_file.ehdr.e_ehsize = sizeof (Elf64_Ehdr);
@@ -662,7 +617,6 @@ dump_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 
 	shp = &elf_file.shdr[ESHDR_DOF];
 	shp->sh_name = 11; /* DTRACE_SHSTRTAB64[11] = ".SUNW_dof" */
-	/* XXXARM: Hayashi made this writeable */
 	shp->sh_flags = SHF_ALLOC;
 	shp->sh_type = SHT_SUNW_dof;
 	shp->sh_offset = off;
@@ -755,145 +709,16 @@ dt_symtab_lookup(Elf_Data *data_sym, int nsym, uintptr_t addr, uint_t shn,
 	return (ret);
 }
 
-#if defined(__sparc)
-
-#define	DT_OP_RET		0x81c7e008
-#define	DT_OP_NOP		0x01000000
-#define	DT_OP_CALL		0x40000000
-#define	DT_OP_CLR_O0		0x90102000
-
-#define	DT_IS_MOV_O7(inst)	(((inst) & 0xffffe000) == 0x9e100000)
-#define	DT_IS_RESTORE(inst)	(((inst) & 0xc1f80000) == 0x81e80000)
-#define	DT_IS_RETL(inst)	(((inst) & 0xfff83fff) == 0x81c02008)
-
-#define	DT_RS2(inst)		((inst) & 0x1f)
-#define	DT_MAKE_RETL(reg)	(0x81c02008 | ((reg) << 14))
-
-/*ARGSUSED*/
-static int
-dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
-    uint32_t *off)
-{
-	uint32_t *ip;
-
-	if ((rela->r_offset & (sizeof (uint32_t) - 1)) != 0)
-		return (-1);
-
-	/*LINTED*/
-	ip = (uint32_t *)(p + rela->r_offset);
-
-	/*
-	 * We only know about some specific relocation types.
-	 */
-	if (GELF_R_TYPE(rela->r_info) != R_SPARC_WDISP30 &&
-	    GELF_R_TYPE(rela->r_info) != R_SPARC_WPLT30)
-		return (-1);
-
-	/*
-	 * We may have already processed this object file in an earlier linker
-	 * invocation. Check to see if the present instruction sequence matches
-	 * the one we would install below.
-	 */
-	if (isenabled) {
-		if (ip[0] == DT_OP_NOP) {
-			(*off) += sizeof (ip[0]);
-			return (0);
-		}
-	} else {
-		if (DT_IS_RESTORE(ip[1])) {
-			if (ip[0] == DT_OP_RET) {
-				(*off) += sizeof (ip[0]);
-				return (0);
-			}
-		} else if (DT_IS_MOV_O7(ip[1])) {
-			if (DT_IS_RETL(ip[0]))
-				return (0);
-		} else {
-			if (ip[0] == DT_OP_NOP) {
-				(*off) += sizeof (ip[0]);
-				return (0);
-			}
-		}
-	}
-
-	/*
-	 * We only expect call instructions with a displacement of 0.
-	 */
-	if (ip[0] != DT_OP_CALL) {
-		dt_dprintf("found %x instead of a call instruction at %llx\n",
-		    ip[0], (u_longlong_t)rela->r_offset);
-		return (-1);
-	}
-
-	if (isenabled) {
-		/*
-		 * It would necessarily indicate incorrect usage if an is-
-		 * enabled probe were tail-called so flag that as an error.
-		 * It's also potentially (very) tricky to handle gracefully,
-		 * but could be done if this were a desired use scenario.
-		 */
-		if (DT_IS_RESTORE(ip[1]) || DT_IS_MOV_O7(ip[1])) {
-			dt_dprintf("tail call to is-enabled probe at %llx\n",
-			    (u_longlong_t)rela->r_offset);
-			return (-1);
-		}
-
-
-		/*
-		 * On SPARC, we take advantage of the fact that the first
-		 * argument shares the same register as for the return value.
-		 * The macro handles the work of zeroing that register so we
-		 * don't need to do anything special here. We instrument the
-		 * instruction in the delay slot as we'll need to modify the
-		 * return register after that instruction has been emulated.
-		 */
-		ip[0] = DT_OP_NOP;
-		(*off) += sizeof (ip[0]);
-	} else {
-		/*
-		 * If the call is followed by a restore, it's a tail call so
-		 * change the call to a ret. If the call if followed by a mov
-		 * of a register into %o7, it's a tail call in leaf context
-		 * so change the call to a retl-like instruction that returns
-		 * to that register value + 8 (rather than the typical %o7 +
-		 * 8); the delay slot instruction is left, but should have no
-		 * effect. Otherwise we change the call to be a nop. We
-		 * identify the subsequent instruction as the probe point in
-		 * all but the leaf tail-call case to ensure that arguments to
-		 * the probe are complete and consistent. An astute, though
-		 * largely hypothetical, observer would note that there is the
-		 * possibility of a false-positive probe firing if the function
-		 * contained a branch to the instruction in the delay slot of
-		 * the call. Fixing this would require significant in-kernel
-		 * modifications, and isn't worth doing until we see it in the
-		 * wild.
-		 */
-		if (DT_IS_RESTORE(ip[1])) {
-			ip[0] = DT_OP_RET;
-			(*off) += sizeof (ip[0]);
-		} else if (DT_IS_MOV_O7(ip[1])) {
-			ip[0] = DT_MAKE_RETL(DT_RS2(ip[1]));
-		} else {
-			ip[0] = DT_OP_NOP;
-			(*off) += sizeof (ip[0]);
-		}
-	}
-
-	return (0);
-}
-
-#elif defined(__i386) || defined(__amd64)
-
-#define	DT_OP_NOP		0x90
-#define	DT_OP_RET		0xc3
-#define	DT_OP_CALL		0xe8
-#define	DT_OP_JMP32		0xe9
-#define	DT_OP_REX_RAX		0x48
-#define	DT_OP_XOR_EAX_0		0x33
-#define	DT_OP_XOR_EAX_1		0xc0
+#define	DT_X86_OP_NOP		0x90
+#define	DT_X86_OP_RET		0xc3
+#define	DT_X86_OP_CALL		0xe8
+#define	DT_X86_OP_JMP32		0xe9
+#define	DT_X86_OP_REX_RAX	0x48
+#define	DT_X86_OP_XOR_EAX_0	0x33
+#define	DT_X86_OP_XOR_EAX_1	0xc0
 
 static int
-dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
+dt_modtext_x86(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
     uint32_t *off)
 {
 	uint8_t *ip = (uint8_t *)(p + rela->r_offset - 1);
@@ -925,22 +750,24 @@ dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
 	 * text modification code below.
 	 */
 	if (!isenabled) {
-		if ((ip[0] == DT_OP_NOP || ip[0] == DT_OP_RET) &&
-		    ip[1] == DT_OP_NOP && ip[2] == DT_OP_NOP &&
-		    ip[3] == DT_OP_NOP && ip[4] == DT_OP_NOP)
+		if ((ip[0] == DT_X86_OP_NOP || ip[0] == DT_X86_OP_RET) &&
+		    ip[1] == DT_X86_OP_NOP && ip[2] == DT_X86_OP_NOP &&
+		    ip[3] == DT_X86_OP_NOP && ip[4] == DT_X86_OP_NOP)
 			return (0);
 	} else if (dtp->dt_oflags & DTRACE_O_LP64) {
-		if (ip[0] == DT_OP_REX_RAX &&
-		    ip[1] == DT_OP_XOR_EAX_0 && ip[2] == DT_OP_XOR_EAX_1 &&
-		    (ip[3] == DT_OP_NOP || ip[3] == DT_OP_RET) &&
-		    ip[4] == DT_OP_NOP) {
+		if (ip[0] == DT_X86_OP_REX_RAX &&
+		    ip[1] == DT_X86_OP_XOR_EAX_0 &&
+		    ip[2] == DT_X86_OP_XOR_EAX_1 &&
+		    (ip[3] == DT_X86_OP_NOP || ip[3] == DT_X86_OP_RET) &&
+		    ip[4] == DT_X86_OP_NOP) {
 			(*off) += 3;
 			return (0);
 		}
 	} else {
-		if (ip[0] == DT_OP_XOR_EAX_0 && ip[1] == DT_OP_XOR_EAX_1 &&
-		    (ip[2] == DT_OP_NOP || ip[2] == DT_OP_RET) &&
-		    ip[3] == DT_OP_NOP && ip[4] == DT_OP_NOP) {
+		if (ip[0] == DT_X86_OP_XOR_EAX_0 &&
+		    ip[1] == DT_X86_OP_XOR_EAX_1 &&
+		    (ip[2] == DT_X86_OP_NOP || ip[2] == DT_X86_OP_RET) &&
+		    ip[3] == DT_X86_OP_NOP && ip[4] == DT_X86_OP_NOP) {
 			(*off) += 2;
 			return (0);
 		}
@@ -950,13 +777,13 @@ dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
 	 * We expect either a call instrution with a 32-bit displacement or a
 	 * jmp instruction with a 32-bit displacement acting as a tail-call.
 	 */
-	if (ip[0] != DT_OP_CALL && ip[0] != DT_OP_JMP32) {
+	if (ip[0] != DT_X86_OP_CALL && ip[0] != DT_X86_OP_JMP32) {
 		dt_dprintf("found %x instead of a call or jmp instruction at "
 		    "%llx\n", ip[0], (u_longlong_t)rela->r_offset);
 		return (-1);
 	}
 
-	ret = (ip[0] == DT_OP_JMP32) ? DT_OP_RET : DT_OP_NOP;
+	ret = (ip[0] == DT_X86_OP_JMP32) ? DT_X86_OP_RET : DT_X86_OP_NOP;
 
 	/*
 	 * Establish the instruction sequence -- all nops for probes, and an
@@ -967,39 +794,36 @@ dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
 	 */
 	if (!isenabled) {
 		ip[0] = ret;
-		ip[1] = DT_OP_NOP;
-		ip[2] = DT_OP_NOP;
-		ip[3] = DT_OP_NOP;
-		ip[4] = DT_OP_NOP;
+		ip[1] = DT_X86_OP_NOP;
+		ip[2] = DT_X86_OP_NOP;
+		ip[3] = DT_X86_OP_NOP;
+		ip[4] = DT_X86_OP_NOP;
 	} else if (dtp->dt_oflags & DTRACE_O_LP64) {
-		ip[0] = DT_OP_REX_RAX;
-		ip[1] = DT_OP_XOR_EAX_0;
-		ip[2] = DT_OP_XOR_EAX_1;
+		ip[0] = DT_X86_OP_REX_RAX;
+		ip[1] = DT_X86_OP_XOR_EAX_0;
+		ip[2] = DT_X86_OP_XOR_EAX_1;
 		ip[3] = ret;
-		ip[4] = DT_OP_NOP;
+		ip[4] = DT_X86_OP_NOP;
 		(*off) += 3;
 	} else {
-		ip[0] = DT_OP_XOR_EAX_0;
-		ip[1] = DT_OP_XOR_EAX_1;
+		ip[0] = DT_X86_OP_XOR_EAX_0;
+		ip[1] = DT_X86_OP_XOR_EAX_1;
 		ip[2] = ret;
-		ip[3] = DT_OP_NOP;
-		ip[4] = DT_OP_NOP;
+		ip[3] = DT_X86_OP_NOP;
+		ip[4] = DT_X86_OP_NOP;
 		(*off) += 2;
 	}
 
 	return (0);
 }
 
-#elif defined(__aarch64__)
+#define	DT_AARCH64_OP_NOP		0xd503201f
+#define	DT_AARCH64_OP_RET		0xd65f03c0
+#define	DT_AARCH64_OP_CALL26		0x94000000
+#define	DT_AARCH64_OP_JUMP26		0x14000000
 
-#define	DT_OP_NOP		0xd503201f
-#define	DT_OP_RET		0xd65f03c0
-#define	DT_OP_CALL26		0x94000000
-#define	DT_OP_JUMP26		0x14000000
-
-/*ARGSUSED*/
 static int
-dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
+dt_modtext_aarch64(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
     uint32_t *off)
 {
 	uint32_t *ip;
@@ -1012,39 +836,36 @@ dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
 	/*
 	 * We only know about some specific relocation types.
 	 */
-	if (GELF_R_TYPE(rela->r_info) != R_AARCH64_CALL26 &&
-	    GELF_R_TYPE(rela->r_info) != R_AARCH64_JUMP26 &&
-	    GELF_R_TYPE(rela->r_info) != R_AARCH64_NONE)
+	if (ELF64_R_TYPE(rela->r_info) != R_AARCH64_CALL26 &&
+	    ELF64_R_TYPE(rela->r_info) != R_AARCH64_JUMP26 &&
+	    ELF64_R_TYPE(rela->r_info) != R_AARCH64_NONE) {
 		return (-1);
+	}
 
 	/*
 	 * We may have already processed this object file in an earlier linker
 	 * invocation. Check to see if the present instruction sequence matches
 	 * the one we would install below.
 	 */
-	if (ip[0] == DT_OP_NOP || ip[0] == DT_OP_RET)
+	if (ip[0] == DT_AARCH64_OP_NOP || ip[0] == DT_AARCH64_OP_RET)
 		return (0);
 
 	/*
 	 * We only expect call instructions with a displacement of 0.
 	 */
-	if (!(ip[0] == DT_OP_CALL26 || ip[0] == DT_OP_JUMP26)) {
+	if (!(ip[0] == DT_AARCH64_OP_CALL26 || ip[0] == DT_AARCH64_OP_JUMP26)) {
 		dt_dprintf("found %x instead of a call or jmp instruction at "
 		    "%llx\n", ip[0], (u_longlong_t)rela->r_offset);
 		return (-1);
 	}
 
-	if (ip[0] == DT_OP_CALL26)
-		ip[0] = DT_OP_NOP;
+	if (ip[0] == DT_AARCH64_OP_CALL26)
+		ip[0] = DT_AARCH64_OP_NOP;
 	else
-		ip[0] = DT_OP_RET;
+		ip[0] = DT_AARCH64_OP_RET;
 
 	return (0);
 }
-
-#else
-#error unknown ISA
-#endif
 
 /*PRINTFLIKE5*/
 static int
@@ -1075,7 +896,7 @@ dt_link_error(dtrace_hdl_t *dtp, Elf *elf, int fd, dt_link_pair_t *bufs,
 }
 
 static int
-process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
+process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp, int mach)
 {
 	static const char dt_prefix[] = "__dtrace";
 	static const char dt_enabled[] = "enabled";
@@ -1129,24 +950,12 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 
 	if (dtp->dt_oflags & DTRACE_O_LP64) {
 		eclass = ELFCLASS64;
-#if defined(__sparc)
-		emachine1 = emachine2 = EM_SPARCV9;
-#elif defined(__i386) || defined(__amd64)
-		emachine1 = emachine2 = EM_AMD64;
-#elif defined(__aarch64__)
-		emachine1 = emachine2 = EM_AARCH64;
-#endif
+		emachine1 = emachine2 = mach;
+		emachine1 = emachine2 = mach;
 		symsize = sizeof (Elf64_Sym);
 	} else {
 		eclass = ELFCLASS32;
-#if defined(__sparc)
-		emachine1 = EM_SPARC;
-		emachine2 = EM_SPARC32PLUS;
-#elif defined(__i386) || defined(__amd64)
-		emachine1 = emachine2 = EM_386;
-#elif defined(__aarch64__)
-		assert(0 && "Trying to create 32bit AArch64 DTrace object");
-#endif
+		emachine1 = emachine2 = mach;
 		symsize = sizeof (Elf32_Sym);
 	}
 
@@ -1163,7 +972,7 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 	/*
 	 * We use this token as a relatively unique handle for this file on the
 	 * system in order to disambiguate potential conflicts between files of
-	 * the same name which contain identially named local symbols.
+	 * the same name which contain identically named local symbols.
 	 */
 	if ((objkey = ftok(obj, 0)) == (key_t)-1) {
 		return (dt_link_error(dtp, elf, fd, bufs,
@@ -1493,9 +1302,20 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 			assert(fsym.st_value <= rela.r_offset);
 
 			off = rela.r_offset - fsym.st_value;
-			if (dt_modtext(dtp, data_tgt->d_buf, eprobe,
-			    &rela, &off) != 0) {
-				goto err;
+
+			if ((mach == EM_386) || (mach == EM_AMD64)) {
+				if (dt_modtext_x86(dtp, data_tgt->d_buf, eprobe,
+				    &rela, &off) != 0) {
+					goto err;
+				}
+			} else if (mach == EM_AARCH64) {
+				if (dt_modtext_aarch64(dtp, data_tgt->d_buf,
+				    eprobe, &rela, &off) != 0) {
+					goto err;
+				}
+			} else {
+				static const char *msg = "unknown target ISA";
+				upanic(msg, strlen(msg));
 			}
 
 			if (dt_probe_define(pvp, prp, s, r, off, eprobe) != 0) {
@@ -1516,16 +1336,6 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 			if (rsym.st_shndx != SHN_SUNW_IGNORE) {
 				rsym.st_shndx = SHN_SUNW_IGNORE;
 				(void) gelf_update_sym(data_sym, ndx, &rsym);
-			}
-
-			if (shdr_rel.sh_type == SHT_RELA) {
-				rela.r_info = GELF_R_INFO(ndx, 0);
-				gelf_update_rela(data_rel, i, &rela);
-			} else {
-				GElf_Rel rel;
-				rel.r_offset = rela.r_offset;
-				rel.r_info = GELF_R_INFO(ndx, 0);
-				gelf_update_rel(data_rel, i, &rel);
 			}
 		}
 	}
@@ -1560,6 +1370,37 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 	char *cmd, tmp;
 	size_t len;
 	int eprobes = 0, ret = 0;
+
+	int mach = EM_NONE;
+	int datamodel = ELFDATANONE;
+
+	if (dtp->dt_target == NULL) {
+#if defined(__x86)
+		if (dtp->dt_oflags & DTRACE_O_LP64) {
+			mach = EM_AMD64;
+		} else {
+			mach = EM_386;
+		}
+#elif defined(__aarch64__)
+		mach = EM_AARCH64;
+#else
+#error Unknown platform
+#endif
+		datamodel = ELFDATA2LSB;
+	} else if (strcmp(dtp->dt_target, "aarch64") == 0) {
+		mach = EM_AARCH64;
+		datamodel = ELFDATA2LSB;
+	} else if (strcmp(dtp->dt_target, "x86") == 0) {
+		if (dtp->dt_oflags & DTRACE_O_LP64) {
+			mach = EM_AMD64;
+		} else {
+			mach = EM_386;
+		}
+		datamodel = ELFDATA2LSB;
+	} else {
+		return (dt_link_error(dtp, NULL, -1, NULL,
+		    "unknown target '%s'", dtp->dt_target));
+	}
 
 	/*
 	 * A NULL program indicates a special use in which we just link
@@ -1608,7 +1449,7 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 	}
 
 	for (i = 0; i < objc; i++) {
-		if (process_obj(dtp, objv[i], &eprobes) != 0)
+		if (process_obj(dtp, objv[i], &eprobes, mach) != 0)
 			return (-1); /* errno is set for us */
 	}
 
@@ -1664,9 +1505,9 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 		(void) unlink(file);
 
 	if (dtp->dt_oflags & DTRACE_O_LP64)
-		status = dump_elf64(dtp, dof, fd);
+		status = dump_elf64(dtp, dof, mach, datamodel, fd);
 	else
-		status = dump_elf32(dtp, dof, fd);
+		status = dump_elf32(dtp, dof, mach, datamodel, fd);
 
 	if (status != 0 || lseek(fd, 0, SEEK_SET) != 0) {
 		return (dt_link_error(dtp, NULL, -1, NULL,
@@ -1675,54 +1516,14 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 
 	if (!dtp->dt_lazyload) {
 		const char *fmt = "%s -o %s -r -Blocal -Breduce /dev/fd/%d %s";
-		int found = 0;
-		dt_dirpath_t *dirp;
 
-				for (dirp = dt_list_next(&dtp->dt_lib_path);
-		    dirp != NULL; dirp = dt_list_next(dirp)) {
-
-#if defined(_MULTI_DATAMODEL)
-			if (dtp->dt_oflags & DTRACE_O_LP64) {
-				(void) snprintf(drti, sizeof (drti),
-				    "%s/64/drti.o", dirp->dir_path);
-			} else
-#endif
-			{
-				(void) snprintf(drti, sizeof (drti),
-				    "%s/drti.o", dirp->dir_path);
-			}
-
-			int drtifd = open64(drti, O_RDONLY);
-			if (drtifd >= 0) {
-				Elf *elf = elf_begin(drtifd, ELF_C_READ, NULL);
-				if (elf) {
-					GElf_Ehdr ehdr;
-					if (elf_kind(elf) == ELF_K_ELF &&
-					    gelf_getehdr(elf, &ehdr) != NULL) {
-						if (ehdr.e_machine ==
-#if defined(__sparc)
-						    EM_SPARCV9
-#elif (defined(__i386) || defined(__amd64))
-						    EM_AMD64
-#elif defined(__aarch64__)
-						    EM_AARCH64
-#else
-#error Unknown platform
-#endif
-						   ) {
-							found = 1;
-						}
-					}
-					elf_end(elf);
-				}
-				close(drtifd);
-			}
-			if (found)
-				break;
+		if (dtp->dt_oflags & DTRACE_O_LP64) {
+			(void) snprintf(drti, sizeof (drti),
+			    "%s/usr/lib/dtrace/64/drti.o", dtp->dt_sysroot);
+		} else {
+			(void) snprintf(drti, sizeof (drti),
+			    "%s/usr/lib/dtrace/drti.o", dtp->dt_sysroot);
 		}
-		if (found == 0)
-			return (dt_link_error(dtp, NULL, -1, NULL,
-				    "drti.o not found\n"));
 
 		len = snprintf(&tmp, 1, fmt, dtp->dt_ld_path, file, fd,
 		    drti) + 1;

@@ -74,7 +74,6 @@ SUBDIRS +=		\
 # libmvec -- not built because AArch64 has a special libm right now
 # libresolv -- libresolv.so.1 for binary compat, not needed
 # libm1 -- not built because AArch64 has a special libm right now
-# smbclnt -- low value, needs cross dtrace
 #
 # libcpc -- not ported
 # libpctx -- part of cpc
@@ -85,7 +84,6 @@ $(NOT_AARCH64_BLD)SUBDIRS += \
 	libmvec		\
 	libpctx		\
 	libresolv	\
-	smbclnt		\
 	libm1
 
 SUBDIRS +=				\
@@ -276,6 +274,7 @@ SUBDIRS +=				\
 	rpcsec_gss	\
 	sasl_plugins	\
 	scsi		\
+	smbclnt		\
 	smbsrv		\
 	smhba		\
 	sun_fc		\
@@ -750,7 +749,8 @@ scsi:		libfru libumem libdevid libdevinfo
 smbclnt:	libfakekernel pkcs11
 smbsrv:		libxnet libpthread librt libshare libidmap pkcs11 libsqlite \
 		libcryptoutil libreparse libcmdutils libresolv2 libsmbfs \
-		libuuid libfakekernel libads libgss libldap5 krb5 libmlrpc
+		libuuid libfakekernel libads libgss libldap5 krb5 libmlrpc \
+		libdtrace
 storage:	libdevice libdevinfo libdevid
 sun_fc:		libdevinfo libsysevent
 sun_sas:	libdevinfo libsysevent libkstat libdevid

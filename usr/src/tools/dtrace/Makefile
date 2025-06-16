@@ -18,30 +18,46 @@
 #
 # CDDL HEADER END
 #
+
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2013-2021 Tintri by DDN, Inc. All rights reserved.
-#
 
-include $(SRC)/Makefile.master
+PROG = dtrace
+OBJS = dtrace.o
 
-SUBDIRS =		\
-	bind-helper	\
-	dtrace		\
-	fksmbd		\
-	nvlprint	\
-	smbadm		\
-	smbd		\
-	smbstat		\
-	test-crypt	\
-	test-msgbuf	\
-	testoplock
+include $(SRC)/cmd/Makefile.cmd
+include $(SRC)/cmd/Makefile.ctf
+include $(SRC)/tools/Makefile.tools
+include $(SRC)/cmd/Makefile.cmd.64
 
-MSGSUBDIRS = smbadm smbstat
+CFLAGS += $(CCVERBOSE)
+CFLAGS64 += $(CCVERBOSE)
+LDFLAGS += -L$(ROOTONBLDLIBMACH64) -R'$$ORIGIN/../../lib/$(NATIVE_MACH)/64'
+LDLIBS += -ldtrace -lproc -lctf -lelf
 
+ADJUNCT_LIBS += libproc.so libctf.so libelf.so
 
+FILEMODE = 0555
 
-include ../Makefile.cmd
-include ./Makefile.subdirs
+CLEANFILES += $(OBJS)
+
+.KEEP_STATE:
+
+all: $(PROG)
+
+install: all $(ROOTONBLDMACH64PROG)
+
+$(PROG): $(OBJS)
+	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
+	$(POST_PROCESS) ; $(STRIP_STABS)
+
+clean:
+	-$(RM) $(CLEANFILES)
+
+%.o: $(SRC)/cmd/dtrace/%.c
+	$(COMPILE.c) $<
+	$(POST_PROCESS_O)
+
+include $(SRC)/cmd/Makefile.targ

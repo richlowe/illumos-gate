@@ -139,10 +139,11 @@ SMATCH=off
 
 YYCFLAGS =
 LDLIBS += -lgen -lproc -lrtld_db -lnsl -lsocket -lctf -lelf -lc
-# XXXARM: intrinsics
-$(AARCH64_BLD)LDLIBS += -lgcc
 DRTILDLIBS = $(LDLIBS.lib) -lc
 LIBDAUDITLIBS = $(LDLIBS.lib) -lmapmalloc -lc -lproc $(LDSTACKPROTECT)
+
+# XXXARM: intrinsics
+$(AARCH64_BLD)LDLIBS += -lgcc
 
 yydebug := YYCFLAGS += -DYYDEBUG
 
@@ -240,12 +241,6 @@ $(LIBDAUDIT): $(LIBDAUDITOBJS)
 	    $(BDIRECT) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
 	    $(LIBDAUDITOBJS) $(LIBDAUDITLIBS)
 	$(POST_PROCESS_SO)
-
-$(ROOTDLIBDIR):
-	$(INS.dir)
-
-$(ROOTDLIBDIR64): $(ROOTDLIBDIR)
-	$(INS.dir)
 
 $(ROOTDLIBDIR)/%.d: ../common/%.d
 	$(INS.file)
