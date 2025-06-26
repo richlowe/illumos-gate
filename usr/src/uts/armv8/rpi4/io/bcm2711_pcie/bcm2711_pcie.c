@@ -49,7 +49,6 @@
 
 #include <sys/hotplug/pci/pcie_hp.h>
 #include <sys/pci_cfgacc.h>
-#include <sys/pci_cfgspace.h>
 #include <sys/pcie.h>
 #include <sys/pcie_impl.h>
 
@@ -336,6 +335,10 @@ bcm2711_pcie_enable_controller(const bcm2711_pcie_softc_t *softc)
 	drv_usecwait(100);
 }
 
+pcie_rc_data_t bcm2711_pcie_rc_data = {
+	.pcie_rc_cfgspace_acc = bcm2711_cfgspace_acc,
+};
+
 int
 bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
@@ -370,6 +373,9 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		    ret);
 		return (ret);
 	}
+
+	ndi_set_bus_private(dip, B_TRUE, DEVI_PORT_TYPE_PCIRC,
+	    &bcm2711_pcie_rc_data);
 
 	VERIFY3U(softc->bc_base, !=, 0);
 
@@ -416,18 +422,6 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	 */
 
 	/*
-	 * XXXPCI: This is not the mechanism I would prefer, but I cannot find
-	 * one I prefer.
-	 */
-	if ((ret = ddi_prop_update_int64(DDI_DEV_T_NONE, dip,
-	    OBP_CFGSPACE_HOOK, (intptr_t)&bcm2711_cfgspace_acc)) !=
-	    DDI_PROP_SUCCESS) {
-		dev_err(dip, CE_WARN, "failed to set cfgspace access "
-		    "hook: %d", ret);
-		return (DDI_FAILURE);
-	}
-
-	/*
 	 * XXXPCI: Should be in pcierc_attach probably, but historically
 	 * happened logically prior
 	 */
@@ -458,8 +452,6 @@ bcm2711_pcie_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	if ((ret = pcierc_detach(dip, cmd)) != DDI_SUCCESS) {
 		return (ret);
 	}
-
-	ddi_prop_remove(DDI_DEV_T_NONE, dip, OBP_CFGSPACE_HOOK);
 
 	ddi_regs_map_free(&softc->bc_handle);
 	ddi_soft_state_free(bcm2711_pcie_soft_state,
