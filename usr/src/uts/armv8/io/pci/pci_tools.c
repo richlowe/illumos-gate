@@ -42,7 +42,6 @@
 #include <sys/sunndi.h>
 #include <sys/ontrap.h>
 #include <sys/pcie.h>
-#include <sys/pci_cfgspace.h>
 #include <sys/pci_tools.h>
 #include <io/pci/pci_tools_ext.h>
 #include <sys/pci_impl.h>

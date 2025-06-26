@@ -127,11 +127,9 @@ On AArch64 all configuration space access goes through `pci_cfgacc_acc` and
 no other means exists.
 
 `pci_cfgacc_acc` dispatches based on the root complex dip to a function that
-provides actual device-specific configuration space access.  Currently this is
-done via a private property on the dip, **pcie-cfgspace-access-hook** an
-`int64` (there are no unsigned integers) containing a pointer to a
-driver-provided function to call.  This is not great, but a full module
-type/ops-vector/registration-type interface seems premature.
+provides actual device-specific configuration space access.  This is stored as
+part of an **pcie_rc_data_t** in the bus-private data of the "up" bus of the
+root complex dip.
 
 === Enumeration
 

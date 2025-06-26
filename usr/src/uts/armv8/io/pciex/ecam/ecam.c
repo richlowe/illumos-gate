@@ -20,7 +20,6 @@
 
 #include <sys/hotplug/pci/pcie_hp.h>
 #include <sys/pci_cfgacc.h>
-#include <sys/pci_cfgspace.h>
 #include <sys/pcie.h>
 #include <sys/pcie_impl.h>
 
@@ -100,6 +99,10 @@ ecam_cfgspace_acc(pci_cfgacc_req_t *req)
 	}
 }
 
+pcie_rc_data_t ecam_pcie_rc_data = {
+	.pcie_rc_cfgspace_acc = ecam_cfgspace_acc,
+};
+
 static int
 ecam_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
@@ -133,21 +136,12 @@ ecam_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		return (ret);
 	}
 
+	ndi_set_bus_private(dip, B_TRUE, DEVI_PORT_TYPE_PCIRC,
+	    &ecam_pcie_rc_data);
+
 	VERIFY3U(softc->ec_base, !=, 0);
 
 	softc->ec_dip = dip;
-
-	/*
-	 * XXXPCI: This is not the mechanism I would prefer, but I cannot find
-	 * one I prefer.
-	 */
-	if ((ret = ddi_prop_update_int64(DDI_DEV_T_NONE, dip,
-	    OBP_CFGSPACE_HOOK, (intptr_t)&ecam_cfgspace_acc)) !=
-	    DDI_PROP_SUCCESS) {
-		dev_err(dip, CE_WARN, "failed to set cfgspace access "
-		    "hook: %d\n", ret);
-		return (DDI_FAILURE);
-	}
 
 	/*
 	 * XXXPCI: Should be in pcierc_attach probably, but historically
@@ -180,8 +174,6 @@ ecam_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	if ((ret = pcierc_detach(dip, cmd)) != DDI_SUCCESS) {
 		return (ret);
 	}
-
-	ddi_prop_remove(DDI_DEV_T_NONE, dip, OBP_CFGSPACE_HOOK);
 
 	ddi_regs_map_free(&softc->ec_handle);
 	ddi_soft_state_free(ecam_soft_state,

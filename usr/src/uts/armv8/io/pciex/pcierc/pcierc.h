@@ -37,6 +37,8 @@
 extern "C" {
 #endif
 
+#include <sys/pci_cfgacc.h>
+
 int	pcierc_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *,
     off_t, off_t, caddr_t *);
 int	pcierc_ctlops(dev_info_t *, dev_info_t *, ddi_ctl_enum_t,
