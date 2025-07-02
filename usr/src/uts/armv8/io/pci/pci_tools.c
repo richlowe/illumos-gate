@@ -79,8 +79,7 @@ static uint8_t pci_bars[] = {
 static uint64_t max_cfg_size = PCI_CONF_HDR_SIZE;
 
 static uint64_t pcitool_swap_endian(uint64_t, int);
-static int pcitool_cfg_access(dev_info_t *, pcitool_reg_t *, boolean_t,
-    boolean_t io_access);
+static int pcitool_cfg_access(dev_info_t *, pcitool_reg_t *, boolean_t);
 
 int
 pcitool_init(dev_info_t *dip, boolean_t is_pciex)
@@ -195,8 +194,7 @@ pcitool_swap_endian(uint64_t data, int size)
 
 /* Access device.  prg is modified. */
 static int
-pcitool_cfg_access(dev_info_t *dip, pcitool_reg_t *prg, boolean_t write_flag,
-    boolean_t io_access)
+pcitool_cfg_access(dev_info_t *dip, pcitool_reg_t *prg, boolean_t write_flag)
 {
 	int size = PCITOOL_ACC_ATTR_SIZE(prg->acc_attr);
 	boolean_t big_endian = PCITOOL_ACC_IS_BIG_ENDIAN(prg->acc_attr);
@@ -215,13 +213,8 @@ pcitool_cfg_access(dev_info_t *dip, pcitool_reg_t *prg, boolean_t write_flag,
 	 * valid other than that it is within the maximum offset.  The
 	 * put functions return void and the get functions return -1 on error.
 	 */
+	max_offset = 0xFFF;
 
-#if XXXPCI
-	if (io_access)
-		max_offset = pci_iocfg_max_offset;
-	else
-#endif
-		max_offset = 0xFFF;
 	if (prg->offset + size - 1 > max_offset) {
 		prg->status = PCITOOL_INVALID_ADDRESS;
 		return (ENOTSUP);
@@ -234,7 +227,7 @@ pcitool_cfg_access(dev_info_t *dip, pcitool_reg_t *prg, boolean_t write_flag,
 	req.offset = prg->offset;
 	req.size = size;
 	req.write = write_flag;
-	req.ioacc = io_access;
+	req.ioacc = B_FALSE;
 	if (write_flag) {
 		if (big_endian) {
 			local_data = pcitool_swap_endian(prg->data, size);
@@ -345,8 +338,7 @@ pcitool_dev_reg_ops(dev_info_t *dip, void *arg, int cmd, int mode)
 				goto done_reg;
 			}
 
-			rval = pcitool_cfg_access(dip, &prg, write_flag,
-			    B_FALSE);
+			rval = pcitool_cfg_access(dip, &prg, write_flag);
 			if (pcitool_debug)
 				prom_printf(
 				    "config access: data:0x%" PRIx64 "\n",
