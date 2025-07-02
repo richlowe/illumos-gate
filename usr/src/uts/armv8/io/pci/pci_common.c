@@ -260,15 +260,7 @@ pci_common_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 
 		/*
 		 * Export any MSI/MSI-X cap locations via properties
-		 *
-		 * XXXPCI: We don't want to do this here, because we don't
-		 * know the system is ok with it.  What are these properties
-		 * used for?  They're used to make sure that supported-types
-		 * was called before someone tried to use MSI.
-		 *
-		 * I don't know why.
 		 */
-#if XXXPCI
 		if (types & DDI_INTR_TYPE_MSI) {
 			if (ndi_prop_update_int(DDI_DEV_T_NONE, rdip,
 			    "pci-msi-capid-pointer", (int)msi_cap_base) !=
@@ -281,7 +273,6 @@ pci_common_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			    DDI_PROP_SUCCESS)
 				goto SUPPORTED_TYPES_OUT;
 		}
-#endif
 		rv = DDI_SUCCESS;
 
 SUPPORTED_TYPES_OUT:
