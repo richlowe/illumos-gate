@@ -487,7 +487,7 @@ SUPPORTED_TYPES_OUT:
 		if (hdlp->ih_type == DDI_INTR_TYPE_FIXED) {
 			/* if interrupt is shared, return failure */
 
-			ASSERT(0 && "XXXPCI: PSM_INTR_OP_GET_SHARED");
+			panic("XXXPCI: PSM_INTR_OP_GET_SHARED");
 #if XXXPCI
 			psm_rval = (*psm_intr_ops)(rdip, hdlp,
 			    PSM_INTR_OP_GET_SHARED, &psm_status);
@@ -509,7 +509,7 @@ SUPPORTED_TYPES_OUT:
 		}
 
 		/* Change the priority */
-		ASSERT(0 && "XXXPCI: PSM_INTR_OP_SET_PRI");
+		panic("XXXPCI: PSM_INTR_OP_SET_PRI");
 #if XXXPCI
 		if ((*psm_intr_ops)(rdip, hdlp, PSM_INTR_OP_SET_PRI, result) ==
 		    PSM_FAILURE)
@@ -587,10 +587,10 @@ SUPPORTED_TYPES_OUT:
 
 		/* For fixed interrupts only: confer with PSM module next */
 		/*
-		 * XXXGIC: This would happen hen we passed this request up the
+		 * XXXGIC: This would happen when we passed this request up the
 		 * tree
 		 */
-		ASSERT(0 && "XXXPCI PSM_INTR_OP_GET_SHARED");
+		panic("XXXPCI PSM_INTR_OP_GET_SHARED");
 #if XXXPCI
 		if (psm_intr_ops != NULL) {
 			/* If interrupt is shared; do nothing */
@@ -625,7 +625,7 @@ SUPPORTED_TYPES_OUT:
 		else if (hdlp->ih_type == DDI_INTR_TYPE_FIXED)
 			pci_rval = pci_intx_get_pending(rdip, &pci_status);
 
-		ASSERT(0 && "PSM_INTR_OP_GET_PENDING");
+		panic("XXXPCI PSM_INTR_OP_GET_PENDING");
 #if XXXPCI
 		/* On failure; next try with PSM module */
 		if (pci_rval != DDI_SUCCESS && psm_intr_ops != NULL)
@@ -658,7 +658,7 @@ SUPPORTED_TYPES_OUT:
 		DDI_INTR_NEXDBG((CE_CONT, "pci_common_intr_ops: GETTARGET\n"));
 
 		bcopy(hdlp, &tmp_hdl, sizeof (ddi_intr_handle_impl_t));
-		ASSERT(0 && "XXXPCI PSM_INTR_OP_GET_INTR");
+		panic("XXXPCI PSM_INTR_OP_GET_INTR");
 #if XXXPCI
 		tmp_hdl.ih_private = (void *)&intrinfo;
 		intrinfo.avgi_req_flags = PSMGI_INTRBY_DEFAULT;
@@ -677,7 +677,7 @@ SUPPORTED_TYPES_OUT:
 	case DDI_INTROP_SETTARGET:
 		/* XXXGIC: Need to pass up the tree */
 		DDI_INTR_NEXDBG((CE_CONT, "pci_common_intr_ops: SETTARGET\n"));
-		ASSERT(0 && "XXXPCI PSM_INTR_OP_SETCPU");
+		panic("XXXPCI PSM_INTR_OP_SETCPU");
 #if XXXPCI
 		bcopy(hdlp, &tmp_hdl, sizeof (ddi_intr_handle_impl_t));
 		tmp_hdl.ih_private = (void *)(uintptr_t)*(int *)result;
@@ -749,7 +749,7 @@ pci_get_intr_from_vecirq(apic_get_intr_t *intrinfo_p,
 	get_info_ii_hdl.ih_private = intrinfo_p;
 	get_info_ii_hdl.ih_vector = vecirq;
 
-	ASSERT(0 && "XXXPCI: PSM_INTR_OP_GET_INTR");
+	panic("XXXPCI: PSM_INTR_OP_GET_INTR");
 
 	if ((*psm_intr_ops)(NULL, &get_info_ii_hdl,
 	    PSM_INTR_OP_GET_INTR, NULL) == PSM_FAILURE)
