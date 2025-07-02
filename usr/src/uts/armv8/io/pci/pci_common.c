@@ -284,7 +284,7 @@ SUPPORTED_TYPES_OUT:
 
 	case DDI_INTROP_NAVAIL:
 	case DDI_INTROP_NINTRS:
-		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)); /* XXXPCI */
+		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)); /* XXXARM */
 
 		/*
 		 * XXXGIC: I hope the flow here is to ask up the tree
@@ -316,7 +316,7 @@ SUPPORTED_TYPES_OUT:
 
 		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type));
 
-#if XXXPCI			/* XXXPCI: No MSI yet */
+#if XXXARM			/* XXXARM: No MSI yet */
 		/*
 		 * MSI or MSIX (figure out number of vectors available)
 		 */
@@ -426,7 +426,7 @@ SUPPORTED_TYPES_OUT:
 	case DDI_INTROP_FREE:
 		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type));
 
-#if XXXPCI
+#if XXXARM			/* XXXARM: No MSI yet */
 		if (DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)) {
 			if (i_ddi_intr_get_current_nintrs(hdlp->ih_dip) - 1 ==
 			    0) {
@@ -540,7 +540,8 @@ SUPPORTED_TYPES_OUT:
 		 * First check the config space and/or
 		 * MSI capability register(s)
 		 */
-		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)); /* XXXPCI? */
+		/* XXXARM: No MSI yet */
+		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type));
 
 		pci_rval = DDI_FAILURE;
 		if (DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type))
@@ -695,7 +696,7 @@ SUPPORTED_TYPES_OUT:
 
 	case DDI_INTROP_GETPOOL:
 		/* XXXGIC: Should be entirely tree-based */
-#if XXXPCI
+#if XXXARM	/* XXXARM: No MSI yet */
 		/*
 		 * For MSI/X interrupts use global IRM pool if available.
 		 */
