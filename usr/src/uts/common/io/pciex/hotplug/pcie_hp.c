@@ -1022,7 +1022,6 @@ port_state_done:
 		ret = DDI_ENOTSUP;
 	}
 
-	/* XXXPCI: no idea */
 #if defined(__x86)
 	/*
 	 * like in attach, since hotplugging can change error registers,

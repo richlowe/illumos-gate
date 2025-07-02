@@ -574,7 +574,7 @@ pciehpc_init(dev_info_t *dip, caddr_t arg)
 	ctrl_p->hc_ops.enable_hpc_intr = pciehpc_enable_intr;
 	ctrl_p->hc_ops.disable_hpc_intr = pciehpc_disable_intr;
 
-	/* XXXPCI: We should, but do not yet, do this */
+	/* XXXARM: This likely needs to exist for ACPI */
 #if	defined(__x86)
 	pciehpc_update_ops(ctrl_p);
 #endif

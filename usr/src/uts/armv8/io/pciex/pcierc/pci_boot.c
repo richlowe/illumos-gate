@@ -1195,7 +1195,6 @@ pci_reprogram(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res)
 }
 
 /* XXXPCI: The PRD interface takes a bus */
-/* XXXPCI: Bus resources */
 static struct memlist *
 find_resource(dev_info_t *rcdip, pci_prd_rsrc_t rsrc)
 {
