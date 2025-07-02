@@ -98,7 +98,7 @@ pcieb_plat_intr_ops(dev_info_t *dip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 boolean_t
 pcieb_plat_pwr_disable(dev_info_t *dip)
 {
-	/* Always disable on arm? XXXPCI */
+	/* Always disable on armv8 */
 	return (B_TRUE);
 }
 
