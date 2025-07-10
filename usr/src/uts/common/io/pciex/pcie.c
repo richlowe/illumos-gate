@@ -2209,7 +2209,6 @@ pcie_uninitchild(dev_info_t *cdip)
 
 /*
  * find the root complex dip.
- * XXXPCI: This used to never return itself.  It now will.
  */
 dev_info_t *
 pcie_get_rc_dip(dev_info_t *dip)
