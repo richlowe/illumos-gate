@@ -729,10 +729,6 @@ pcie_init(dev_info_t *dip, caddr_t arg)
 		PCIE_DBG("%s%d: Failed setting hotplug framework\n",
 		    ddi_driver_name(dip), ddi_get_instance(dip));
 
-		/*
-		 * XXXPCI: Why's this SPARC-y, what's the pci devctl node for
-		 * there?
-		 */
 #if defined(__sparc)
 		ddi_remove_minor_node(dip, "devctl");
 
