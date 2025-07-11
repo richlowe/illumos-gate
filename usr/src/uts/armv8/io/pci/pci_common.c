@@ -181,7 +181,7 @@ pci_get_priority(dev_info_t *dip, ddi_intr_handle_impl_t *hdlp, int *pri)
 	return (DDI_SUCCESS);
 }
 
-#ifdef XXXPCI
+#if XXXARM			/* Used only for MSIs */
 static int pcieb_intr_pri_counter = 0;
 #endif
 
@@ -198,7 +198,7 @@ pci_common_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	int			pci_rval, psm_rval = -1;
 	int			types = 0;
 	ddi_intr_handle_impl_t	tmp_hdl;
-#if XXXPCI
+#if XXXARM			/* No MSI support yet */
 	ihdl_plat_t		*ihdl_plat_datap;
 	int			pciepci = 0;
 	int			behavior;
