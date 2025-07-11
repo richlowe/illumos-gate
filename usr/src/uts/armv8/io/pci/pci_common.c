@@ -477,12 +477,6 @@ SUPPORTED_TYPES_OUT:
 		if (*(int *)result > LOCK_LEVEL)
 			return (DDI_FAILURE);
 
-		/* Ensure that PSM is all initialized */
-#if XXXPCI
-		if (psm_intr_ops == NULL)
-			return (DDI_FAILURE);
-#endif
-
 		/* For fixed interrupts */
 		if (hdlp->ih_type == DDI_INTR_TYPE_FIXED) {
 			/* if interrupt is shared, return failure */
