@@ -39,34 +39,35 @@ extern "C" {
 
 #include <sys/pci_cfgacc.h>
 
-int	pcierc_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *,
+extern int	pcierc_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *,
     off_t, off_t, caddr_t *);
-int	pcierc_ctlops(dev_info_t *, dev_info_t *, ddi_ctl_enum_t,
+extern int	pcierc_ctlops(dev_info_t *, dev_info_t *, ddi_ctl_enum_t,
     void *, void *);
-int	pcierc_intr_ops(dev_info_t *, dev_info_t *, ddi_intr_op_t,
+extern int	pcierc_intr_ops(dev_info_t *, dev_info_t *, ddi_intr_op_t,
     ddi_intr_handle_impl_t *, void *);
-int	pcierc_fm_init(dev_info_t *, dev_info_t *, int,
+extern int	pcierc_fm_init(dev_info_t *, dev_info_t *, int,
     ddi_iblock_cookie_t *);
-int	pcierc_bus_get_eventcookie(dev_info_t *, dev_info_t *, char *,
+extern int	pcierc_bus_get_eventcookie(dev_info_t *, dev_info_t *, char *,
     ddi_eventcookie_t *);
-int	pcierc_bus_add_eventcall(dev_info_t *, dev_info_t *,
+extern int	pcierc_bus_add_eventcall(dev_info_t *, dev_info_t *,
     ddi_eventcookie_t, void (*)(dev_info_t *,
 	ddi_eventcookie_t, void *, void *),
     void *, ddi_callback_id_t *);
-int	pcierc_bus_remove_eventcall(dev_info_t *, ddi_callback_id_t);
-int	pcierc_bus_post_event(dev_info_t *, dev_info_t *,
+extern int	pcierc_bus_remove_eventcall(dev_info_t *, ddi_callback_id_t);
+extern int	pcierc_bus_post_event(dev_info_t *, dev_info_t *,
     ddi_eventcookie_t, void *);
 
-int	pcierc_fm_callback(dev_info_t *, ddi_fm_error_t *, const void *);
+extern int	pcierc_fm_callback(dev_info_t *, ddi_fm_error_t *,
+    const void *);
 
-int	pcierc_open(dev_t *, int, int, cred_t *);
-int	pcierc_close(dev_t, int, int, cred_t *);
-int	pcierc_ioctl(dev_t, int, intptr_t, int, cred_t *, int *);
+extern int	pcierc_open(dev_t *, int, int, cred_t *);
+extern int	pcierc_close(dev_t, int, int, cred_t *);
+extern int	pcierc_ioctl(dev_t, int, intptr_t, int, cred_t *, int *);
 
-int	pcierc_attach(dev_info_t *devi, ddi_attach_cmd_t cmd);
-int	pcierc_detach(dev_info_t *devi, ddi_detach_cmd_t cmd);
-int	pcierc_info(dev_info_t *, ddi_info_cmd_t, void *, void **);
-int	pcierc_bus_config(dev_info_t *, uint_t, ddi_bus_config_op_t,
+extern int	pcierc_attach(dev_info_t *devi, ddi_attach_cmd_t cmd);
+extern int	pcierc_detach(dev_info_t *devi, ddi_detach_cmd_t cmd);
+extern int	pcierc_info(dev_info_t *, ddi_info_cmd_t, void *, void **);
+extern int	pcierc_bus_config(dev_info_t *, uint_t, ddi_bus_config_op_t,
     void *, dev_info_t **);
 
 #ifdef __cplusplus
