@@ -228,6 +228,7 @@ pcitool_cfg_access(dev_info_t *dip, pcitool_reg_t *prg, boolean_t write_flag)
 	req.size = size;
 	req.write = write_flag;
 	req.ioacc = B_FALSE;
+
 	if (write_flag) {
 		if (big_endian) {
 			local_data = pcitool_swap_endian(prg->data, size);
@@ -262,16 +263,7 @@ pcitool_cfg_access(dev_info_t *dip, pcitool_reg_t *prg, boolean_t write_flag)
 			prg->data = local_data;
 		}
 	}
-	/*
-	 * Check if legacy I/O config access is used, in which case the valid
-	 * range varies with the I/O space mechanism used.
-	 */
-#if XXXPCI
-	if (req.ioacc && (prg->offset + size - 1 > pci_iocfg_max_offset)) {
-		prg->status = PCITOOL_INVALID_ADDRESS;
-		return (ENOTSUP);
-	}
-#endif
+
 	/* There's no reliable physical address on this platform */
 	prg->phys_addr = 0;
 
