@@ -181,7 +181,7 @@ int pcieb_die = PF_ERR_FATAL_FLAGS;
 int pcieb_disable_41210_wkarnd = 0;
 
 /* flag to turn on MSI support */
-int pcieb_enable_msi = 0;	/* XXXARM / XXXPCI */
+int pcieb_enable_msi = 1;
 
 #if defined(DEBUG)
 uint_t pcieb_dbg_print = 0;
