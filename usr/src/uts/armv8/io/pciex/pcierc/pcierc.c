@@ -233,6 +233,8 @@ pcierc_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	pci_state_t	*pcip = NULL;
 	int		ret;
 
+	pcie_rc_init_bus(devi);
+
 	if (cmd == DDI_RESUME) {
 		return (DDI_SUCCESS);
 	}

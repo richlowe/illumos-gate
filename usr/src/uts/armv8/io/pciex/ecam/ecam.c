@@ -143,12 +143,6 @@ ecam_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 	softc->ec_dip = dip;
 
-	/*
-	 * XXXPCI: Should be in pcierc_attach probably, but historically
-	 * happened logically prior
-	 */
-	pcie_rc_init_bus(dip);
-
 	if ((ret = pcierc_attach(dip, cmd)) != DDI_SUCCESS) {
 		return (ret);
 	}
