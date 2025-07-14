@@ -173,6 +173,8 @@ GFX_PRIVATE_OBJS	+=		\
 
 EFIFB_OBJS		+= efifb.o
 
+BOOTDEV_OBJS		+= bootdev.o
+
 ASSYM_DEPS +=			\
 	aarch64_subr.o		\
 	copy.o			\
