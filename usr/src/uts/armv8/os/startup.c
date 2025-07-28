@@ -77,7 +77,6 @@
 #include <sys/kobj.h>
 #include <sys/kobj_lex.h>
 #include <sys/systeminfo.h>
-#include <sys/rtc.h>
 #include <sys/smbios.h>
 #include <sys/clconf.h>
 #include <sys/kdi.h>
@@ -274,6 +273,7 @@ getl2cacheinfo(int *csz, int *lsz, int *assoc)
 
 	write_csselr_el1(1u << 1); /* CCSIDR_EL1 should reflect L2$ */
 	ccsidr = read_ccsidr_el1();
+	PRM_DEBUG(ccsidr);
 
 	/*
 	 * We need ID_AA64MMFR2.CCIDX prior to cpu features being detected
@@ -287,8 +287,19 @@ getl2cacheinfo(int *csz, int *lsz, int *assoc)
 		l2cache_assoc = bitx64(ccsidr, 23, 3) + 1;
 	}
 
+	PRM_DEBUG(num_sets);
+	PRM_DEBUG(l2cache_assoc);
+
 	l2cache_linesz = (1u << (4 + bitx64(ccsidr, 2, 0)));
+	PRM_DEBUG(l2cache_linesz);
 	l2cache_sz = l2cache_linesz * l2cache_assoc * num_sets;
+	PRM_DEBUG(l2cache_sz);
+
+	if (num_sets == 1 && l2cache_assoc == 1) {
+		PRM_POINT("NOTICE: working around KVM cache size "
+		    "discovery restrictions");
+		l2cache_assoc = 0;
+	}
 }
 
 void
