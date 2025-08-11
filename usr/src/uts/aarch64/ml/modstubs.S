@@ -639,9 +639,6 @@ fcnname##_info:								\
  */
 #ifndef BOOTDEV_MODULE
 	MODULE(bootdev,misc);
-/*
- * XXXARM: Not implemented
- */
 	STUB(bootdev, i_promname_to_devname, 0);
 	STUB(bootdev, i_convert_boot_device_name, 0);
 	END_MODULE(bootdev);
@@ -856,6 +853,11 @@ fcnname##_info:								\
 
 /*
  * Stubs for checkpoint-resume module
+ *
+ * We neither have nor intend to have this support on ARM, but this stub
+ * is not a modstub in the traditional sense of providing dependency-less
+ * auto-loading, but instead this is what forms the canonical cpr()
+ * definition should a platform not have the misc/cpr module.
  */
 #ifndef CPR_MODULE
 	MODULE(cpr,misc);
@@ -1097,40 +1099,6 @@ fcnname##_info:								\
 	NO_UNLOAD_STUB(dcopy, dcopy_cmd_post, nomod_minus_one);
 	NO_UNLOAD_STUB(dcopy, dcopy_cmd_poll, nomod_minus_one);
 	END_MODULE(dcopy);
-#endif
-
-/*
- * Stubs for acpica
- */
-#ifndef ACPICA_MODULE
-	MODULE(acpica,misc);
-	NO_UNLOAD_STUB(acpica, AcpiOsReadPort, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiOsWritePort, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiInstallNotifyHandler, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiRemoveNotifyHandler, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiEvaluateObject, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiEvaluateObjectTyped, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiWriteBitRegister, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiReadBitRegister, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, AcpiOsFree, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, acpica_get_handle_cpu, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, acpica_get_global_FADT, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, acpica_write_cpupm_capabilities,
-	    nomod_minus_one)		       ;
-	NO_UNLOAD_STUB(acpica, __acpi_wbinvd, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpica, acpi_reset_system, nomod_minus_one) ;
-	END_MODULE(acpica);
-#endif
-
-/*
- * Stubs for acpidev
- */
-#ifndef ACPIDEV_MODULE
-	MODULE(acpidev,misc);
-	NO_UNLOAD_STUB(acpidev, acpidev_dr_get_cpu_numa_info, nomod_minus_one) ;
-	NO_UNLOAD_STUB(acpidev, acpidev_dr_free_cpu_numa_info,
-	    nomod_minus_one) ;
-	END_MODULE(acpidev);
 #endif
 
 #ifndef IPNET_MODULE

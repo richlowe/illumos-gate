@@ -90,7 +90,7 @@ void (*pci_putl_func)(int bus, int dev, int func, int reg, uint32_t val);
 /*
  * Internal routines
  */
-static int pci_check(void);
+static boolean_t pci_check(void);
 
 #if !defined(__xpv)
 static int pci_check_bios(void);
@@ -126,7 +126,7 @@ pci_cfgspace_init(void)
  * This code determines if this system supports PCI/PCIE and which
  * type of configuration access method is used
  */
-static int
+static boolean_t
 pci_check(void)
 {
 	uint64_t ecfginfo[4];
@@ -139,7 +139,7 @@ pci_check(void)
 	 * BIOS is still available.
 	 */
 	if (pci_bios_cfg_type != PCI_MECHANISM_UNKNOWN)
-		return (TRUE);
+		return (B_TRUE);
 
 #if defined(__xpv)
 	/*
@@ -229,7 +229,7 @@ pci_check(void)
 		break;
 
 	default:
-		return (FALSE);
+		return (B_FALSE);
 	}
 #endif /* __xpv */
 
@@ -245,7 +245,7 @@ pci_check(void)
 		mcfg_bus_end = ecfginfo[3];
 	}
 
-	return (TRUE);
+	return (B_TRUE);
 }
 
 #if !defined(__xpv)
