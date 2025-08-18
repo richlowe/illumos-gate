@@ -134,6 +134,7 @@
 #include <sys/pci.h>
 #include <sys/pci_cfgacc.h>
 #include <sys/pci_impl.h>
+#include <sys/pci_memlist.h>
 #include <sys/pci_props.h>
 #include <sys/pcie_impl.h>
 #include <sys/plat/pci_prd.h>

@@ -153,9 +153,6 @@ typedef enum {
 	 * Indicates that we need IEEE 1275-compatible node naming.  This
 	 * names nodes based on the mechanism described in the IEEE 1275 PCI
 	 * bus binding section 2.5 "FCode Evaluation Semantics".
-	 *
-	 * This is necessary in the case here firmware-provided nodes and OS
-	 * enumerated nodes must be merged.
 	 */
 	PCI_PRD_COMPAT_1275		= 1 << 3,
 } pci_prd_compat_flags_t;

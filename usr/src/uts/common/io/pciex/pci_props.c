@@ -285,7 +285,7 @@ struct pci_class_to_1275_name {
 
 /*
  * These are taken from the IEEE 1275 Open Firmware bus binding for PCI
- * version 2.1, section 2.1 "FCode Evaluation Emantics", Table 1.
+ * version 2.1, section 2.5 "FCode Evaluation Semantics", Table 1.
  *
  * The PCI Express bus binding incorporates this same table by reference.
  */
@@ -333,7 +333,7 @@ static const struct pci_class_to_1275_name pci_class_to_1275[] = {
 };
 
 static const char *
-class_to_1275_name(const pci_prop_data_t *prop)
+pci_prop_class_to_1275_name(const pci_prop_data_t *prop)
 {
 	for (int i = 0; i < ARRAY_SIZE(pci_class_to_1275); i++) {
 		if ((pci_class_to_1275[i].pci.class == prop->ppd_class) &&
@@ -357,7 +357,7 @@ pci_prop_to_node_name(const pci_prop_data_t *prop, char *buf, size_t bufsz)
 		strlcpy(buf, "isa", bufsz);
 	} else {
 		if (flags & PCI_PRD_COMPAT_1275) {
-			const char *generic = class_to_1275_name(prop);
+			const char *generic = pci_prop_class_to_1275_name(prop);
 
 			if (generic != NULL) {
 				strlcpy(buf, generic, bufsz);
