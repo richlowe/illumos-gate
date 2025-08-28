@@ -36,11 +36,9 @@
 #include <sys/conf.h>
 #include <sys/pci.h>
 #include <sys/sunndi.h>
-#include <sys/mach_intr.h>
 #include <sys/pci_intr_lib.h>
 #include <sys/policy.h>
 #include <sys/sysmacros.h>
-#include <sys/clock.h>
 #include <sys/pci_tools.h>
 #include <io/pci/pci_tools_ext.h>
 #include <io/pci/pci_common.h>
@@ -287,7 +285,7 @@ SUPPORTED_TYPES_OUT:
 		ASSERT(!DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)); /* XXXARM */
 
 		/*
-		 * XXXGIC: I hope the flow here is to ask up the tree
+		 * XXXARM: I hope the flow here is to ask up the tree
 		 * regardless, possibly with some prior processing, but absent
 		 * MSI there's no processing to do.
 		 */
@@ -306,7 +304,7 @@ SUPPORTED_TYPES_OUT:
 		 */
 		if (hdlp->ih_type == DDI_INTR_TYPE_FIXED) {
 			/*
-			 * XXXGIC: longer term, we just just inline hwat this
+			 * XXXARM: longer term, we just just inline what this
 			 * does
 			 */
 			pci_alloc_intr_fixed(pdip, rdip, hdlp, result);
@@ -462,7 +460,7 @@ SUPPORTED_TYPES_OUT:
 		}
 		break;
 	case DDI_INTROP_GETPRI:
-		/* XXXGIC: Pass up the tree? */
+		/* XXXARM: Pass up the tree? */
 		/* Get the priority.  `pci_get_priority` updates `hdlp` */
 		if (pci_get_priority(rdip, hdlp, &priority) != DDI_SUCCESS)
 			return (DDI_FAILURE);
@@ -471,7 +469,7 @@ SUPPORTED_TYPES_OUT:
 		*(int *)result = priority;
 		break;
 	case DDI_INTROP_SETPRI:
-		/* XXXGIC: Pass up the tree */
+		/* XXXARM: Pass up the tree */
 
 		/* Validate the interrupt priority passed */
 		if (*(int *)result > LOCK_LEVEL)
@@ -481,8 +479,8 @@ SUPPORTED_TYPES_OUT:
 		if (hdlp->ih_type == DDI_INTR_TYPE_FIXED) {
 			/* if interrupt is shared, return failure */
 
-			panic("XXXPCI: PSM_INTR_OP_GET_SHARED");
-#if XXXPCI
+			panic("XXXARM: PSM_INTR_OP_GET_SHARED");
+#if XXXARM
 			psm_rval = (*psm_intr_ops)(rdip, hdlp,
 			    PSM_INTR_OP_GET_SHARED, &psm_status);
 			/*
@@ -503,8 +501,8 @@ SUPPORTED_TYPES_OUT:
 		}
 
 		/* Change the priority */
-		panic("XXXPCI: PSM_INTR_OP_SET_PRI");
-#if XXXPCI
+		panic("XXXARM: PSM_INTR_OP_SET_PRI");
+#if XXXARM
 		if ((*psm_intr_ops)(rdip, hdlp, PSM_INTR_OP_SET_PRI, result) ==
 		    PSM_FAILURE)
 			return (DDI_FAILURE);
@@ -513,23 +511,23 @@ SUPPORTED_TYPES_OUT:
 		hdlp->ih_pri = *(int *)result;
 		break;
 	case DDI_INTROP_ADDISR:
-		/* XXXGIC: Pass up tree? */
-#ifdef XXXPCI
+		/* XXXARM: Pass up tree? */
+#ifdef XXXARM
 		ihdl_plat_datap = (ihdl_plat_t *)hdlp->ih_private;
 		pci_kstat_create(&ihdl_plat_datap->ip_ksp, pdip, hdlp);
 #endif
 		break;
 	case DDI_INTROP_REMISR:
-		/* XXXGIC: Pass up the tree? */
+		/* XXXARM: Pass up the tree? */
 		/* Get the interrupt structure pointer */
-#if XXXPCI
+#if XXXARM
 		ihdl_plat_datap = (ihdl_plat_t *)hdlp->ih_private;
 		if (ihdl_plat_datap->ip_ksp != NULL)
 			pci_kstat_delete(ihdl_plat_datap->ip_ksp);
 #endif
 		break;
 	case DDI_INTROP_GETCAP:
-		/* XXXGIC: Pass up the tree? */
+		/* XXXARM: Pass up the tree? */
 		/*
 		 * First check the config space and/or
 		 * MSI capability register(s)
@@ -546,13 +544,13 @@ SUPPORTED_TYPES_OUT:
 
 		*(int *)result = pci_rval;
 
-		/* XXXGIC: parent should add/capabilities as necessary */
+		/* XXXARM: parent should add/capabilities as necessary */
 		return (i_ddi_intr_ops(pdip, rdip, intr_op,
 		    hdlp, result));
 
 	case DDI_INTROP_SETMASK:
 	case DDI_INTROP_CLRMASK:
-		/* XXXGIC: Need to pass up the chain, though unsure how */
+		/* XXXARM: Need to pass up the chain, though unsure how */
 		/*
 		 * First handle in the config space
 		 */
@@ -581,11 +579,11 @@ SUPPORTED_TYPES_OUT:
 
 		/* For fixed interrupts only: confer with PSM module next */
 		/*
-		 * XXXGIC: This would happen when we passed this request up the
+		 * XXXARM: This would happen when we passed this request up the
 		 * tree
 		 */
-		panic("XXXPCI PSM_INTR_OP_GET_SHARED");
-#if XXXPCI
+		panic("XXXARM PSM_INTR_OP_GET_SHARED");
+#if XXXARM
 		if (psm_intr_ops != NULL) {
 			/* If interrupt is shared; do nothing */
 			psm_rval = (*psm_intr_ops)(rdip, hdlp,
@@ -607,7 +605,7 @@ SUPPORTED_TYPES_OUT:
 		return (DDI_FAILURE);
 #endif
 	case DDI_INTROP_GETPENDING:
-		/* XXXGIC: Need to pass up */
+		/* XXXARM: Need to pass up */
 		/*
 		 * First check the config space and/or
 		 * MSI capability register(s)
@@ -619,8 +617,8 @@ SUPPORTED_TYPES_OUT:
 		else if (hdlp->ih_type == DDI_INTR_TYPE_FIXED)
 			pci_rval = pci_intx_get_pending(rdip, &pci_status);
 
-		panic("XXXPCI PSM_INTR_OP_GET_PENDING");
-#if XXXPCI
+		panic("XXXARM PSM_INTR_OP_GET_PENDING");
+#if XXXARM
 		/* On failure; next try with PSM module */
 		if (pci_rval != DDI_SUCCESS && psm_intr_ops != NULL)
 			psm_rval = (*psm_intr_ops)(rdip, hdlp,
@@ -631,7 +629,7 @@ SUPPORTED_TYPES_OUT:
 		    "psm_rval = %x, psm_status = %x, pci_rval = %x, "
 		    "pci_status = %x\n", psm_rval, psm_status, pci_rval,
 		    pci_status));
-#if XXXPCI
+#if XXXARM
 		if (psm_rval == PSM_FAILURE && pci_rval == DDI_FAILURE) {
 			*(int *)result = 0;
 			return (DDI_FAILURE);
@@ -648,12 +646,12 @@ SUPPORTED_TYPES_OUT:
 		break;
 
 	case DDI_INTROP_GETTARGET:
-		/* XXXGIC: Need to pass up the tree */
+		/* XXXARM: Need to pass up the tree */
 		DDI_INTR_NEXDBG((CE_CONT, "pci_common_intr_ops: GETTARGET\n"));
 
 		bcopy(hdlp, &tmp_hdl, sizeof (ddi_intr_handle_impl_t));
-		panic("XXXPCI PSM_INTR_OP_GET_INTR");
-#if XXXPCI
+		panic("XXXARM PSM_INTR_OP_GET_INTR");
+#if XXXARM
 		tmp_hdl.ih_private = (void *)&intrinfo;
 		intrinfo.avgi_req_flags = PSMGI_INTRBY_DEFAULT;
 		intrinfo.avgi_req_flags |= PSMGI_REQ_CPUID;
@@ -669,10 +667,10 @@ SUPPORTED_TYPES_OUT:
 #endif
 		break;
 	case DDI_INTROP_SETTARGET:
-		/* XXXGIC: Need to pass up the tree */
+		/* XXXARM: Need to pass up the tree */
 		DDI_INTR_NEXDBG((CE_CONT, "pci_common_intr_ops: SETTARGET\n"));
-		panic("XXXPCI PSM_INTR_OP_SETCPU");
-#if XXXPCI
+		panic("XXXARM PSM_INTR_OP_SETCPU");
+#if XXXARM
 		bcopy(hdlp, &tmp_hdl, sizeof (ddi_intr_handle_impl_t));
 		tmp_hdl.ih_private = (void *)(uintptr_t)*(int *)result;
 		tmp_hdl.ih_flags = PSMGI_INTRBY_DEFAULT;
@@ -689,7 +687,7 @@ SUPPORTED_TYPES_OUT:
 		break;
 
 	case DDI_INTROP_GETPOOL:
-		/* XXXGIC: Should be entirely tree-based */
+		/* XXXARM: Should be entirely tree-based */
 #if XXXARM	/* XXXARM: No MSI yet */
 		/*
 		 * For MSI/X interrupts use global IRM pool if available.
@@ -725,7 +723,7 @@ pci_alloc_intr_fixed(dev_info_t *pdip, dev_info_t *rdip,
 		hdlp->ih_cap |= pci_status;
 }
 
-#if XXXPCI
+#if XXXARM
 int
 pci_get_intr_from_vecirq(apic_get_intr_t *intrinfo_p,
     int vecirq, boolean_t is_irq)
@@ -743,7 +741,7 @@ pci_get_intr_from_vecirq(apic_get_intr_t *intrinfo_p,
 	get_info_ii_hdl.ih_private = intrinfo_p;
 	get_info_ii_hdl.ih_vector = vecirq;
 
-	panic("XXXPCI: PSM_INTR_OP_GET_INTR");
+	panic("XXXARM: PSM_INTR_OP_GET_INTR");
 
 	if ((*psm_intr_ops)(NULL, &get_info_ii_hdl,
 	    PSM_INTR_OP_GET_INTR, NULL) == PSM_FAILURE)

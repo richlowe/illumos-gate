@@ -62,8 +62,10 @@
 #define	BCM2711_REG_BRIDGE_STATE	0x4068
 #define	BCM2711_REG_BRIDGE_LINK_STATE	0x00bc
 
-#define	BCM2711_DEV_CFG_DATA		0x8000 /* (read/write) config space data */
-#define	BCM2711_DEV_CFG_INDEX		0x9000 /* (write) config space index  */
+/* (read/write) config space data */
+#define	BCM2711_DEV_CFG_DATA		0x8000
+/* (write) config space index  */
+#define	BCM2711_DEV_CFG_INDEX		0x9000
 
 #define	BCM2711_MAX_BUS			1
 
@@ -391,7 +393,7 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	/*
 	 * wait for controller startup
 	 */
-	for (uint_t i = 0;; i++) {
+	for (uint_t i = 0; ; i++) {
 		uint32_t bstate =
 		    bcm2711_pcie_read_reg(softc, BCM2711_REG_BRIDGE_STATE);
 
@@ -418,7 +420,7 @@ bcm2711_pcie_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	}
 
 	/*
-	 * XXXPCI: do we need to set the CPU->PCI memory window?
+	 * XXXARM: do we need to set the CPU->PCI memory window?
 	 */
 
 	if ((ret = pcierc_attach(dip, cmd)) != DDI_SUCCESS) {

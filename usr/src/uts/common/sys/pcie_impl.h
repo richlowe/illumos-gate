@@ -31,13 +31,9 @@
 extern "C" {
 #endif
 
-#include <sys/ddi.h>
-#include <sys/ddifm.h>
 #include <sys/pci_cfgacc.h>
 #include <sys/pcie.h>
 #include <sys/pciev.h>
-#include <sys/sunddi.h>
-#include <sys/sunndi.h>
 #include <sys/taskq_impl.h>
 
 #define	PCI_GET_BDF(dip)	\

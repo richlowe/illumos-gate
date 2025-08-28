@@ -227,14 +227,7 @@ DRV_KMODS += gictwo
 DRV_KMODS += gicthree
 DRV_KMODS += pl03one
 DRV_KMODS += efifb
-
-MISC_KMODS += pci_prd
-MISC_KMODS += pcicfg
-MISC_KMODS += pcie
-
 DRV_KMODS += pcieb
-DRV_KMODS += pcierc
-DRV_KMODS += ecam
 
 #
 #	'Dacf' Modules (/kernel/dacf):
@@ -246,4 +239,7 @@ DACF_KMODS += consconfig_dacf
 #
 MISC_KMODS += bootdev
 MISC_KMODS += gfx_private
+MISC_KMODS += pci_prd
+MISC_KMODS += pcicfg
+MISC_KMODS += pcie
 MISC_KMODS += platmod

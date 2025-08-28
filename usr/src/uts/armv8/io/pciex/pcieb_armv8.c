@@ -85,12 +85,6 @@ int
 pcieb_plat_intr_ops(dev_info_t *dip, dev_info_t *rdip, ddi_intr_op_t intr_op,
     ddi_intr_handle_impl_t *hdlp, void *result)
 {
-
-	/*
-	 * XXXPCI: It is possible that we have to do classic interrupt swizzling
-	 * here, but it is similarly possible that the interrupt-map on the
-	 * host bridge handles that for us.
-	 */
 	return (i_ddi_intr_ops(dip, rdip, intr_op, hdlp, result));
 }
 

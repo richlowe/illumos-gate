@@ -71,7 +71,6 @@ typedef struct pci_cfgacc_req {
 	pci_cfg_data_t	value;
 	boolean_t	ioacc;
 } pci_cfgacc_req_t;
-
 #define	VAL8(req)	((req)->value.b)
 #define	VAL16(req)	((req)->value.w)
 #define	VAL32(req)	((req)->value.dw)

@@ -317,6 +317,7 @@ pcie_hp_intr(dev_info_t *dip)
 /*
  * Probe the given PCIe/PCI Hotplug Connection (CN).
  */
+/*ARGSUSED*/
 int
 pcie_hp_probe(pcie_hp_slot_t *slot_p)
 {

@@ -837,13 +837,13 @@ fcnname##_info:								\
 
 /*
  * Stubs for PCI configurator module (misc/pcicfg).
+ * These are necessary because of the circular dependency between misc/pcie
+ * and misc/pcicfg
  */
-#ifndef PCICFG_MODULE
 	MODULE(pcicfg,misc);
 	STUB(pcicfg, pcicfg_configure, 0);
 	STUB(pcicfg, pcicfg_unconfigure, 0);
 	END_MODULE(pcicfg);
-#endif
 
 #ifndef IWSCN_MODULE
 	MODULE(iwscn,drv);

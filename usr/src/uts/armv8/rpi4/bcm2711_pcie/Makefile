@@ -13,7 +13,7 @@ ROOTMODULE	= $(ROOT_RPI4_DRV_DIR)/$(MODULE)
 
 LDFLAGS += -Nmisc/pcie -Nmisc/pcierc
 
-INC_PATH += -I$(SRC)/uts/armv8/io/pciex/pcierc/
+INC_PATH += -I$(SRC)/uts/aarch64/io/pciex/pcierc/
 
 #
 #	Include common rules.

@@ -25,6 +25,7 @@
 
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
+#include <sys/sunndi.h>
 
 #include <sys/pci.h>
 #include <sys/pci_cfgacc.h>

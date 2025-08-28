@@ -48,7 +48,6 @@
 #include <sys/promif.h>
 #include <sys/sunndi.h>
 #include <sys/ndi_impldefs.h>
-
 #include <sys/sysmacros.h>
 #include <sys/systeminfo.h>
 #include <sys/utsname.h>
@@ -72,6 +71,7 @@ uint64_t ramdisk_start, ramdisk_end;
 
 static void impl_bus_initialprobe(void);
 static void impl_bus_reprobe(void);
+
 static void i_ddi_free_unitintr(unit_intr_t *);
 
 /*
@@ -1937,7 +1937,7 @@ impl_xlate_ranges(dev_info_t *child, uint32_t *in, size_t in_len,
 	 * as PCI devices. Our code will just shift the non-address data off
 	 * the end of the child address.
 	 *
-	 * XXXPCI: The PCIe nexus drivers replace this with an interpreted
+	 * XXXARM: The PCIe nexus drivers replace this with an interpreted
 	 * version (which is a hack, but so would be doing it here).
 	 */
 	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, child,

@@ -38,7 +38,6 @@
 #include <sys/stat.h>
 #include <sys/sunddi.h>
 #include <vm/seg_kmem.h>
-#include <sys/machparam.h>
 #include <sys/sunndi.h>
 #include <sys/ontrap.h>
 #include <sys/pcie.h>

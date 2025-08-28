@@ -815,7 +815,8 @@ pcicfg_configure_ntbridge(dev_info_t *new_device, uint_t bus, uint_t device)
 		rc = PCICFG_FAILURE;
 		return (rc);
 	}
-	DEBUG0("pcicfg: Success loading nontransparent bridge nexus driver..\n");
+	DEBUG0("pcicfg: Success loading nontransparent bridge "
+	    "nexus driver..\n");
 
 	/* Now set aside pci resource allocation requests for our children */
 	if (pcicfg_ntbridge_allocate_resources(new_device) != PCICFG_SUCCESS) {
@@ -1204,8 +1205,9 @@ pcicfg_ntbridge_unconfigure_child(dev_info_t *new_device, uint_t devno)
 	ddi_acc_handle_t	config_handle;
 	pci_bus_range_t *pci_bus_range;
 
-	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, new_device, DDI_PROP_DONTPASS,
-	    "bus-range", (int **)&pci_bus_range, &len) != DDI_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, new_device,
+	    DDI_PROP_DONTPASS, "bus-range", (int **)&pci_bus_range, &len) !=
+	    DDI_SUCCESS) {
 		DEBUG0("no bus-range property\n");
 		return (PCICFG_FAILURE);
 	}
@@ -1255,8 +1257,8 @@ pcicfg_ntbridge_unconfigure(dev_info_t *dip)
 	uint_t			k;
 	int			rc = DDI_FAILURE;
 
-	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "bus-range",
-	    &bus, &k) != DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "bus-range", &bus, &k) != DDI_PROP_SUCCESS) {
 		DEBUG0("ntbridge: Failed to read bus-range property\n");
 		return (rc);
 	}
@@ -2411,8 +2413,9 @@ pcicfg_free_bridge_resources(dev_info_t *dip)
 	int			i;
 
 
-	if ((i = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    OBP_RANGES, (int **)&ranges, &length)) != DDI_PROP_SUCCESS) {
+	if ((i = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, OBP_RANGES, (int **)&ranges, &length)) !=
+	    DDI_PROP_SUCCESS) {
 		DEBUG0("Failed to read ranges property\n");
 		if (ddi_get_child(dip)) {
 			cmn_err(CE_WARN, "No ranges property found for %s",
@@ -2717,8 +2720,8 @@ pcicfg_update_assigned_prop(dev_info_t *dip, pci_regspec_t *newone)
 	caddr_t		newreg;
 	uint_t		status;
 
-	status = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "assigned-addresses", (int **)&assigned, &alen);
+	status = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "assigned-addresses", (int **)&assigned, &alen);
 
 	alen = CELLS_1275_TO_BYTES(alen);
 
@@ -2767,8 +2770,8 @@ pcicfg_update_ranges_prop(dev_info_t *dip, ppb_ranges_t *addition)
 	caddr_t		newreg;
 	uint_t		status;
 
-	status = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    OBP_RANGES, (int **)&ranges, &rlen);
+	status = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, OBP_RANGES, (int **)&ranges, &rlen);
 
 	rlen = CELLS_1275_TO_BYTES(rlen);
 
@@ -4509,8 +4512,8 @@ pcicfg_config_setup(dev_info_t *dip, ddi_acc_handle_t *handle)
 {
 	caddr_t		cfgaddr;
 	ddi_device_acc_attr_t attr;
-	dev_info_t 	*anode;
-	int 		status;
+	dev_info_t	*anode;
+	int		status;
 	uint_t		rlen;
 	pci_regspec_t	*reg;
 	int		ret = DDI_SUCCESS;

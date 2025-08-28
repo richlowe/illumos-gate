@@ -192,7 +192,7 @@ static ndi_event_set_t pcierc_ndi_events = {
  * address spaces, which is critical to supporting "I/O space" access on
  * aarch64.
  *
- * XXXPCI: This sucks
+ * XXXARM: This sucks
  */
 static int
 pcierc_update_ppd_ranges(dev_info_t *dip)
@@ -241,7 +241,7 @@ pcierc_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 
 	/*
 	 * Update the parent-private range data
-	 * XXXPCI: This sucks, see the implementation for a description of why.
+	 * XXXARM: This sucks, see the implementation for a description of why.
 	 */
 	pcierc_update_ppd_ranges(devi);
 
@@ -1142,7 +1142,7 @@ pcierc_bus_config(dev_info_t *pdip, uint_t flags, ddi_bus_config_op_t op,
 	 * path taken when mounting root via ndi_devi_config_one() under
 	 * resolve_pathname()
 	 *
-	 * XXXPCI: This would be unnecessary if PCI enumeration could target
+	 * XXXARM: This would be unnecessary if PCI enumeration could target
 	 * specific devices, which would also be good.
 	 */
 	if (((op == BUS_CONFIG_ALL) || (op == BUS_CONFIG_ONE) ||

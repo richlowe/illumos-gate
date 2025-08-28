@@ -35,17 +35,17 @@ UTSBASE	= ../..
 #	Define the module and object file sets.
 #
 MODULE		= pcierc
-OBJECTS		= $(PCI_E_RC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
+OBJECTS		= $(PCIERC_OBJS:%=$(OBJS_DIR)/%)
+ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-INC_PATH += -I$(SRC)/uts/armv8/io/pciex/pcierc/
+INC_PATH += -I$(SRC)/uts/aarch64/io/pciex/pcierc/
 
 LDFLAGS += -Nmisc/pcie -Nmisc/pci_prd
 
 #
 #	Include common rules.
 #
-include $(UTSBASE)/armv8/Makefile.armv8
+include $(UTSBASE)/aarch64/Makefile.aarch64
 
 #
 #	Define targets
@@ -85,13 +85,13 @@ install:	$(INSTALL_DEPS)
 #
 #	Include common targets.
 #
-include $(UTSBASE)/armv8/Makefile.targ
+include $(UTSBASE)/aarch64/Makefile.targ
 
-$(OBJS_DIR)/%.o:		$(SRC)/uts/armv8/io/pciex/pcierc/%.c
+$(OBJS_DIR)/%.o:		$(SRC)/uts/aarch64/io/pciex/pcierc/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(SRC)/uts/armv8/io/pci/%.c
+$(OBJS_DIR)/%.o:		$(SRC)/uts/aarch64/io/pci/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 

@@ -56,7 +56,7 @@ pcie_fini_plat(dev_info_t *dip)
 
 /* ARGSUSED */
 int
-pcie_plat_pwr_setup(dev_info_t *dip __unused)
+pcie_plat_pwr_setup(dev_info_t *dip)
 {
 	return (DDI_SUCCESS);
 }
@@ -64,7 +64,8 @@ pcie_plat_pwr_setup(dev_info_t *dip __unused)
 /*
  * Undo whatever is done in pcie_plat_pwr_setup
  */
+/* ARGSUSED */
 void
-pcie_plat_pwr_teardown(dev_info_t *dip __unused)
+pcie_plat_pwr_teardown(dev_info_t *dip)
 {
 }

@@ -17,7 +17,7 @@
 /*
  * PCI Resource Discovery on armv8.  We just ask the PROM device tree.
  *
- * XXXPCI: Architecturally, I'm assuming that this module `pci_prd_armv8` is
+ * XXXARM: Architecturally, I'm assuming that this module `pci_prd_armv8` is
  * devicetree based, and an acpi-based `pci_prd_sbsa` would exist.
  */
 

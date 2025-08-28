@@ -152,11 +152,13 @@ impl_acc_err_init(ddi_acc_hdl_t *handlep)
 
 	fmcap = ddi_fm_capable(handlep->ah_dip);
 
-	if (handlep->ah_acc.devacc_attr_version < DDI_DEVICE_ATTR_V1 || !DDI_FM_ACC_ERR_CAP(fmcap)) {
+	if ((handlep->ah_acc.devacc_attr_version < DDI_DEVICE_ATTR_V1) ||
+	    !DDI_FM_ACC_ERR_CAP(fmcap)) {
 		handlep->ah_acc.devacc_attr_access = DDI_DEFAULT_ACC;
 	} else if (DDI_FM_ACC_ERR_CAP(fmcap)) {
 		if (handlep->ah_acc.devacc_attr_access == DDI_DEFAULT_ACC) {
-			i_ddi_drv_ereport_post(handlep->ah_dip, DVR_EFMCAP, NULL, DDI_NOSLEEP);
+			i_ddi_drv_ereport_post(handlep->ah_dip, DVR_EFMCAP,
+			    NULL, DDI_NOSLEEP);
 		} else {
 			errp = hp->ahi_err;
 			otp = (on_trap_data_t *)errp->err_ontrap;
@@ -170,7 +172,8 @@ impl_acc_err_init(ddi_acc_hdl_t *handlep)
 }
 
 int
-impl_dma_check(dev_info_t *dip, const void *handle, const void *pci_hdl, const void *not_used)
+impl_dma_check(dev_info_t *dip, const void *handle, const void *pci_hdl,
+    const void *not_used)
 {
 	return (DDI_FM_UNKNOWN);
 }
@@ -219,7 +222,8 @@ impl_acc_hdl_init(ddi_acc_hdl_t *handlep)
 			hp->ahi_rep_get8 = i_ddi_io_rep_get8;
 			hp->ahi_rep_put8 = i_ddi_io_rep_put8;
 
-			if (handlep->ah_acc.devacc_attr_endian_flags == DDI_STRUCTURE_BE_ACC) {
+			if (handlep->ah_acc.devacc_attr_endian_flags ==
+			    DDI_STRUCTURE_BE_ACC) {
 				hp->ahi_get16 = i_ddi_io_swap_get16;
 				hp->ahi_get32 = i_ddi_io_swap_get32;
 				hp->ahi_get64 = i_ddi_io_swap_get64;
@@ -253,7 +257,8 @@ impl_acc_hdl_init(ddi_acc_hdl_t *handlep)
 			hp->ahi_rep_get8 = i_ddi_rep_get8;
 			hp->ahi_rep_put8 = i_ddi_rep_put8;
 
-			if (handlep->ah_acc.devacc_attr_endian_flags == DDI_STRUCTURE_BE_ACC) {
+			if (handlep->ah_acc.devacc_attr_endian_flags ==
+			    DDI_STRUCTURE_BE_ACC) {
 				hp->ahi_get16 = i_ddi_swap_get16;
 				hp->ahi_get32 = i_ddi_swap_get32;
 				hp->ahi_get64 = i_ddi_swap_get64;
@@ -295,77 +300,77 @@ uint8_t
 ddi_get8(ddi_acc_handle_t handle, uint8_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get8(hp, addr);
+	return (hp->ahi_get8(hp, addr));
 }
 
 uint8_t
 ddi_mem_get8(ddi_acc_handle_t handle, uint8_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get8(hp, addr);
+	return (hp->ahi_get8(hp, addr));
 }
 
 uint8_t
 ddi_io_get8(ddi_acc_handle_t handle, uint8_t *dev_addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get8(hp, dev_addr);
+	return (hp->ahi_get8(hp, dev_addr));
 }
 
 uint16_t
 ddi_get16(ddi_acc_handle_t handle, uint16_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get16(hp, addr);
+	return (hp->ahi_get16(hp, addr));
 }
 
 uint16_t
 ddi_mem_get16(ddi_acc_handle_t handle, uint16_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get16(hp, addr);
+	return (hp->ahi_get16(hp, addr));
 }
 
 uint16_t
 ddi_io_get16(ddi_acc_handle_t handle, uint16_t *dev_addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get16(hp, dev_addr);
+	return (hp->ahi_get16(hp, dev_addr));
 }
 
 uint32_t
 ddi_get32(ddi_acc_handle_t handle, uint32_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get32(hp, addr);
+	return (hp->ahi_get32(hp, addr));
 }
 
 uint32_t
 ddi_mem_get32(ddi_acc_handle_t handle, uint32_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get32(hp, addr);
+	return (hp->ahi_get32(hp, addr));
 }
 
 uint32_t
 ddi_io_get32(ddi_acc_handle_t handle, uint32_t *dev_addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get32(hp, dev_addr);
+	return (hp->ahi_get32(hp, dev_addr));
 }
 
 uint64_t
 ddi_get64(ddi_acc_handle_t handle, uint64_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get64(hp, addr);
+	return (hp->ahi_get64(hp, addr));
 }
 
 uint64_t
 ddi_mem_get64(ddi_acc_handle_t handle, uint64_t *addr)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	return hp->ahi_get64(hp, addr);
+	return (hp->ahi_get64(hp, addr));
 }
 
 void
@@ -446,157 +451,185 @@ ddi_mem_put64(ddi_acc_handle_t handle, uint64_t *dev_addr, uint64_t value)
 }
 
 void
-ddi_rep_get8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_get8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get8(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_rep_get16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_get16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get16(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_rep_get32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_get32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get32(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_rep_get64(ddi_acc_handle_t handle, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_get64(ddi_acc_handle_t handle, uint64_t *host_addr, uint64_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get64(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_rep_put8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_put8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put8(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_rep_put16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_put16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put16(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_rep_put32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_put32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put32(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+ddi_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr, uint64_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put64(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_get8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_get8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get8(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_get16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_get16(ddi_acc_handle_t handle, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get16(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_get32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_get32(ddi_acc_handle_t handle, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get32(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_get64(ddi_acc_handle_t handle, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_get64(ddi_acc_handle_t handle, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_get64(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_put8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_put8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put8(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_put16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_put16(ddi_acc_handle_t handle, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put16(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_put32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_put32(ddi_acc_handle_t handle, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put32(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
 	hp->ahi_rep_put64(hp, host_addr, dev_addr, repcount, flags);
 }
 
 void
-ddi_io_rep_get8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount)
+ddi_io_rep_get8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	hp->ahi_rep_get8(hp, host_addr, dev_addr, repcount, DDI_DEV_NO_AUTOINCR);
+	hp->ahi_rep_get8(hp, host_addr, dev_addr, repcount,
+	    DDI_DEV_NO_AUTOINCR);
 }
 
 void
-ddi_io_rep_get16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount)
+ddi_io_rep_get16(ddi_acc_handle_t handle, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	hp->ahi_rep_get16(hp, host_addr, dev_addr, repcount, DDI_DEV_NO_AUTOINCR);
+	hp->ahi_rep_get16(hp, host_addr, dev_addr, repcount,
+	    DDI_DEV_NO_AUTOINCR);
 }
 
 void
-ddi_io_rep_get32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount)
+ddi_io_rep_get32(ddi_acc_handle_t handle, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	hp->ahi_rep_get32(hp, host_addr, dev_addr, repcount, DDI_DEV_NO_AUTOINCR);
+	hp->ahi_rep_get32(hp, host_addr, dev_addr, repcount,
+	    DDI_DEV_NO_AUTOINCR);
 }
 
 void
-ddi_io_rep_put8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount)
+ddi_io_rep_put8(ddi_acc_handle_t handle, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	hp->ahi_rep_put8(hp, host_addr, dev_addr, repcount, DDI_DEV_NO_AUTOINCR);
+	hp->ahi_rep_put8(hp, host_addr, dev_addr, repcount,
+	    DDI_DEV_NO_AUTOINCR);
 }
 
 void
-ddi_io_rep_put16(ddi_acc_handle_t handle, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount)
+ddi_io_rep_put16(ddi_acc_handle_t handle, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	hp->ahi_rep_put16(hp, host_addr, dev_addr, repcount, DDI_DEV_NO_AUTOINCR);
+	hp->ahi_rep_put16(hp, host_addr, dev_addr, repcount,
+	    DDI_DEV_NO_AUTOINCR);
 }
 
 void
-ddi_io_rep_put32(ddi_acc_handle_t handle, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount)
+ddi_io_rep_put32(ddi_acc_handle_t handle, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount)
 {
 	ddi_acc_impl_t *hp = (ddi_acc_impl_t *)handle;
-	hp->ahi_rep_put32(hp, host_addr, dev_addr, repcount, DDI_DEV_NO_AUTOINCR);
+	hp->ahi_rep_put32(hp, host_addr, dev_addr, repcount,
+	    DDI_DEV_NO_AUTOINCR);
 }
 
 int
