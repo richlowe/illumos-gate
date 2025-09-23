@@ -150,6 +150,12 @@
 #include <sys/clock_impl.h>
 #include <sys/consdev.h>
 #include <sys/sunddi.h>
+#if defined(__aarch64__)
+#include <sys/kobj.h>
+#include <sys/modctl.h>
+#include <sys/frame.h>
+#include <sys/promif.h>
+#endif
 
 /*
  * Panic variables which are set once during the QUIESCE state by the
@@ -420,6 +426,38 @@ void
 panic(const char *format, ...)
 {
 	va_list alist;
+#if defined(__aarch64__)
+	ulong_t off;
+	char *sym;
+
+	struct frame *fp = (struct frame *)__builtin_frame_address(0);
+
+	for (;;) {
+		uint64_t par;
+
+		write_s1e1r((uint64_t)fp);
+		isb();
+
+		par = read_par_el1();
+		if (par & 1) {
+			break;
+		}
+
+		if ((sym = kobj_getsymname(fp->fr_savpc, &off)) != NULL) {
+			prom_printf("%016lx %s:%s+%lx\n", (uintptr_t)fp,
+			    mod_containing_pc((caddr_t)fp->fr_savpc), sym, off);
+		} else {
+			prom_printf("%016lx %lx\n",
+			    (uintptr_t)fp, fp->fr_savpc);
+		}
+
+		if (((struct frame *)fp->fr_savfp) == fp) {
+			break;
+		}
+
+		fp = (struct frame *)fp->fr_savfp;
+	}
+#endif
 
 	va_start(alist, format);
 	vpanic(format, alist);
