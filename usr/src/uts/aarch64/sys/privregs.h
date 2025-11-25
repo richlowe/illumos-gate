@@ -106,6 +106,8 @@ struct regs {
 	greg_t r_esr;
 	greg_t r_far;
 	greg_t r_trapno;
+	greg_t r_ttbr0;
+	greg_t r_ttbr1;
 };
 
 #ifdef _KERNEL
@@ -170,7 +172,10 @@ struct regs {
 	stp	x17, x18, [sp, #REGOFF_TP];	\
 	mrs	x17, far_el1;			\
 	lsr	w18, w18, #ESR_EC_SHIFT;	\
-	stp	x17, x18, [sp, #REGOFF_FAR];
+	stp	x17, x18, [sp, #REGOFF_FAR];	\
+	mrs	x17, ttbr0_el1;			\
+	mrs	x18, ttbr1_el1;			\
+	stp	x17, x18, [sp, #REGOFF_TTBR0];
 
 #define	__SAVE_FRAME		\
 	mrs	x17, elr_el1;	\

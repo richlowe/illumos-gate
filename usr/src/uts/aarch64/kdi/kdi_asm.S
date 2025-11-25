@@ -194,5 +194,5 @@
 
 	// We're going off to the normal handler, allow debug exceptions
 	msr	DAIFClr, #DAIF_SETCLEAR_DEBUG
-	b	from_current_el_sync_handler
+	b	from_current_el_sync_handler_no_save
 	SET_SIZE(kdi_pass_to_kernel)

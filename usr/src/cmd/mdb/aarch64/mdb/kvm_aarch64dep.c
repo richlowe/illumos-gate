@@ -138,6 +138,8 @@ kt_regs_to_kregs(struct regs *regs, mdb_tgt_gregset_t *gregs)
 	gregs->kregs[KREG_ESR] = regs->r_esr;
 	gregs->kregs[KREG_FAR] = regs->r_far;
 	gregs->kregs[KREG_TRAPNO] = regs->r_trapno;
+	gregs->kregs[KREG_TTBR0] = regs->r_ttbr0;
+	gregs->kregs[KREG_TTBR1] = regs->r_ttbr1;
 }
 
 int
