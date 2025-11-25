@@ -20,7 +20,7 @@
 #include <sys/asm_linkage.h>
 #include <sys/privregs.h>
 
-	#include "assym.h"
+#include "assym.h"
 
 #define KDISVC_SHIFT	3
 #if (1 << KDISVC_SHIFT) != KDISVC_SIZE

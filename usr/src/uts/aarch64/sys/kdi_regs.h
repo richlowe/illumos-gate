@@ -175,7 +175,9 @@ typedef struct {
 #define	KDIREG_ESR	37
 #define	KDIREG_FAR	38
 #define	KDIREG_TRAPNO	39
+#define	KDIREG_TTBR0	40
+#define	KDIREG_TTBR1	41
 
-#define	KDIREG_NGREG	(KDIREG_TRAPNO + 1)
+#define	KDIREG_NGREG	(KDIREG_TTBR1 + 1)
 
 #endif /* _SYS_KDI_REGS_H */

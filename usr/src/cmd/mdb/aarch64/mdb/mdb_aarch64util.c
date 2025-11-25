@@ -128,6 +128,8 @@ const mdb_tgt_regdesc_t mdb_aarch64_kregs[] = {
 	{ "trapno", KREG_TRAPNO, MDB_TGT_R_EXPORT },
 	{ "far", KREG_FAR, MDB_TGT_R_EXPORT },
 	{ "esr", KREG_ESR, MDB_TGT_R_EXPORT },
+	{ "ttbr0", KREG_TTBR0, MDB_TGT_R_EXPORT },
+	{ "ttbr1", KREG_TTBR1, MDB_TGT_R_EXPORT },
 	{ NULL, 0, 0 }
 };
 
