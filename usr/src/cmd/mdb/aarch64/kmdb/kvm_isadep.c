@@ -239,6 +239,8 @@ kmt_printregs(const mdb_tgt_gregset_t *gregs)
 	mdb_printf("%%tp = 0x%0?p %15A\n\n", GETREG2(KREG_TP));
 
 	mdb_printf("%%far    = 0x%0?p %15A\n", GETREG2(KREG_FAR));
+	mdb_printf("%%ttbr0  = 0x%0?p %15A %%ttbr1 = 0x%0?p %A\n",
+	    GETREG2(KREG_TTBR0), GETREG2(KREG_TTBR1));
 	mdb_printf("%%spsr   = 0x%0?p ", psr);
 	mdb_printf("  <%c,%c,%c,%c,%s,%s,%c,%c,%c,%c,el=%s>\n",
 	    (psr & PSR_N ? 'N' : 'n'),
