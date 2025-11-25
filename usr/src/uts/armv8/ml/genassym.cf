@@ -311,6 +311,7 @@ define	REGOFF_TP	offsetof(struct regs, r_tp)
 define	REGOFF_TRAPNO	offsetof(struct regs, r_trapno)
 define	REGOFF_FAR	offsetof(struct regs, r_far)
 define	REGOFF_ESR	offsetof(struct regs, r_esr)
+define	REGOFF_TTBR0	offsetof(struct regs, r_ttbr0)
 
 define	ESR_EC_SHIFT	ESR_EC_SHIFT
 define	ESR_ISS_MASK	ESR_ISS_MASK

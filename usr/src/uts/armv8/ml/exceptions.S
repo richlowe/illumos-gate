@@ -113,8 +113,6 @@ SET_SIZE(from_current_el_sp0_error)
 	.balign	VECTOR_ENTRY_SIZE
 ALTENTRY(from_current_el_sync)
 	clrex
-	__SAVE_REGS_EL1
-	__SAVE_FRAME
 	b	from_current_el_sync_handler
 	CHECK_VECTOR_ENTRY(from_current_el_sync)
 SET_SIZE(from_current_el_sync)
@@ -213,6 +211,10 @@ SET_SIZE(from_lower_el_aarch32_error)
 	SET_SIZE(exception_vector)
 
 	ENTRY(from_current_el_sync_handler)
+	__SAVE_REGS_EL1
+	__SAVE_FRAME
+	// Entry via the KDI has an already saved frame
+	ALTENTRY(from_current_el_sync_handler_no_save)
 	mrs	x1, esr_el1
 	lsr	w0, w1, #ESR_EC_SHIFT	// w0 <- EC, no need to mask.
 	mrs	x2, far_el1
