@@ -22,6 +22,7 @@
 #include <sys/modctl.h>
 #include <sys/sunddi.h>
 
+#include "memseg.h"
 #include "mmu.h"
 
 static int
@@ -209,6 +210,7 @@ static const mdb_dcmd_t dcmds[] = {
 	    arm_features_dcmd },
 	{ "interrupts", "", "print interrupts", gic_interrupts_dcmd },
 	{ "memseg_list", ":", "show memseg list", memseg_list },
+	{ "ttbr", ":", "show translation table base registers", ttbr_dcmd },
 	{ NULL },
 };
 
