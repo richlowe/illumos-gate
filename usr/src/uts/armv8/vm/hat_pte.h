@@ -85,6 +85,8 @@ struct hat_mmu_info {
 	uint_t max_level;	/* num_level - 1 */
 	uint_t max_page_level;	/* maximum level at which we can map a page */
 
+	uint_t hash_cnt;	/* cnt of entries in htable_hash_cache */
+
 	uintptr_t kernelbase;
 };
 extern struct hat_mmu_info mmu;

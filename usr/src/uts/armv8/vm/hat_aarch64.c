@@ -150,7 +150,7 @@ hat_alloc(struct as *as)
 	ASSERT(hat->hat_flags == 0);
 
 	hat->hat_ht_hash = kmem_cache_alloc(hat_hash_cache, KM_SLEEP);
-	bzero(hat->hat_ht_hash, HTABLE_NUM_HASH * sizeof (htable_t *));
+	bzero(hat->hat_ht_hash, mmu.hash_cnt * sizeof (htable_t *));
 
 	/*
 	 * Initialize Kernel HAT entries at the top of the top level page
@@ -266,6 +266,26 @@ mmu_init(void)
 	mmu.max_page_level = MAX_PAGE_LEVEL;
 
 	mmu.kernelbase = ~((1ul << (VA_BITS - 1)) - 1);
+
+	/*
+	 * Compute how many hash table entries to have per process for htables.
+	 * We start with 1 page's worth of entries.
+	 *
+	 * If physical memory is small, reduce the amount needed to cover it.
+	 */
+	uint64_t max_htables = physmax / NPTEPERPT;
+	mmu.hash_cnt = MMU_PAGESIZE / sizeof (htable_t *);
+	while (mmu.hash_cnt > 16 && mmu.hash_cnt >= max_htables)
+		mmu.hash_cnt >>= 1;
+
+	/*
+	 * If running in 64 bits and physical memory is large,
+	 * increase the size of the cache to cover all of memory for
+	 * a 64 bit process.
+	 */
+#define	HASH_MAX_LENGTH 4
+	while (mmu.hash_cnt * HASH_MAX_LENGTH < max_htables)
+		mmu.hash_cnt <<= 1;
 }
 
 /*
@@ -284,8 +304,9 @@ hat_init()
 
 	hat_cache = kmem_cache_create("hat_t", sizeof (hat_t),
 	    0, hati_constructor, NULL, NULL, NULL, 0, 0);
-	hat_hash_cache = kmem_cache_create("HatHash", MMU_PAGESIZE,
-	    0, NULL, NULL, NULL, NULL, 0, 0);
+	hat_hash_cache = kmem_cache_create("HatHash",
+	    mmu.hash_cnt * sizeof (htable_t *), 0, NULL, NULL, NULL,
+	    NULL, 0, 0);
 
 	/*
 	 * Set up the kernel's hat
@@ -310,7 +331,7 @@ hat_init()
 	 * XX64 - tune for 64 bit procs
 	 */
 	kas.a_hat->hat_ht_hash = kmem_cache_alloc(hat_hash_cache, KM_NOSLEEP);
-	bzero(kas.a_hat->hat_ht_hash, MMU_PAGESIZE);
+	bzero(kas.a_hat->hat_ht_hash, mmu.hash_cnt * sizeof (htable_t *));
 
 	/*
 	 * zero out the top level and cached htable pointers
