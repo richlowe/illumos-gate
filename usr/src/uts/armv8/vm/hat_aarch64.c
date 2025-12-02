@@ -152,10 +152,13 @@ hat_alloc(struct as *as)
 	hat->hat_ht_hash = kmem_cache_alloc(hat_hash_cache, KM_SLEEP);
 	bzero(hat->hat_ht_hash, HTABLE_NUM_HASH * sizeof (htable_t *));
 
+	/*
+	 * Initialize Kernel HAT entries at the top of the top level page
+	 * tables for the new hat.
+	 */
 	hat->hat_htable = NULL;
 	hat->hat_ht_cached = NULL;
-	/* create top level */
-	ht = htable_create(hat, (uintptr_t)0, MAX_PAGE_LEVEL, NULL);
+	ht = htable_create(hat, (uintptr_t)0, TOP_LEVEL(hat), NULL);
 	hat->hat_htable = ht;
 
 	/*
@@ -255,8 +258,13 @@ mmu_init(void)
 {
 	hole_start = HOLE_START;
 	hole_end = HOLE_END;
-	mmu.max_asid = ((read_tcr() & TCR_AS)? 0xFFFF: 0xFF);
-	mmu.max_level = MAX_PAGE_LEVEL;
+
+	mmu.max_asid = ((read_tcr() & TCR_AS) ? 0xFFFF : 0xFF);
+
+	mmu.max_level = MAX_PAGE_LEVEL; /* XXX: num_level - 1 */
+	mmu.num_level = MMU_PAGE_LEVELS;
+	mmu.max_page_level = MAX_PAGE_LEVEL;
+
 	mmu.kernelbase = ~((1ul << (VA_BITS - 1)) - 1);
 }
 
@@ -1004,7 +1012,7 @@ hat_memload_array(
 		 * decide what level mapping to use (ie. pagesize)
 		 */
 		pfn = page_pptonum(pages[pgindx]);
-		for (level = MAX_PAGE_LEVEL; ; --level) {
+		for (level = mmu.max_page_level; ; --level) {
 			pgsize = LEVEL_SIZE(level);
 			if (level == 0)
 				break;
@@ -1127,7 +1135,7 @@ hat_devload(
 		/*
 		 * decide what level mapping to use (ie. pagesize)
 		 */
-		for (level = MAX_PAGE_LEVEL; ; --level) {
+		for (level = mmu.max_page_level; ; --level) {
 			pgsize = LEVEL_SIZE(level);
 			if (level == 0)
 				break;
@@ -1551,7 +1559,7 @@ hat_unload_callback(
 		 */
 		entry = htable_va2entry(vaddr, ht);
 		hat_pte_unmap(ht, entry, flags, old_pte, NULL, B_FALSE);
-		ASSERT(ht->ht_level <= MAX_PAGE_LEVEL);
+		ASSERT(ht->ht_level <= mmu.max_page_level);
 		vaddr += LEVEL_SIZE(ht->ht_level);
 		contig_va = vaddr;
 		++r[r_cnt - 1].rng_cnt;
@@ -1697,7 +1705,7 @@ hat_getattr(hat_t *hat, caddr_t addr, uint_t *attr)
 	if (IN_VA_HOLE(vaddr))
 		return ((uint_t)-1);
 
-	ht = htable_getpte(hat, vaddr, NULL, &pte, MAX_PAGE_LEVEL);
+	ht = htable_getpte(hat, vaddr, NULL, &pte, mmu.max_page_level);
 	if (ht == NULL)
 		return ((uint_t)-1);
 
@@ -2088,7 +2096,7 @@ hat_share(
 		/*
 		 * Can't ever share top table.
 		 */
-		if (l == MAX_PAGE_LEVEL)
+		if (l == mmu.max_level)
 			goto not_shared;
 
 		/*
@@ -2240,8 +2248,8 @@ hat_unshare(hat_t *hat, caddr_t addr, size_t len, uint_t ismszc)
 	 * finished, because if hat_pageunload() were to unload a shared
 	 * pagetable page, its hat_tlb_inval() will do a global TLB invalidate.
 	 */
-	l = MAX_PAGE_LEVEL;
-	if (l == MAX_PAGE_LEVEL)
+	l = mmu.max_page_level;
+	if (l == mmu.max_level)	/* XXX: True true? */
 		--l;
 	for (; l >= 0; --l) {
 		for (vaddr = (uintptr_t)addr; vaddr < eaddr;
@@ -3095,7 +3103,7 @@ hat_page_fault(hat_t *hat, caddr_t vaddr)
 		uint_t entry;
 		pte_t oldpte;
 		htable_t *ht = htable_getpte(hat, (uintptr_t)vaddr, &entry,
-		    &oldpte, MAX_PAGE_LEVEL);
+		    &oldpte, mmu.max_page_level);
 		if (ht == NULL)
 			break;
 
