@@ -49,7 +49,10 @@ typedef int32_t level_t;
  *
  */
 #define	PAGE_LEVEL		(0)
+
+/* XXX: These two may not always match */
 #define	MAX_PAGE_LEVEL		(MMU_PAGE_LEVELS - 1)
+#define	MAX_NUM_LEVEL		(MMU_PAGE_LEVELS - 1)
 
 #define	PTE_SOFTWARE		PTE_SFW_MASK
 #define	PTE_NOSYNC		(0x4ul << PTE_SFW_SHIFT)
@@ -68,7 +71,7 @@ typedef int32_t level_t;
 #define	TOP_LEVEL(hat)		MAX_PAGE_LEVEL
 
 /*
- * HAT/MMU parameters that depend on kernel mode and/or processor type
+ * HAT/MMU parameters that depend on processor type or configuration
  */
 struct htable;
 struct hat_mmu_info {
@@ -76,8 +79,12 @@ struct hat_mmu_info {
 	uintptr_t kmap_eaddr;	/* end addr of kmap */
 	struct htable **kmap_htables; /* htables for segmap + 32 bit heap */
 	pte_t *kmap_ptes;	/* mapping of pagetables that map kmap */
-	uint32_t max_asid;
-	int max_level;
+	uint16_t max_asid;	/* maximum address-space identifier */
+
+	uint_t num_level;	/* Number of paging levels in use */
+	uint_t max_level;	/* num_level - 1 */
+	uint_t max_page_level;	/* maximum level at which we can map a page */
+
 	uintptr_t kernelbase;
 };
 extern struct hat_mmu_info mmu;
