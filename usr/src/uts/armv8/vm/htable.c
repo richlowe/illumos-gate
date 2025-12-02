@@ -294,7 +294,7 @@ htable_steal_active(hat_t *hat, uint_t cnt, uint_t threshold,
 	uintptr_t	va;
 	pte_t	pte;
 
-	h = h_start = h_seed++ % (MMU_PAGESIZE / sizeof (htable_t *));
+	h = h_start = h_seed++ % mmu.hash_cnt;
 	do {
 		higher = NULL;
 		HTABLE_ENTER(h);
@@ -379,7 +379,7 @@ htable_steal_active(hat_t *hat, uint_t cnt, uint_t threshold,
 		HTABLE_EXIT(h);
 		if (higher != NULL)
 			htable_release(higher);
-		if (++h == (MMU_PAGESIZE / sizeof (htable_t *)))
+		if (++h == mmu.hash_cnt)
 			h = 0;
 	} while (*stolen < cnt && h != h_start);
 }
@@ -851,7 +851,7 @@ htable_purge_hat(hat_t *hat)
 	/*
 	 * walk thru the htable hash table and free all the htables in it.
 	 */
-	for (h = 0; h < (MMU_PAGESIZE / sizeof (htable_t *)); ++h) {
+	for (h = 0; h < mmu.hash_cnt; ++h) {
 		while ((ht = hat->hat_ht_hash[h]) != NULL) {
 			if (ht->ht_next)
 				ht->ht_next->ht_prev = ht->ht_prev;
@@ -1868,7 +1868,7 @@ hat_dump(void)
 	 * Dump all page tables
 	 */
 	for (hat = kas.a_hat; hat != NULL; hat = hat->hat_next) {
-		for (h = 0; h < (MMU_PAGESIZE / sizeof (htable_t *)); ++h) {
+		for (h = 0; h < mmu.hash_cnt; ++h) {
 			for (ht = hat->hat_ht_hash[h]; ht; ht = ht->ht_next) {
 				dump_page(ht->ht_pfn);
 			}
