@@ -24,6 +24,20 @@
 #include <mdb/mdb_err.h>
 #include <mdb/mdb_modapi.h>
 
+#include "mmu.h"
+
+struct hat_mmu_info mmu;
+
+void
+init_mmu(void)
+{
+	if (mmu.num_level != 0)
+		return;
+
+	if (mdb_readsym(&mmu, sizeof (mmu), "mmu") == -1)
+		mdb_warn("Can't use HAT information before mmu_init()\n");
+}
+
 static void
 decode_ttbr(uint64_t ttbr)
 {

@@ -28,6 +28,7 @@ MODULE = unix.so
 MDBTGT = kvm
 
 MODSRCS =		\
+	htable.c	\
 	memseg.c	\
 	mmu.c		\
 	unix.c
