@@ -22,6 +22,7 @@
 #include <sys/modctl.h>
 #include <sys/sunddi.h>
 
+#include "htable.h"
 #include "memseg.h"
 #include "mmu.h"
 
@@ -197,6 +198,8 @@ gic_interrupts_dcmd(uintptr_t addr, uint_t flags, int argc,
 static const mdb_dcmd_t dcmds[] = {
 	{ "arm_features", ":", "dump the arm_features vector",
 	    arm_features_dcmd },
+	{ "htables", "", "Given hat_t *, lists all its htable_t * values",
+	    htables_dcmd, htables_help },
 	{ "interrupts", "", "print interrupts", gic_interrupts_dcmd },
 	{ "memseg_list", ":", "show memseg list", memseg_list },
 	{ "ttbr", ":", "show translation table base registers", ttbr_dcmd },
