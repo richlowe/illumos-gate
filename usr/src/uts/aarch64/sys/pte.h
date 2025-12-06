@@ -70,9 +70,9 @@ typedef uint64_t pte_t;
 #define	PTE_SH_INNER		(3ull << 8)
 #define	PTE_SH_OUTER		(2ull << 8)
 #define	PTE_SH_NONSHARE		(0ull << 8)
+
 #define	PTE_AP_MASK		(3ull << 6)
 #define	PTE_AP_RO		(1ull << 7)
-
 #define	PTE_AP_USER		(1ull << 6)
 #define	PTE_AP_KRWUNA		0
 #define	PTE_AP_KRWURW		PTE_AP_USER

@@ -30,6 +30,9 @@ extern struct hat_mmu_info mmu;
 
 extern void init_mmu(void);
 extern int ttbr_dcmd(uintptr_t, uint_t, int, const mdb_arg_t *);
+extern int pte_dcmd(uintptr_t, uint_t, int, const mdb_arg_t *);
+extern int ptable_dcmd(uintptr_t, uint_t, int, const mdb_arg_t *);
+extern int vatopfn_dcmd(uintptr_t, uint_t, int, const mdb_arg_t *);
 
 #ifdef __cplusplus
 }
