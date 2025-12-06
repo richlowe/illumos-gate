@@ -202,7 +202,12 @@ static const mdb_dcmd_t dcmds[] = {
 	    htables_dcmd, htables_help },
 	{ "interrupts", "", "print interrupts", gic_interrupts_dcmd },
 	{ "memseg_list", ":", "show memseg list", memseg_list },
+	{ "ptable", ":[-rRvl N]", "decode page table given a physaddr",
+	    ptable_dcmd },
+	{ "pte", ":[-l N]", "decode page table entries", pte_dcmd },
 	{ "ttbr", ":", "show translation table base registers", ttbr_dcmd },
+	{ "vatopfn", ":[-a as]", "translate a virtual address to a pfn",
+	    vatopfn_dcmd },
 	{ NULL },
 };
 
