@@ -308,16 +308,23 @@
 #define	CPUECTLR_SMP	(1<<6)
 
 #define	TCR_AS		(1ul<<36)
-#define	TCR_IPS_4G	(0ul<<32)
-#define	TCR_IPS_64G	(1ul<<32)
-#define	TCR_IPS_1T	(2ul<<32)
-#define	TCR_IPS_4T	(3ul<<32)
-#define	TCR_IPS_16T	(4ul<<32)
-#define	TCR_IPS_256T	(5ul<<32)
+
 #define	TCR_IPS_SHIFT	32
+#define	TCR_IPS_4G	(0ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_64G	(1ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_1T	(2ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_4T	(3ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_16T	(4ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_256T	(5ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_4PB	(6ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_64PB	(7ul << TCR_IPS_SHIFT)
+#define	TCR_IPS_MASK	(0x7ul << TCR_IPS_SHIFT)
+#define	TCR_IPS(x)	((x) & TCR_IPS_MASK)
+
 #define	TCR_TG1_16K	(1ul<<30)
 #define	TCR_TG1_4K	(2ul<<30)
 #define	TCR_TG1_64K	(3ul<<30)
+
 #define	TCR_SH1_NSH	(0ul<<28)
 #define	TCR_SH1_OSH	(2ul<<28)
 #define	TCR_SH1_ISH	(3ul<<28)
