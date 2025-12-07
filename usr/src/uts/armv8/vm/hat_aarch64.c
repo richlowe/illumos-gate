@@ -259,11 +259,15 @@ mmu_init(void)
 	hole_start = HOLE_START;
 	hole_end = HOLE_END;
 
-	mmu.max_asid = ((read_tcr() & TCR_AS) ? 0xFFFF : 0xFF);
+	uint64_t tcr = read_tcr();
+
+	mmu.max_asid = ((tcr & TCR_AS) ? 0xFFFF : 0xFF);
 
 	mmu.max_level = MAX_PAGE_LEVEL; /* XXX: num_level - 1 */
 	mmu.num_level = MMU_PAGE_LEVELS;
 	mmu.max_page_level = MAX_PAGE_LEVEL;
+
+	mmu.pa_size = TCR_IPS(tcr);
 
 	mmu.kernelbase = ~((1ul << (VA_BITS - 1)) - 1);
 
