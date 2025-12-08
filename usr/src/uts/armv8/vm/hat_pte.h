@@ -87,6 +87,7 @@ struct hat_mmu_info {
 
 	uint_t hash_cnt;	/* cnt of entries in htable_hash_cache */
 
+	uint64_t va_size;	/* effective virtual address size  */
 	uint64_t pa_size;	/* effective physical address size */
 
 	uintptr_t kernelbase;
