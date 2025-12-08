@@ -346,10 +346,17 @@
 #define	TCR_IRGN1_WBNA	(3ul<<24)
 #define	TCR_EPD1	(1ul<<23)
 #define	TCR_A1		(1ul<<22)
-#define	TCR_T1SZ_256T	(16ul<<16)
+
+
+#define	TCR_T1SZ_SHIFT	16
+#define	TCR_T1SZ_256T	(16ul << TCR_T1SZ_SHIFT)
+#define	TCR_T1SZ_MASK	(0x3ful << TCR_T1SZ_SHIFT)
+#define	TCR_T1SZ(x)	(((x) & TCR_T1SZ_MASK) >> TCR_T1SZ_SHIFT)
+
 #define	TCR_TG0_4K	(0ul<<14)
 #define	TCR_TG0_64K	(1ul<<14)
 #define	TCR_TG0_16K	(2ul<<14)
+
 #define	TCR_SH0_NSH	(0ul<<12)
 #define	TCR_SH0_OSH	(2ul<<12)
 #define	TCR_SH0_ISH	(3ul<<12)
@@ -362,8 +369,11 @@
 #define	TCR_IRGN0_WT	(2ul<<8)
 #define	TCR_IRGN0_WBNA	(3ul<<8)
 #define	TCR_EPD0	(1ul<<7)
-#define	TCR_T0SZ_256T	(16ul<<0)
 
+#define	TCR_T0SZ_SHIFT	0
+#define	TCR_T0SZ_MASK	(0x3ful << TCR_T0SZ_SHIFT)
+#define	TCR_T0SZ_256T	(16ul << TCR_T0SZ_SHIFT)
+#define	TCR_T0SZ(x)	(((x) & TCR_T0SZ_MASK) >> TCR_T0SZ_SHIFT)
 
 #define	TTBR_ASID_SHIFT		48
 #define	TTBR_ASID_MASK		(0xffull << TTBR_ASID_SHIFT)

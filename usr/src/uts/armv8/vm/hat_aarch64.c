@@ -267,8 +267,10 @@ mmu_init(void)
 	mmu.num_level = MMU_PAGE_LEVELS;
 	mmu.max_page_level = MAX_PAGE_LEVEL;
 
+	mmu.va_size = 64 - TCR_T1SZ(tcr);
 	mmu.pa_size = TCR_IPS(tcr);
 
+	/* XXX: Calculate this properly from T1SZ */
 	mmu.kernelbase = ~((1ul << (VA_BITS - 1)) - 1);
 
 	/*
