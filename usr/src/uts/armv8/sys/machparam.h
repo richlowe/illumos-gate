@@ -134,7 +134,7 @@ extern "C" {
 /*
  * Define upper limit on user address space
  */
-#define	USERLIMIT	(ADDRESS_C(1) << (VA_BITS - 1))
+#define	USERLIMIT	HOLE_START
 
 /*
  * This limit, traditionally for ILP32 processes, may also be applied to LP64
