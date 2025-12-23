@@ -1830,7 +1830,7 @@ pte_copy(htable_t *src, htable_t *dest, uint_t entry, uint_t count)
 	/*
 	 * now do the copy
 	 */
-	size = count << PTE_BITS;
+	size = count * sizeof (pte_t);
 	bcopy(src_va, dst_va, size);
 }
 
@@ -1850,7 +1850,7 @@ pte_zero(htable_t *dest, uint_t entry, uint_t count)
 
 	dst_va = (caddr_t)PT_INDEX_PTR(hat_kpm_pfn2va(dest->ht_pfn), entry);
 
-	size = count << PTE_BITS;
+	size = count * sizeof (pte_t);
 	bzero(dst_va, size);
 }
 
