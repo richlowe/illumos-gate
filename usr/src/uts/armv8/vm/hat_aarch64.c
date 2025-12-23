@@ -270,6 +270,7 @@ mmu_init(void)
 	mmu.va_size = 64 - TCR_T1SZ(tcr);
 	mmu.pa_size = TCR_IPS(tcr);
 
+	VERIFY3U(mmu.va_size, ==, VA_BITS);
 
 	/*
 	 * Compute how many hash table entries to have per process for htables.
