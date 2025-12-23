@@ -89,8 +89,6 @@ struct hat_mmu_info {
 
 	uint64_t va_size;	/* effective virtual address size  */
 	uint64_t pa_size;	/* effective physical address size */
-
-	uintptr_t kernelbase;
 };
 extern struct hat_mmu_info mmu;
 
