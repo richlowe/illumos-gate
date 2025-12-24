@@ -71,6 +71,16 @@ typedef int32_t level_t;
 #define	TOP_LEVEL(hat)		MAX_PAGE_LEVEL
 
 /*
+ * Bit 55 is guaranteed to fall in the hole, and is specified by ARM as
+ * the one to use:
+ *
+ * Arm Architecture Reference Manual for A-profile architecture
+ *     D8.1.8 Supported virtual address ranges
+ *     (ARM DDI 0487L.b)
+ */
+#define	IS_KERNEL_MAPPING(__va)	(((uintptr_t)(__va)) & (1UL << 55))
+
+/*
  * HAT/MMU parameters that depend on processor type or configuration
  */
 struct htable;

@@ -41,6 +41,8 @@
 #include <sys/framebuffer.h>
 #include <sys/efifb.h>
 
+#include <vm/hat_pte.h>
+
 #include "saio.h"
 #include "dboot.h"
 #include "dboot_printf.h"
@@ -49,16 +51,6 @@ extern void kmem_init(void);
 extern void map_phys(pte_t pte_attr, uintptr_t vaddr,
     uint64_t paddr, size_t bytes);
 extern uint64_t memlist_get(uint64_t size, int align, struct memlist **listp);
-
-/*
- * The bit 55 is guaranteed to fall in the hole, and is specified by ARM as
- * the one to use:
- *
- * Arm Architecture Reference Manual for A-profile architecture
- *     D8.1.8 Supported virtual address ranges
- *     (ARM DDI 0487L.b)
- */
-#define	IS_KERNEL_MAPPING(__va)	(((uintptr_t)(__va)) & (1UL << 55))
 
 extern struct efi_map_header *efi_map_header;
 extern struct memlist *pfreelistp;
