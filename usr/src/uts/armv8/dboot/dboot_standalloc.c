@@ -50,6 +50,14 @@ extern void map_phys(pte_t pte_attr, caddr_t vaddr,
     uint64_t paddr, size_t bytes);
 extern uint64_t memlist_get(uint64_t size, int align, struct memlist **listp);
 
+/*
+ * The bit 55 is guaranteed to fall in the hole, and is specified by ARM as
+ * the one to use:
+ *
+ * Arm Architecture Reference Manual for A-profile architecture
+ *     D8.1.8 Supported virtual address ranges
+ *     (ARM DDI 0487L.b)
+ */
 #define	IS_KERNEL_MAPPING(__va)	(((uint64_t)(__va)) & (1UL << 55))
 
 extern struct efi_map_header *efi_map_header;
@@ -61,8 +69,9 @@ extern caddr_t _BootScratchEnd;
 extern void init_physmem(void);
 
 static caddr_t scratch_used_top;
-static pte_t *l1_ptbl0;
-static pte_t *l1_ptbl1;
+
+static pte_t *l3_ptbl0;
+static pte_t *l3_ptbl1;
 
 static void init_pt(void);
 
@@ -71,7 +80,7 @@ static void dump_tables(uint64_t tab, uint64_t va_offset);
 #endif
 
 static inline int
-l1_pteidx(caddr_t vaddr)
+l3_pteidx(caddr_t vaddr)
 {
 	return ((((uintptr_t)vaddr) >> (PAGESHIFT + 3 * NPTESHIFT)) &
 	    ((1 << NPTESHIFT) - 1));
@@ -85,14 +94,14 @@ l2_pteidx(caddr_t vaddr)
 }
 
 static inline int
-l3_pteidx(caddr_t vaddr)
+l1_pteidx(caddr_t vaddr)
 {
 	return ((((uintptr_t)vaddr) >> (PAGESHIFT + 1 * NPTESHIFT)) &
 	    ((1 << NPTESHIFT) - 1));
 }
 
 static inline int
-l4_pteidx(caddr_t vaddr)
+l0_pteidx(caddr_t vaddr)
 {
 	return ((((uintptr_t)vaddr) >> (PAGESHIFT)) & ((1 << NPTESHIFT) - 1));
 }
@@ -135,14 +144,14 @@ init_pt(void)
 	}
 
 	if ((paddr = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp)) == 0)
-		panic("phy alloc error for L1 PT\n");
+		panic("phy alloc error for L3 PT\n");
 	memset((void *)paddr, 0, MMU_PAGESIZE);
-	l1_ptbl0 = (pte_t *)paddr;
+	l3_ptbl0 = (pte_t *)paddr;
 
 	if ((paddr = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp)) == 0)
-		panic("phy alloc error for L1 PT\n");
+		panic("phy alloc error for L3 PT\n");
 	memset((void *)paddr, 0, MMU_PAGESIZE);
-	l1_ptbl1 = (pte_t *)paddr;
+	l3_ptbl1 = (pte_t *)paddr;
 
 	/*
 	 * Memory that can be normally mapped. This is a subset of physical
@@ -259,16 +268,16 @@ init_pt(void)
 
 	write_mair(mair);
 	write_tcr(tcr);
-	write_ttbr0((uint64_t)l1_ptbl0);
-	write_ttbr1((uint64_t)l1_ptbl1);
+	write_ttbr0((uint64_t)l3_ptbl0);
+	write_ttbr1((uint64_t)l3_ptbl1);
 	isb();
 
 #if 0
 	if (debug) {
 		dboot_printf("Lower Memory Tables\n");
-		dump_tables((uint64_t)l1_ptbl0, 0);
+		dump_tables((uint64_t)l3_ptbl0, 0);
 		dboot_printf("Upper Memory Tables\n");
-		dump_tables((uint64_t)l1_ptbl1, SEGKPM_BASE);
+		dump_tables((uint64_t)l3_ptbl1, SEGKPM_BASE);
 	}
 #endif
 
@@ -294,20 +303,20 @@ alloc_pagetable_page(const char *lvl)
 static void
 map_pages(pte_t pte_attr, caddr_t vaddr, uint64_t paddr, size_t bytes)
 {
-	int l1_idx = l1_pteidx(vaddr);
-	int l2_idx = l2_pteidx(vaddr);
 	int l3_idx = l3_pteidx(vaddr);
-	int l4_idx = l4_pteidx(vaddr);
+	int l2_idx = l2_pteidx(vaddr);
+	int l1_idx = l1_pteidx(vaddr);
+	int l0_idx = l0_pteidx(vaddr);
 
-	pte_t *l1_ptbl = IS_KERNEL_MAPPING(vaddr) ? l1_ptbl1 : l1_ptbl0;
+	pte_t *l3_ptbl = IS_KERNEL_MAPPING(vaddr) ? l3_ptbl1 : l3_ptbl0;
 
-	if ((l1_ptbl[l1_idx] & PTE_TYPE_MASK) == 0)
-		l1_ptbl[l1_idx] = PTE_TABLE_APT_NOUSER|PTE_TABLE_UXNT|
-		    PTE_TABLE|alloc_pagetable_page("L1");
-	if ((l1_ptbl[l1_idx] & PTE_VALID) == 0)
-		panic("invalid L1 PT\n");
+	if ((l3_ptbl[l3_idx] & PTE_TYPE_MASK) == 0)
+		l3_ptbl[l3_idx] = PTE_TABLE_APT_NOUSER|PTE_TABLE_UXNT|
+		    PTE_TABLE|alloc_pagetable_page("L3");
+	if ((l3_ptbl[l3_idx] & PTE_VALID) == 0)
+		panic("invalid L3 PT\n");
 
-	pte_t *l2_ptbl = (pte_t *)(uintptr_t)(l1_ptbl[l1_idx] & PTE_PFN_MASK);
+	pte_t *l2_ptbl = (pte_t *)(uintptr_t)(l3_ptbl[l3_idx] & PTE_PFN_MASK);
 
 	if (bytes == MMU_PAGESIZE1G) {
 		if ((uintptr_t)vaddr & (MMU_PAGESIZE1G - 1))
@@ -327,35 +336,35 @@ map_pages(pte_t pte_attr, caddr_t vaddr, uint64_t paddr, size_t bytes)
 	if ((l2_ptbl[l2_idx] & PTE_TYPE_MASK) != PTE_TABLE)
 		panic("invalid L2 PT\n");
 
-	pte_t *l3_ptbl = (pte_t *)(uintptr_t)(l2_ptbl[l2_idx] & PTE_PFN_MASK);
+	pte_t *l1_ptbl = (pte_t *)(uintptr_t)(l2_ptbl[l2_idx] & PTE_PFN_MASK);
 
 	if (bytes == MMU_PAGESIZE2M) {
 		if ((uintptr_t)vaddr & (MMU_PAGESIZE2M - 1))
 			panic("invalid vaddr alignment (2M)\n");
 		if (paddr & (MMU_PAGESIZE2M - 1))
 			panic("invalid paddr alignment (2M)\n");
-		if (l3_ptbl[l3_idx] & PTE_VALID)
-			panic("invalid L3 PT\n");
-		l3_ptbl[l3_idx] = paddr|pte_attr|PTE_BLOCK;
+		if (l1_ptbl[l1_idx] & PTE_VALID)
+			panic("invalid L1 PT\n");
+		l1_ptbl[l1_idx] = paddr|pte_attr|PTE_BLOCK;
 		dsb(ish);
 		return;
 	}
 
-	if ((l3_ptbl[l3_idx] & PTE_TYPE_MASK) == 0)
-		l3_ptbl[l3_idx] = PTE_TABLE_APT_NOUSER|PTE_TABLE_UXNT|
-		    PTE_TABLE|alloc_pagetable_page("L3");
-	if ((l3_ptbl[l3_idx] & PTE_TYPE_MASK) != PTE_TABLE)
-		panic("invalid L3 PT\n");
+	if ((l1_ptbl[l1_idx] & PTE_TYPE_MASK) == 0)
+		l1_ptbl[l1_idx] = PTE_TABLE_APT_NOUSER|PTE_TABLE_UXNT|
+		    PTE_TABLE|alloc_pagetable_page("L1");
+	if ((l1_ptbl[l1_idx] & PTE_TYPE_MASK) != PTE_TABLE)
+		panic("invalid L1 PT\n");
 
-	pte_t *l4_ptbl = (pte_t *)(uintptr_t)(l3_ptbl[l3_idx] & PTE_PFN_MASK);
+	pte_t *l0_ptbl = (pte_t *)(uintptr_t)(l1_ptbl[l1_idx] & PTE_PFN_MASK);
 	if (bytes == MMU_PAGESIZE) {
 		if ((uintptr_t)vaddr & (MMU_PAGESIZE - 1))
 			panic("invalid vaddr alignment (4K)\n");
 		if (paddr & (MMU_PAGESIZE - 1))
 			panic("invalid paddr alignment (4K)\n");
-		if (l4_ptbl[l4_idx] & PTE_VALID)
-			panic("invalid L4 PT\n");
-		l4_ptbl[l4_idx] = paddr|pte_attr|PTE_PAGE;
+		if (l0_ptbl[l0_idx] & PTE_VALID)
+			panic("invalid L0 PT\n");
+		l0_ptbl[l0_idx] = paddr|pte_attr|PTE_PAGE;
 		dsb(ish);
 		return;
 	}
