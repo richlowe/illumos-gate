@@ -176,30 +176,30 @@ boot_compinfo(int fd, struct compinfo *cbp)
 }
 
 static inline int
-l3_pteidx(caddr_t vaddr)
+l3_pteidx(uintptr_t vaddr)
 {
-	return ((((uintptr_t)vaddr) >>
+	return ((vaddr >>
 	    (PAGESHIFT+3*NPTESHIFT)) & ((1<<NPTESHIFT)-1));
 }
 
 static inline int
-l2_pteidx(caddr_t vaddr)
+l2_pteidx(uintptr_t vaddr)
 {
-	return ((((uintptr_t)vaddr) >>
+	return ((vaddr >>
 	    (PAGESHIFT+2*NPTESHIFT)) & ((1<<NPTESHIFT)-1));
 }
 
 static inline int
-l1_pteidx(caddr_t vaddr)
+l1_pteidx(uintptr_t vaddr)
 {
-	return ((((uintptr_t)vaddr) >>
+	return ((vaddr >>
 	    (PAGESHIFT+1*NPTESHIFT)) & ((1<<NPTESHIFT)-1));
 }
 
 static inline int
-l0_pteidx(caddr_t vaddr)
+l0_pteidx(uintptr_t vaddr)
 {
-	return ((((uintptr_t)vaddr) >> (PAGESHIFT)) & ((1<<NPTESHIFT)-1));
+	return ((vaddr >> (PAGESHIFT)) & ((1<<NPTESHIFT)-1));
 }
 
 static paddr_t
@@ -223,7 +223,7 @@ pt_alloc(bootops_t *bop)
 }
 
 static void
-map_phys(bootops_t *bop, pte_t pte_attr, caddr_t vaddr, uint64_t paddr)
+map_phys(bootops_t *bop, pte_t pte_attr, uintptr_t vaddr, uint64_t paddr)
 {
 	int l3_idx = l3_pteidx(vaddr);
 	int l2_idx = l2_pteidx(vaddr);
@@ -415,7 +415,7 @@ do_bsys_alloc(bootops_t *bop, caddr_t virthint, size_t size, int align)
 {
 	paddr_t a = align;	/* same type as pa for masking */
 	paddr_t pa;
-	caddr_t va;
+	uintptr_t va;
 	ssize_t s;		/* the aligned size */
 
 	if (a < MMU_PAGESIZE)
@@ -439,7 +439,7 @@ do_bsys_alloc(bootops_t *bop, caddr_t virthint, size_t size, int align)
 	/*
 	 * Add the mappings to the page tables, try large pages first.
 	 */
-	va = virthint;
+	va = (uintptr_t)virthint;
 	s = size;
 	while (s > 0) {
 		/*
