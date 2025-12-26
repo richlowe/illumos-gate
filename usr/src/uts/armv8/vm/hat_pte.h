@@ -113,10 +113,24 @@ extern struct hat_mmu_info mmu;
 #define	FMT_PTE			"0x%lx"
 #define	GET_PTE(ptr)		(*(volatile pte_t *)(ptr))
 #define	SET_PTE(ptr, pte)	(*(volatile pte_t *)(ptr) = (pte))
+
 #define	LEVEL_SHIFT(l)		(MMU_PAGESHIFT + (l) * NPTESHIFT)
 #define	LEVEL_SIZE(l)		(1ul << LEVEL_SHIFT(l))
 #define	LEVEL_OFFSET(l)		(LEVEL_SIZE(l)-1)
 #define	LEVEL_MASK(l)		(~LEVEL_OFFSET(l))
+
+/*
+ * Return the part of addr, appropriately shifted and masked, to index into a
+ * page table of specified level.
+ *
+ * would paste `level` multiple times so is a bad macro
+ */
+extern __GNU_INLINE uint_t
+LEVEL_INDEX(uint64_t addr, uint_t level)
+{
+	return (((addr & LEVEL_MASK(level)) >> LEVEL_SHIFT(level)) &
+	    ((1 << NPTESHIFT) - 1));
+}
 
 #define	PTE_SET(p, f)		((p) |= (f))
 #define	PTE_CLR(p, f)		((p) &= ~(pte_t)(f))
