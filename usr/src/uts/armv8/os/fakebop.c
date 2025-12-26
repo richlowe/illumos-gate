@@ -175,33 +175,6 @@ boot_compinfo(int fd, struct compinfo *cbp)
 	return (0);
 }
 
-static inline int
-l3_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >>
-	    (PAGESHIFT+3*NPTESHIFT)) & ((1<<NPTESHIFT)-1));
-}
-
-static inline int
-l2_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >>
-	    (PAGESHIFT+2*NPTESHIFT)) & ((1<<NPTESHIFT)-1));
-}
-
-static inline int
-l1_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >>
-	    (PAGESHIFT+1*NPTESHIFT)) & ((1<<NPTESHIFT)-1));
-}
-
-static inline int
-l0_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >> (PAGESHIFT)) & ((1<<NPTESHIFT)-1));
-}
-
 static paddr_t
 pt_alloc(bootops_t *bop)
 {
@@ -225,10 +198,10 @@ pt_alloc(bootops_t *bop)
 static void
 map_phys(bootops_t *bop, pte_t pte_attr, uintptr_t vaddr, uint64_t paddr)
 {
-	int l3_idx = l3_pteidx(vaddr);
-	int l2_idx = l2_pteidx(vaddr);
-	int l1_idx = l1_pteidx(vaddr);
-	int l0_idx = l0_pteidx(vaddr);
+	int l3_idx = LEVEL_INDEX(vaddr, 3);
+	int l2_idx = LEVEL_INDEX(vaddr, 2);
+	int l1_idx = LEVEL_INDEX(vaddr, 1);
+	int l0_idx = LEVEL_INDEX(vaddr, 0);
 
 	pte_t *l3_ptbl = (pte_t *)(IS_KERNEL_MAPPING((uintptr_t)vaddr) ?
 	    read_ttbr1() : read_ttbr0());

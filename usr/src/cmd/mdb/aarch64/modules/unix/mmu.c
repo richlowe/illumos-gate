@@ -346,6 +346,17 @@ ptable_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	return (DCMD_OK);
 }
 
+/*
+ * XXX: this is kernel `LEVEL_INDEX` here for the agnosticism of
+ * _mdb_ks_pageshift
+ */
+static inline uint64_t
+pte_index(uintptr_t addr, uint_t level)
+{
+	return (((addr & LEVEL_MASK(level)) >> LEVEL_SHIFT(level)) &
+	    ((1 << (_mdb_ks_pageshift - 3)) - 1));
+}
+
 int
 vatopfn_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
@@ -396,9 +407,7 @@ vatopfn_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 
 	/* Needs dynamism (as indeed the kernel macros do) */
 	for (int i = mmu.max_level; i >= 0; i--) {
-		/* XXX: 1ff is the 9 bit index-ness */
-		uint_t idx = ((addr & LEVEL_MASK(i)) >>
-		    LEVEL_SHIFT(i)) & 0x1ff;
+		uint_t idx = pte_index(addr, i);
 
 		pte_t pte;
 		if (mdb_pread(&pte, sizeof (pte),

@@ -71,33 +71,6 @@ static void init_pt(void);
 static void dump_tables(uint64_t tab, uint64_t va_offset);
 #endif
 
-static inline int
-l3_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >> (PAGESHIFT + 3 * NPTESHIFT)) &
-	    ((1 << NPTESHIFT) - 1));
-}
-
-static inline int
-l2_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >> (PAGESHIFT + 2 * NPTESHIFT)) &
-	    ((1 << NPTESHIFT) - 1));
-}
-
-static inline int
-l1_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >> (PAGESHIFT + 1 * NPTESHIFT)) &
-	    ((1 << NPTESHIFT) - 1));
-}
-
-static inline int
-l0_pteidx(uintptr_t vaddr)
-{
-	return ((vaddr >> (PAGESHIFT)) & ((1 << NPTESHIFT) - 1));
-}
-
 void
 init_memory(void)
 {
@@ -294,10 +267,10 @@ alloc_pagetable_page(const char *lvl)
 static void
 map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, size_t bytes)
 {
-	int l3_idx = l3_pteidx(vaddr);
-	int l2_idx = l2_pteidx(vaddr);
-	int l1_idx = l1_pteidx(vaddr);
-	int l0_idx = l0_pteidx(vaddr);
+	int l3_idx = LEVEL_INDEX(vaddr, 3);
+	int l2_idx = LEVEL_INDEX(vaddr, 2);
+	int l1_idx = LEVEL_INDEX(vaddr, 1);
+	int l0_idx = LEVEL_INDEX(vaddr, 0);
 
 	pte_t *l3_ptbl = IS_KERNEL_MAPPING(vaddr) ? l3_ptbl1 : l3_ptbl0;
 
