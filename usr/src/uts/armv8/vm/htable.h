@@ -92,6 +92,12 @@ typedef struct htable htable_t;
 	((((va) >> LEVEL_SHIFT(1)) + ((va) >> 28) + (lvl) +		\
 	((uintptr_t)(hat) >> 4)) & (mmu.hash_cnt - 1))
 
+#define	HTABLE_NUM_PTES(ht)	NPTEPERPT
+
+#define	HTABLE_LAST_PAGE(ht)			\
+	((ht)->ht_vaddr - MMU_PAGESIZE +	\
+	((uintptr_t)HTABLE_NUM_PTES(ht) * LEVEL_SIZE((ht)->ht_level)))
+
 /*
  * Compute the last page aligned VA mapped by an htable.
  *
@@ -100,12 +106,6 @@ typedef struct htable htable_t;
  *
  * XX64 - The check for the VA hole needs to be better generalized.
  */
-#define	HTABLE_NUM_PTES(ht)	NPTEPERPT
-
-#define	HTABLE_LAST_PAGE(ht)			\
-	((ht)->ht_vaddr - MMU_PAGESIZE +	\
-	((uintptr_t)HTABLE_NUM_PTES(ht) * LEVEL_SIZE((ht)->ht_level)))
-
 #define	NEXT_ENTRY_VA(va, l)	((va & LEVEL_MASK(l)) + LEVEL_SIZE(l))
 
 #if defined(_KERNEL)
