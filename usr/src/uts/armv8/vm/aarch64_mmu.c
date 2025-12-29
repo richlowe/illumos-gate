@@ -166,7 +166,7 @@ hat_kern_alloc(
 	 * the entire top level page table for the kernel. Make sure there's
 	 * enough reserve for that too.
 	 */
-	table_cnt += NPTEPERPT - ((kernelbase >> LEVEL_SHIFT(mmu.max_level)) &
+	table_cnt += NPTEPERPT - ((_kernelbase >> LEVEL_SHIFT(mmu.max_level)) &
 	    (NPTEPERPT - 1));
 
 	/*
@@ -340,7 +340,7 @@ boot_reserve(void)
 		[MMFR0_PARANGE_64P] =	(1ul << 56)	/* 64PB */
 	};
 
-	uintptr_t va = KERNELBASE;
+	uintptr_t va = _kernelbase;
 	pte_t *ptbl[MMU_PAGE_LEVELS] = {0};
 
 	ptbl[MMU_PAGE_LEVELS - 1] =
