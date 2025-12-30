@@ -889,7 +889,9 @@ system_pages_kstat_update(kstat_t *ksp, int rw)
 	system_pages_kstat.nfree.value.ul	= kobj_stat.nfree;
 	system_pages_kstat.nalloc_calls.value.ul = kobj_stat.nalloc_calls;
 	system_pages_kstat.nfree_calls.value.ul	= kobj_stat.nfree_calls;
-	system_pages_kstat.kernelbase.value.ul	= (ulong_t)KERNELBASE;
+
+	/* XXX: The dynamic kernelbase, this code is _MACHDEP */
+	system_pages_kstat.kernelbase.value.ul	= _kernelbase;
 
 #ifdef	__sparc
 	/*

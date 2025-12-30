@@ -111,7 +111,7 @@ extern "C" {
 							// ...
 #define	VALLOC_BASE	(MISC_VA_BASE + MISC_VA_SIZE)
 #define	MISC_VA_BASE	(SEGKPM_BASE + SEGKPM_SIZE)
-#define	SEGKPM_BASE	KERNELBASE
+#define	SEGKPM_BASE	HOLE_END
 #define	KERNELBASE	HOLE_END
 
 /*
