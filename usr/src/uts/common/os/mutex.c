@@ -346,7 +346,7 @@ mutex_vector_enter(mutex_impl_t *lp)
 	kthread_id_t	lastowner = MUTEX_NO_OWNER; /* track owner changes */
 	hrtime_t	sleep_time = 0;	/* how long we slept */
 	hrtime_t	spin_time = 0;	/* how long we spun */
-	cpu_t 		*cpup;
+	cpu_t		*cpup;
 	turnstile_t	*ts;
 	volatile mutex_impl_t *vlp = (volatile mutex_impl_t *)lp;
 	uint_t		backoff = 0;	/* current backoff */
@@ -568,9 +568,11 @@ mutex_init(kmutex_t *mp, char *name, kmutex_type_t type, void *ibc)
 {
 	mutex_impl_t *lp = (mutex_impl_t *)mp;
 
-	ASSERT(ibc < (void *)KERNELBASE);	/* see 1215173 */
+	/* XXX: The dynamic KERNELBASE, this code is _MACHDEP  */
+	ASSERT((uintptr_t)ibc < _kernelbase);	/* see 1215173 */
 
-	if ((intptr_t)ibc > ipltospl(LOCK_LEVEL) && ibc < (void *)KERNELBASE) {
+	if ((intptr_t)ibc > ipltospl(LOCK_LEVEL) &&
+	    ((uintptr_t)ibc < _kernelbase)) {
 		ASSERT(type != MUTEX_ADAPTIVE && type != MUTEX_DEFAULT);
 		MUTEX_SET_TYPE(lp, MUTEX_SPIN);
 		LOCK_INIT_CLEAR(&lp->m_spin.m_spinlock);
