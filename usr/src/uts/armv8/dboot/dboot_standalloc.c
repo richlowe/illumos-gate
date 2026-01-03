@@ -108,12 +108,12 @@ init_pt(void)
 	}
 
 	if ((paddr = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp)) == 0)
-		panic("phy alloc error for L3 PT\n");
+		panic("phy alloc error for lower L3 PT\n");
 	memset((void *)paddr, 0, MMU_PAGESIZE);
 	l3_ptbl0 = (pte_t *)paddr;
 
 	if ((paddr = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp)) == 0)
-		panic("phy alloc error for L3 PT\n");
+		panic("phy alloc error for upper L3 PT\n");
 	memset((void *)paddr, 0, MMU_PAGESIZE);
 	l3_ptbl1 = (pte_t *)paddr;
 
