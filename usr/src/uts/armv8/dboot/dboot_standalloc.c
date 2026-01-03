@@ -121,12 +121,8 @@ init_pt(void)
 	/*
 	 * Memory that can be normally mapped. This is a subset of physical
 	 * memory and removes the reserved, firmware code and firmware data
-	 * spans.
-	 *
-	 * This memory is mapped to both the lower address space and the
-	 * segkpm region. When in the lower region, it's marked as executable,
-	 * since we just don't know at this point. When in segkpm it's simply
-	 * marked as read/write.
+	 * spans.  Mapped executable at EL1 because we don't know the real
+	 * needs.
 	 */
 	for (ml = pmappablep; ml != NULL; ml = ml->ml_next) {
 		uint_t ng = 0;
@@ -137,10 +133,6 @@ init_pt(void)
 		map_phys(PTE_UXN|PTE_AF|PTE_SH_INNER|
 		    PTE_AP_KRWUNA|PTE_ATTR_NORMEM|ng,
 		    ml->ml_address,
-		    ml->ml_address, ml->ml_size);
-		map_phys(PTE_UXN|PTE_PXN|PTE_AF|PTE_SH_INNER|
-		    PTE_AP_KRWUNA|PTE_ATTR_NORMEM,
-		    (ml->ml_address + SEGKPM_BASE),
 		    ml->ml_address, ml->ml_size);
 	}
 
@@ -158,15 +150,11 @@ init_pt(void)
 		    PTE_AP_KROUNA|PTE_ATTR_NORMEM,
 		    ml->ml_address,
 		    ml->ml_address, ml->ml_size);
-		map_phys(PTE_UXN|PTE_PXN|PTE_AF|PTE_SH_INNER|
-		    PTE_AP_KROUNA|PTE_ATTR_NORMEM,
-		    (ml->ml_address + SEGKPM_BASE),
-		    ml->ml_address, ml->ml_size);
 	}
 
 	/*
 	 * Firmware code is mapped to the lower address space as executable
-	 * by privileged modes and to the segkpm region as read-only.
+	 * by privileged modes.
 	 *
 	 * This memory will be appropriately mapped in via an address space
 	 * when calling UEFI runtime services.
@@ -176,15 +164,10 @@ init_pt(void)
 		    PTE_AP_KRWUNA|PTE_ATTR_NORMEM,
 		    ml->ml_address,
 		    ml->ml_address, ml->ml_size);
-		map_phys(PTE_UXN|PTE_PXN|PTE_AF|PTE_SH_INNER|
-		    PTE_AP_KROUNA|PTE_ATTR_NORMEM,
-		    (ml->ml_address + SEGKPM_BASE),
-		    ml->ml_address, ml->ml_size);
 	}
 
 	/*
-	 * Firmware data is mapped to the lower address space as read/write
-	 * and to the segkpm region as read-only.
+	 * Firmware data is mapped to the lower address space as read/write.
 	 *
 	 * This memory will be appropriately mapped in via an address space
 	 * when calling UEFI runtime services.
@@ -194,16 +177,8 @@ init_pt(void)
 		    PTE_AP_KRWUNA|PTE_ATTR_NORMEM,
 		    ml->ml_address,
 		    ml->ml_address, ml->ml_size);
-		map_phys(PTE_UXN|PTE_PXN|PTE_AF|PTE_SH_INNER|
-		    PTE_AP_KROUNA|PTE_ATTR_NORMEM,
-		    (ml->ml_address + SEGKPM_BASE),
-		    ml->ml_address, ml->ml_size);
 	}
 
-	/*
-	 * We do not create device mappings in segkpm. That's for physical
-	 * memory only.
-	 */
 	for (ml = pldriolistp; ml != NULL; ml = ml->ml_next) {
 		uint_t ng = 0;
 		if (!IS_KERNEL_MAPPING(ml->ml_address))
@@ -215,13 +190,12 @@ init_pt(void)
 			    PTE_AP_KRWUNA|PTE_ATTR_UNORDERED|ng,
 			    ml->ml_address,
 			    ml->ml_address, ml->ml_size);
-			continue;
+		} else {
+			map_phys(PTE_UXN|PTE_PXN|PTE_AF|PTE_SH_INNER|
+			    PTE_AP_KRWUNA|PTE_ATTR_DEVICE|ng,
+			    ml->ml_address,
+			    ml->ml_address, ml->ml_size);
 		}
-
-		map_phys(PTE_UXN|PTE_PXN|PTE_AF|PTE_SH_INNER|
-		    PTE_AP_KRWUNA|PTE_ATTR_DEVICE|ng,
-		    ml->ml_address,
-		    ml->ml_address, ml->ml_size);
 	}
 
 	uint64_t mair = ((MAIR_ATTR_nGnRnE    << (MAIR_STRONG_ORDER * 8)) |
