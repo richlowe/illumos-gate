@@ -150,8 +150,41 @@ hat_kern_alloc(
 	/* KPM is not optional on ARM */
 	VERIFY3U(kpm_size, >, 0);
 
-	pte_t *l3_ptbl = (pte_t *)TTBR_BADDR48(read_ttbr1());
+	/*
+	 * Establish the page tables for segkpm.
+	 */
+	for (struct memlist *pmem = phys_install; pmem != NULL;
+	    pmem = pmem->ml_next) {
+		uintptr_t paddr = pmem->ml_address;
+		size_t psize = pmem->ml_size;
 
+		VERIFY(IS_PAGEALIGNED(pmem->ml_address));
+		VERIFY3U(psize % MMU_PAGESIZE, ==, 0);
+
+		while (psize >= MMU_PAGESIZE) {
+			int l = 0;
+			uintptr_t vaddr = (uintptr_t)kpm_vbase + paddr;
+
+			/* find the largest page size */
+			for (l = mmu.max_page_level; l > 0; l--) {
+				if ((paddr & LEVEL_OFFSET(l)) == 0 &&
+				    (vaddr & LEVEL_OFFSET(l)) == 0 &&
+				    psize >= LEVEL_SIZE(l))
+					break;
+			}
+
+			kbm_map((uintptr_t)(kpm_vbase + paddr), paddr, l);
+			paddr += LEVEL_SIZE(l);
+			psize -= LEVEL_SIZE(l);
+		}
+		VERIFY3U(psize, ==, 0);
+	}
+
+	/*
+	 * Walk the boot loader's page tables and figure out
+	 * how many tables and page mappings there will be.
+	 */
+	pte_t *l3_ptbl = (pte_t *)TTBR_BADDR48(read_ttbr1());
 	for (int i = 0; i < NPTEPERPT; i++) {
 		if (!PTE_ISTABLE(l3_ptbl[i], 3)) {
 			continue;
@@ -214,7 +247,6 @@ hat_kern_alloc(
  * In particular it can not change the pagesize used for any existing
  * mappings or this code breaks!
  */
-
 void
 hat_kern_setup(void)
 {
@@ -387,13 +419,9 @@ boot_reserve(void)
 			l++;
 			continue;
 		}
+
 		size_t page_size = LEVEL_SIZE(l);
-		if (va == SEGKPM_BASE) {
-			ASSERT(l == MMU_PAGE_LEVELS - 1);
-			va += SEGKPM_SIZE;
-			ptbl[l] += SEGKPM_SIZE / page_size;
-			continue;
-		}
+
 		if (!PTE_ISVALID(*ptbl[l])) {
 			va += page_size;
 			++ptbl[l];
