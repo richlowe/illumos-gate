@@ -1318,7 +1318,8 @@ htable_attach(
 		pte = ptep[i];
 		if (PTE_ISVALID(pte)) {
 			++ht->ht_valid_cnt;
-			if (!PTE_ISPAGE(pte, level)) {
+			if (PTE_ISTABLE(pte, level)) {
+				ASSERT3U(level, >=, 1);
 				htable_attach(hat, base, level - 1,
 				    ht, PTE2PFN(pte, level));
 				ptep = PT_INDEX_PTR(hat_kpm_pfn2va(pfn), 0);

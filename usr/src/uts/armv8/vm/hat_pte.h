@@ -67,10 +67,7 @@ typedef int8_t level_t;
 extern __GNU_INLINE boolean_t
 PTE_ISTABLE(uint64_t pte, uint_t level)
 {
-	if (!PTE_ISVALID(pte)) {
-		return (B_FALSE);
-	}
-
+	/* NB: no need to check PTE_VALID, it's rolled up into the types */
 	return ((((pte) & PTE_TYPE_MASK) == PTE_TABLE) && (level != 0));
 }
 

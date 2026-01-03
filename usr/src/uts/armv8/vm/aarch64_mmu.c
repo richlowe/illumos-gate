@@ -51,6 +51,9 @@
 #include <sys/controlregs.h>
 #include <sys/pte.h>
 #include <sys/cpuid.h>
+#include <sys/machsystm.h>
+
+#include <vm/kboot_mmu.h>
 
 /*
  * Flag is not set early in boot. Once it is set we are no longer
@@ -416,11 +419,13 @@ boot_reserve(void)
 		}
 
 		*ptbl[l] |= PTE_NOCONSIST;
-		uint64_t pa = (*ptbl[l] & ~(page_size - 1)) & (pa_size - 1);
+
+		uint64_t pa = P2PHASE(*ptbl[l] & LEVEL_MASK(l), pa_size);
+
 		for (uint64_t x = 0; x < page_size / MMU_PAGESIZE; x++) {
 			pfn_t pfn = mmu_btop(pa + MMU_PAGESIZE * x);
 			page_t *pp = page_numtopp_nolock(pfn);
-			if (pp) {
+			if (pp != NULL) {
 				ASSERT(PAGE_EXCL(pp));
 				ASSERT(pp->p_lckcnt == 1);
 

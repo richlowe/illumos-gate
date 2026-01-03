@@ -42,6 +42,7 @@
 #include <sys/efifb.h>
 
 #include <vm/hat_pte.h>
+#include <vm/hat_aarch64.h>
 
 #include "saio.h"
 #include "dboot.h"
@@ -62,8 +63,8 @@ extern void init_physmem(void);
 
 static caddr_t scratch_used_top;
 
-static pte_t *l3_ptbl0;
-static pte_t *l3_ptbl1;
+static pte_t *ptbl_low;
+static pte_t *ptbl_high;
 
 static void init_pt(void);
 
@@ -108,14 +109,14 @@ init_pt(void)
 	}
 
 	if ((paddr = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp)) == 0)
-		panic("phy alloc error for L3 PT\n");
+		panic("phy alloc error for lower top-level PT\n");
 	memset((void *)paddr, 0, MMU_PAGESIZE);
-	l3_ptbl0 = (pte_t *)paddr;
+	ptbl_low = (pte_t *)paddr;
 
 	if ((paddr = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp)) == 0)
-		panic("phy alloc error for L3 PT\n");
+		panic("phy alloc error for upper top-level PT\n");
 	memset((void *)paddr, 0, MMU_PAGESIZE);
-	l3_ptbl1 = (pte_t *)paddr;
+	ptbl_high = (pte_t *)paddr;
 
 	/*
 	 * Memory that can be normally mapped. This is a subset of physical
@@ -250,16 +251,16 @@ init_pt(void)
 
 	write_mair(mair);
 	write_tcr(tcr);
-	write_ttbr0((uint64_t)l3_ptbl0);
-	write_ttbr1((uint64_t)l3_ptbl1);
+	write_ttbr0((uint64_t)ptbl_low);
+	write_ttbr1((uint64_t)ptbl_high);
 	isb();
 
 #if 0
 	if (debug) {
 		dboot_printf("Lower Memory Tables\n");
-		dump_tables((uint64_t)l3_ptbl0, 0);
+		dump_tables((uint64_t)ptbl_low, 0);
 		dboot_printf("Upper Memory Tables\n");
-		dump_tables((uint64_t)l3_ptbl1, SEGKPM_BASE);
+		dump_tables((uint64_t)ptbl_high, HOLE_END);
 	}
 #endif
 
@@ -273,131 +274,97 @@ init_pt(void)
 }
 
 static paddr_t
-alloc_pagetable_page(const char *lvl)
+alloc_pagetable_page(uint_t lvl)
 {
 	paddr_t pa;
 	if ((pa = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp)) == 0)
-		panic("phy alloc error for %s PT\n", lvl);
+		panic("page table alloc error for level %d\n", lvl);
 	memset((void *)(uintptr_t)pa, 0, MMU_PAGESIZE);
 	return (pa);
 }
 
+#define	DBOOT_ASSERT(EX) \
+	((void)((EX) || (panic("%s:%d: %s: assertion failed: %s\n", \
+	    __FILE__, __LINE__, __func__, #EX), 0)))
+
 static void
-map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, size_t bytes)
+map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 {
-	int l3_idx = LEVEL_INDEX(vaddr, 3);
-	int l2_idx = LEVEL_INDEX(vaddr, 2);
-	int l1_idx = LEVEL_INDEX(vaddr, 1);
-	int l0_idx = LEVEL_INDEX(vaddr, 0);
+	DBOOT_ASSERT(IS_PAGEALIGNED(vaddr));
+	DBOOT_ASSERT(IS_PAGEALIGNED(paddr));
 
-	pte_t *l3_ptbl = IS_KERNEL_MAPPING(vaddr) ? l3_ptbl1 : l3_ptbl0;
+	pte_t *ptbl = IS_KERNEL_MAPPING(vaddr) ? ptbl_high : ptbl_low;
 
-	if (!PTE_ISVALID((l3_ptbl[l3_idx]))) {
-		l3_ptbl[l3_idx] = PTE_TABLE_APT_NOUSER|PTE_TABLE_UXNT|
-		    PTE_TABLE|alloc_pagetable_page("L3");
+	/* XXX: Needs to be dynamic, and match the choice in the kernel */
+	for (int l = MMU_PAGE_LEVELS - 1; l > level; l--) {
+		/* Need a new entry */
+		if (!PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, l)])) {
+			paddr_t pa = alloc_pagetable_page(l);
+
+			/* XXX: MAKEPTE(...) */
+			ptbl[LEVEL_INDEX(vaddr, l)] = pa |
+			    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER |
+			    PTE_TABLE;
+			dsb(ish);
+			isb();
+		} else if (!PTE_ISTABLE(ptbl[LEVEL_INDEX(vaddr, l)], l)) {
+			panic("overlapping %s allocation for 0x%lx at "
+			    "level %d (needed a table)\n", __func__, vaddr, l);
+		}
+
+		ptbl = (pte_t *)(ptbl[LEVEL_INDEX(vaddr, l)] & PTE_PFN_MASK);
 	}
 
-	if (!PTE_ISTABLE(l3_ptbl[l3_idx], 3)) {
-		panic("invalid L3 PT\n");
+	/* XXX: MAKEPTE */
+	uint_t type = (level == 0) ? PTE_PAGE : PTE_BLOCK;
+	pte_t newpte = paddr | pte_attr | type;
+
+	if (PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, level)]) &&
+	    !PTE_EQUIV(ptbl[LEVEL_INDEX(vaddr, level)], newpte)) {
+		panic("overlapping %s allocation for 0x%lx at level %d\n"
+		    "(old %lx new %lx), they are not equivalent\n",
+		    __func__, vaddr, level,
+		    ptbl[LEVEL_INDEX(vaddr, level)],
+		    newpte);
 	}
 
-	pte_t *l2_ptbl = (pte_t *)(uintptr_t)(l3_ptbl[l3_idx] & PTE_PFN_MASK);
-
-	if (bytes == MMU_PAGESIZE1G) {
-		if (vaddr & (MMU_PAGESIZE1G - 1))
-			panic("invalid vaddr alignment (1G)\n");
-		if (paddr & (MMU_PAGESIZE1G - 1))
-			panic("invalid paddr alignment (1G)\n");
-		if (PTE_ISVALID(l2_ptbl[l2_idx]))
-			panic("L2 PT already used\n");
-		l2_ptbl[l2_idx] = paddr|pte_attr|PTE_BLOCK;
-		dsb(ish);
-		return;
-	}
-
-	if (!PTE_ISVALID(l2_ptbl[l2_idx])) {
-		l2_ptbl[l2_idx] = PTE_TABLE_APT_NOUSER|PTE_TABLE_UXNT|
-		    PTE_TABLE|alloc_pagetable_page("L2");
-	}
-
-	if (!PTE_ISTABLE(l2_ptbl[l2_idx], 2)) {
-		panic("invalid L2 PT\n");
-	}
-
-	pte_t *l1_ptbl = (pte_t *)(uintptr_t)(l2_ptbl[l2_idx] & PTE_PFN_MASK);
-
-	if (bytes == MMU_PAGESIZE2M) {
-		if (vaddr & (MMU_PAGESIZE2M - 1))
-			panic("invalid vaddr alignment (2M)\n");
-		if (paddr & (MMU_PAGESIZE2M - 1))
-			panic("invalid paddr alignment (2M)\n");
-		if (PTE_ISVALID(l1_ptbl[l1_idx]))
-			panic("L1 PT already used\n");
-		l1_ptbl[l1_idx] = paddr|pte_attr|PTE_BLOCK;
-		dsb(ish);
-		return;
-	}
-
-	if (!PTE_ISVALID(l1_ptbl[l1_idx])) {
-		l1_ptbl[l1_idx] = PTE_TABLE_APT_NOUSER|PTE_TABLE_UXNT|
-		    PTE_TABLE|alloc_pagetable_page("L1");
-	}
-
-	if (!PTE_ISTABLE(l1_ptbl[l1_idx], 1)) {
-		panic("invalid L1 PT\n");
-	}
-
-	pte_t *l0_ptbl = (pte_t *)(uintptr_t)(l1_ptbl[l1_idx] & PTE_PFN_MASK);
-	if (bytes == MMU_PAGESIZE) {
-		if (vaddr & (MMU_PAGESIZE - 1))
-			panic("invalid vaddr alignment (4K)\n");
-		if (paddr & (MMU_PAGESIZE - 1))
-			panic("invalid paddr alignment (4K)\n");
-		if (PTE_ISVALID(l0_ptbl[l0_idx]))
-			panic("L0 PT already in use\n");
-		l0_ptbl[l0_idx] = paddr|pte_attr|PTE_PAGE;
-		dsb(ish);
-		return;
-	}
-
-	panic("invalid size\n");
+	ptbl[LEVEL_INDEX(vaddr, level)] = newpte;
+	dsb(ish);
+	isb();
 }
 
 void
 map_phys(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, size_t bytes)
 {
-	if ((vaddr % MMU_PAGESIZE) != 0) {
+	if (!IS_P2ALIGNED(vaddr, MMU_PAGESIZE)) {
 		panic("map_phys invalid vaddr\n");
 	}
-	if ((paddr % MMU_PAGESIZE) != 0) {
+
+	if (!IS_P2ALIGNED(paddr, MMU_PAGESIZE)) {
 		panic("map_phys invalid paddr\n");
 	}
-	if ((bytes % MMU_PAGESIZE) != 0) {
+
+	if (!IS_P2ALIGNED(bytes, MMU_PAGESIZE)) {
 		panic("map_phys invalid size\n");
 	}
 
-	while (bytes) {
-		size_t maxalign = vaddr & (-vaddr);
-		size_t mapsz;
+	while (bytes >= MMU_PAGESIZE) {
+		int l = 0;
 
-		/*
-		 * XXXARM: These calculations are terribly suspicious
-		 */
-		if (maxalign >= MMU_PAGESIZE1G && bytes >= MMU_PAGESIZE1G &&
-		    paddr >= MMU_PAGESIZE1G) {
-			mapsz = MMU_PAGESIZE1G;
-		} else if (maxalign >= MMU_PAGESIZE2M &&
-		    bytes >= MMU_PAGESIZE2M && paddr >= MMU_PAGESIZE2M) {
-			mapsz = MMU_PAGESIZE2M;
-		} else {
-			mapsz = MMU_PAGESIZE;
+		/* find the largest page size */
+		for (l = MMU_PAGE_LEVELS - 1; l > 0; l--) {
+			if (((paddr & LEVEL_OFFSET(l)) == 0) &&
+			    ((vaddr & LEVEL_OFFSET(l)) == 0) &&
+			    bytes >= LEVEL_SIZE(l))
+				break;
 		}
 
-		map_pages(pte_attr, vaddr, paddr, mapsz);
-		bytes -= mapsz;
-		vaddr += mapsz;
-		paddr += mapsz;
+		map_pages(pte_attr, vaddr, paddr, l);
+		bytes -= LEVEL_SIZE(l);
+		vaddr += LEVEL_SIZE(l);
+		paddr += LEVEL_SIZE(l);
 	}
+	DBOOT_ASSERT(bytes == 0);
 }
 
 static caddr_t
@@ -430,32 +397,40 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 			break;
 		case RES_CHILDVIRT:
 			vaddr = virthint;
-			while (bytes) {
+
+			while (bytes >= MMU_PAGESIZE) {
+				int l = 0;
 				uintptr_t va = (uintptr_t)virthint;
-				size_t maxalign = va & (-va);
-				size_t mapsz;
-				if (maxalign >= MMU_PAGESIZE1G &&
-				    bytes >= MMU_PAGESIZE1G) {
-					mapsz = MMU_PAGESIZE1G;
-				} else if (maxalign >= MMU_PAGESIZE2M &&
-				    bytes >= MMU_PAGESIZE2M) {
-					mapsz = MMU_PAGESIZE2M;
-				} else {
-					mapsz = MMU_PAGESIZE;
+
+				/*
+				 * find the largest page size that fits the
+				 * address and size, the physical address is
+				 * constrained when we allocate it.
+				 */
+				for (l = MMU_PAGE_LEVELS - 1; l > 0; l--) {
+					if (((paddr & LEVEL_OFFSET(l)) == 0) &&
+					    ((va & LEVEL_OFFSET(l)) == 0) &&
+					    bytes >= LEVEL_SIZE(l))
+						break;
 				}
-				paddr = memlist_get(mapsz, mapsz, &pfreelistp);
+
+				paddr = memlist_get(LEVEL_SIZE(l),
+				    LEVEL_SIZE(l), &pfreelistp);
 				if (paddr == 0) {
-					panic("phys mem allocate error\n");
+					panic("couldn't allocate %ld bytes "
+					    "of physmem\n", LEVEL_SIZE(l));
 				}
-				map_phys(PTE_AF | PTE_SH_INNER | PTE_UXN |
+
+				map_pages(PTE_AF | PTE_SH_INNER | PTE_UXN |
 				    PTE_AP_KRWUNA | PTE_ATTR_NORMEM, va, paddr,
-				    mapsz);
-				bytes -= mapsz;
-				virthint += mapsz;
+				    l);
+				bytes -= LEVEL_SIZE(l);
+				virthint += LEVEL_SIZE(l);
 			}
+			DBOOT_ASSERT(bytes == 0);
 			break;
 		default:
-			dprintf("Bad resurce type\n");
+			panic("Bad resource type\n");
 			break;
 		}
 	}
