@@ -339,18 +339,20 @@ map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, size_t bytes)
 void
 map_phys(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, size_t bytes)
 {
-	if ((vaddr % MMU_PAGESIZE) != 0) {
+	if (!IS_P2ALIGNED(vaddr, MMU_PAGESIZE)) {
 		panic("map_phys invalid vaddr\n");
 	}
-	if ((paddr % MMU_PAGESIZE) != 0) {
+
+	if (!IS_P2ALIGNED(paddr, MMU_PAGESIZE)) {
 		panic("map_phys invalid paddr\n");
 	}
-	if ((bytes % MMU_PAGESIZE) != 0) {
+
+	if (!IS_P2ALIGNED(bytes, MMU_PAGESIZE)) {
 		panic("map_phys invalid size\n");
 	}
 
-	while (bytes) {
-		size_t maxalign = vaddr & (-vaddr);
+	while (bytes != 0) {
+		size_t maxalign = P2ALIGN(vaddr, vaddr);
 		size_t mapsz;
 
 		/*
@@ -405,7 +407,7 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 			vaddr = virthint;
 			while (bytes) {
 				uintptr_t va = (uintptr_t)virthint;
-				size_t maxalign = va & (-va);
+				size_t maxalign = P2ALIGN(va, va);
 				size_t mapsz;
 				if (maxalign >= MMU_PAGESIZE1G &&
 				    bytes >= MMU_PAGESIZE1G) {
