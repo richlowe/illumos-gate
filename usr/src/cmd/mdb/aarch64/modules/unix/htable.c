@@ -33,74 +33,102 @@
 
 #include "mmu.h"
 
-static int
-do_htables_dcmd(hat_t *hatp)
-{
-	struct hat hat;
-	htable_t *ht;
-	htable_t htable;
-	int h;
+typedef struct {
+	hat_t htw_hat;
+	uint_t htw_bucket;
+} htables_walk_data_t;
 
+int
+htables_walk_init(mdb_walk_state_t *wsp)
+{
 	init_mmu();
 
 	if (mmu.num_level == 0)
-		return (DCMD_ERR);
+		return (WALK_ERR);
 
-	/*
-	 * read the hat and its hash table
-	 */
-	if (mdb_vread(&hat, sizeof (hat), (uintptr_t)hatp) == -1) {
-		mdb_warn("Couldn't read struct hat\n");
-		return (DCMD_ERR);
+	if (wsp->walk_addr == 0) {
+		mdb_warn("missing hat address\n");
+		return (WALK_ERR);
 	}
 
-	/*
-	 * read the htable hashtable
-	 */
-	for (h = 0; h < mmu.hash_cnt; ++h) {
-		if (mdb_vread(&ht, sizeof (htable_t *),
-		    (uintptr_t)(hat.hat_ht_hash + h)) == -1) {
-			mdb_warn("Couldn't read htable ptr\n");
-			return (DCMD_ERR);
-		}
-		for (; ht != NULL; ht = htable.ht_next) {
-			mdb_printf("%p\n", ht);
-			if (mdb_vread(&htable, sizeof (htable_t),
-			    (uintptr_t)ht) == -1) {
-				mdb_warn("Couldn't read htable\n");
-				return (DCMD_ERR);
-			}
+	htables_walk_data_t *htw = mdb_alloc(sizeof (htables_walk_data_t),
+	    UM_SLEEP);
+
+	if (mdb_vread(&htw->htw_hat, sizeof (hat_t), wsp->walk_addr) == -1) {
+		mdb_warn("couldn't read struct hat");
+		return (WALK_ERR);
+	}
+
+	htw->htw_bucket = 0;
+
+	wsp->walk_addr = 0;
+
+	while ((wsp->walk_addr == 0) &&
+	    (htw->htw_bucket < (mmu.hash_cnt - 1))) {
+		htw->htw_bucket += 1;
+
+		uintptr_t baddr = (uintptr_t)(htw->htw_hat.hat_ht_hash +
+		    htw->htw_bucket);
+
+		if (mdb_vread(&wsp->walk_addr, sizeof (htable_t *),
+		    baddr) == -1) {
+			mdb_warn("couldn't read htable ptr %p", baddr);
+			return (WALK_ERR);
 		}
 	}
-	return (DCMD_OK);
+
+	wsp->walk_data = htw;
+
+	return (WALK_NEXT);
 }
 
-/*
- * Dump the htables for the given hat
- */
-/*ARGSUSED*/
 int
-htables_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
+htables_walk_step(mdb_walk_state_t *wsp)
 {
-	hat_t *hat;
+	htables_walk_data_t *htw = wsp->walk_data;
+	int status;
 
-	init_mmu();
+	status = wsp->walk_callback(wsp->walk_addr, wsp->walk_data,
+	    wsp->walk_cbdata);
 
-	if (mmu.num_level == 0)
-		return (DCMD_ERR);
+	if (status != WALK_NEXT) {
+		return (status);
+	}
 
-	if ((flags & DCMD_ADDRSPEC) == 0)
-		return (DCMD_USAGE);
+	htable_t ht;
+	if (mdb_vread(&ht, sizeof (ht), wsp->walk_addr) == -1) {
+		mdb_warn("failed to read htable %p", wsp->walk_addr);
+		return (WALK_ERR);
+	}
 
-	hat = (hat_t *)addr;
+	if (ht.ht_next != NULL) {	/* Continue down the chain */
+		wsp->walk_addr = (uintptr_t)ht.ht_next;
+		return (WALK_NEXT);
+	} else if (htw->htw_bucket < mmu.hash_cnt) { /* Go to the next bucket */
+		uintptr_t next = 0;
 
-	return (do_htables_dcmd(hat));
+		while ((next == 0) && (htw->htw_bucket < (mmu.hash_cnt - 1))) {
+			htw->htw_bucket += 1;
+
+			uintptr_t baddr = (uintptr_t)(htw->htw_hat.hat_ht_hash +
+			    htw->htw_bucket);
+
+			if (mdb_vread(&next, sizeof (htable_t *),
+			    baddr) == -1) {
+				mdb_warn("couldn't read htable ptr %p", baddr);
+				return (WALK_ERR);
+			}
+		}
+		wsp->walk_addr = next;
+
+		return ((next == 0) ? WALK_DONE : WALK_NEXT);
+	} else {
+		return (WALK_DONE);
+	}
 }
 
 void
-htables_help(void)
+htables_walk_fini(mdb_walk_state_t *wsp)
 {
-	mdb_printf(
-	    "Given a (hat_t *), generates the list of all (htable_t *)s\n"
-	    "that correspond to that address space\n");
+	mdb_free(wsp->walk_data, sizeof (htables_walk_data_t));
 }
