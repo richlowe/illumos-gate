@@ -28,6 +28,10 @@ extern int htables_dcmd(uintptr_t addr, uint_t flags, int argc,
 	const mdb_arg_t *argv);
 extern void htables_help(void);
 
+extern int htables_walk_init(mdb_walk_state_t *);
+extern int htables_walk_step(mdb_walk_state_t *);
+extern void htables_walk_fini(mdb_walk_state_t *);
+
 #ifdef __cplusplus
 }
 #endif

@@ -198,8 +198,6 @@ gic_interrupts_dcmd(uintptr_t addr, uint_t flags, int argc,
 static const mdb_dcmd_t dcmds[] = {
 	{ "arm_features", ":", "dump the arm_features vector",
 	    arm_features_dcmd },
-	{ "htables", "", "Given hat_t *, lists all its htable_t * values",
-	    htables_dcmd, htables_help },
 	{ "interrupts", "", "print interrupts", gic_interrupts_dcmd },
 	{ "memseg_list", ":", "show memseg list", memseg_list },
 	{ "ptable", ":[-rRvl N]", "decode page table given a physaddr",
@@ -214,6 +212,8 @@ static const mdb_dcmd_t dcmds[] = {
 static const mdb_walker_t walkers[] = {
 	{ "memseg", "walk the memseg structures",
 	    memseg_walk_init, memseg_walk_step, memseg_walk_fini },
+	{ "htables", "walk a hat's htables",
+	    htables_walk_init, htables_walk_step, htables_walk_fini },
 	{ NULL }
 };
 
