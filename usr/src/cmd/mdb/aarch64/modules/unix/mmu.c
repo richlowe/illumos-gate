@@ -421,13 +421,10 @@ vatopfn_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 			{ MDB_TYPE_IMMEDIATE, { .a_val = i } }
 		};
 
-		mdb_printf("[%p+%x] ", next_table, idx);
-		mdb_call_dcmd("unix`pte", pte, DCMD_ADDRSPEC,
-		    ARRAY_SIZE(v), v);
-
-		if ((pte & PTE_VALID) == 0) {
-			mdb_printf("not mapped");
-			return (DCMD_OK);
+		if (!(flags & DCMD_PIPE_OUT)) {
+			mdb_printf("[%p+%x] ", next_table, idx);
+			mdb_call_dcmd("unix`pte", pte, DCMD_ADDRSPEC,
+			    ARRAY_SIZE(v), v);
 		}
 
 		if (PTE_ISTABLE(pte, i)) {
