@@ -249,13 +249,12 @@ pte_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	 * encoding.  I'm sure there's a reason it's not page and block that
 	 * share, given they share everything else.
 	 */
-	if ((addr & PTE_VALID) == 0) {
+	if (!PTE_ISVALID(addr)) {
 		mdb_printf("invalid %p\n", addr);
 		return (DCMD_OK);
-	} else if (((addr & PTE_TYPE_MASK) == PTE_BLOCK) ||
-	    (((addr & PTE_TYPE_MASK) == PTE_PAGE) && (level == 0))) {
+	} else if (!PTE_ISTABLE(addr, level)) {
 		return (pte_page_block(addr, level));
-	} else if (((addr & PTE_TYPE_MASK) == PTE_TABLE) && (level > 0)) {
+	} else if (PTE_ISTABLE(addr, level)) {
 		return (pte_table(addr, level));
 	} else {
 		mdb_warn("impossible pte type: %d\n", addr & PTE_TYPE_MASK);
@@ -380,7 +379,8 @@ vatopfn_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	}
 
 	if (asaddr == 0) {	/* Default is the kernel address space */
-		if (mdb_readsym(&as, sizeof (struct as), "kas") == -1) {
+		if (mdb_readsym(&as, sizeof (struct as), "kas") !=
+		    sizeof (struct as)) {
 			mdb_warn("couldn't read kernel address space (kas)");
 			return (DCMD_ERR);
 		}
@@ -405,7 +405,6 @@ vatopfn_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 
 	uintptr_t next_table = mmu_ptob(htable.ht_pfn);
 
-	/* Needs dynamism (as indeed the kernel macros do) */
 	for (int i = mmu.max_level; i >= 0; i--) {
 		uint_t idx = pte_index(addr, i);
 
@@ -431,15 +430,16 @@ vatopfn_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 			return (DCMD_OK);
 		}
 
-		/* Abstract */
-		if (((pte & PTE_TYPE_MASK) == PTE_TABLE) && (i > 0)) {
+		if (PTE_ISTABLE(pte, i)) {
 			next_table = takebits(pte, 47, _mdb_ks_pageshift);
 			continue;
-		} else if (((pte & PTE_TYPE_MASK) == PTE_PAGE) ||
-		    ((pte & PTE_TYPE_MASK) == PTE_BLOCK)) {
-			mdb_printf("physaddr=%p\n",
+		} else if (!PTE_ISTABLE(pte, i)) {
+			mdb_printf("%p\n",
 			    takebits(pte, 47, _mdb_ks_pageshift) |
 			    (addr & _mdb_ks_pageoffset));
+			break;
+		} else {
+			mdb_printf("not mapped");
 			break;
 		}
 	}
