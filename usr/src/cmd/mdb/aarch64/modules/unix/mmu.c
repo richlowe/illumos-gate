@@ -357,9 +357,8 @@ pte_index(uintptr_t addr, uint_t level)
 }
 
 int
-vatopfn_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
+vatopa(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
-
 	init_mmu();
 
 	if (mmu.num_level == 0)
