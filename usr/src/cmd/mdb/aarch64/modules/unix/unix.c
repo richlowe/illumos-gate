@@ -215,8 +215,8 @@ static const mdb_dcmd_t dcmds[] = {
 	    ptable_dcmd },
 	{ "pte", ":[-l N]", "decode page table entries", pte_dcmd },
 	{ "ttbr", ":", "show translation table base registers", ttbr_dcmd },
-	{ "vatopfn", ":[-a as]", "translate a virtual address to a pfn",
-	    vatopfn_dcmd },
+	{ "vatopa", ":[-a as]", "translate a virtual to a physical address",
+	    vatopa },
 	{ NULL },
 };
 
