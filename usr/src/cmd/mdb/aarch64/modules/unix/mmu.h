@@ -33,6 +33,7 @@ extern int ttbr_dcmd(uintptr_t, uint_t, int, const mdb_arg_t *);
 extern int pte_dcmd(uintptr_t, uint_t, int, const mdb_arg_t *);
 extern int ptable_dcmd(uintptr_t, uint_t, int, const mdb_arg_t *);
 extern int vatopa(uintptr_t, uint_t, int, const mdb_arg_t *);
+extern int patova(uintptr_t, uint_t, int, const mdb_arg_t *);
 
 #ifdef __cplusplus
 }
