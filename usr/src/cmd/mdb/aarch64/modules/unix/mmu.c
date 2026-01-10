@@ -442,3 +442,82 @@ vatopa(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 
 	return (DCMD_OK);
 }
+
+/*
+ * It is important that this interrogates the HAT and MMU, and not the entire
+ * virtual memory subsystem (even though the reverse mappings in the VM make
+ * it much faster and easier).  We are specifically looking for hardware
+ * reality, not what the VM subsystem believes to be true.
+ */
+static int
+patova_cb(uintptr_t addr, const void *data, void *cbdata)
+{
+	uintptr_t target = (uintptr_t)cbdata;
+	htable_t htable;
+
+	if (mdb_vread(&htable, sizeof (htable), addr) != sizeof (htable)) {
+		mdb_warn("failed to read htable: %p", addr);
+		return (WALK_ERR);
+	}
+
+	uintptr_t pfnpa = mmu_ptob(htable.ht_pfn);
+	uintptr_t offset = target & ~LEVEL_MASK(htable.ht_level);
+
+	for (int i = 0; i < _mdb_ks_pagesize / sizeof (pte_t); i++) {
+		uintptr_t pteaddr = (uintptr_t)PT_INDEX_PTR(pfnpa, i);
+		pte_t pte;
+
+		if (mdb_pread(&pte, sizeof (pte), pteaddr) != sizeof (pte_t)) {
+			mdb_warn("failed to read pte: %lx", pteaddr);
+			return (WALK_ERR);
+		}
+
+		if (!PTE_ISPAGE(pte, htable.ht_level)) {
+			continue;
+		}
+
+		uintptr_t pfnmaps = pte & PTE_PFN_MASK;
+
+		if ((target > pfnmaps) &&
+		    (target < (pfnmaps + LEVEL_SIZE(htable.ht_level)))) {
+			mdb_printf("%p\n",
+			    htable.ht_vaddr +
+			    (i << LEVEL_SHIFT(htable.ht_level)) +
+			    offset);
+		}
+	}
+
+	return (WALK_NEXT);
+}
+
+int
+patova(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
+{
+	if (!(flags & DCMD_ADDRSPEC)) {
+		mdb_warn("missing physical address\n");
+		return (DCMD_USAGE);
+	}
+
+	struct as as;
+	uintptr_t asaddr = 0;
+
+	if (mdb_getopts(argc, argv,
+	    'a', MDB_OPT_UINT64, &asaddr, NULL) != argc) {
+		return (DCMD_USAGE);
+	}
+
+	if (asaddr == 0) {	/* Default is the kernel address space */
+		if (mdb_readsym(&as, sizeof (as), "kas") != sizeof (as)) {
+			mdb_warn("couldn't read kernel address space (kas)");
+			return (DCMD_ERR);
+		}
+	} else {
+		if (mdb_vread(&as, sizeof (as), asaddr) != sizeof (as)) {
+			mdb_warn("couldn't read address space from %p", asaddr);
+			return (DCMD_ERR);
+		}
+	}
+
+	return (mdb_pwalk("htables", patova_cb, (void *)addr,
+	    (uintptr_t)as.a_hat));
+}

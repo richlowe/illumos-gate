@@ -206,6 +206,8 @@ static const mdb_dcmd_t dcmds[] = {
 	{ "ttbr", ":", "show translation table base registers", ttbr_dcmd },
 	{ "vatopa", ":[-a as]", "translate a virtual to a physical address",
 	    vatopa },
+	{ "patova", ":[-a as]", "translate a physical into its virtual "
+	    "addresses", patova },
 	{ NULL },
 };
 
