@@ -72,9 +72,9 @@ init_mmu(void)
 static void
 decode_ttbr(uint64_t ttbr)
 {
-	uint16_t asid = (ttbr & TTBR_ASID_MASK) >> TTBR_ASID_SHIFT;
-	uint64_t baddr = (ttbr & TTBR_BADDR48_MASK) >> TTBR_BADDR48_SHIFT;
-	uint8_t cnp = (ttbr & TTBR_CNP_MASK) >> TTBR_CNP_SHIFT;
+	uint16_t asid = TTBR_ASID(ttbr);
+	uint64_t baddr = TTBR_BADDR48(ttbr);
+	uint8_t cnp = TTBR_CNP(ttbr);
 
 	mdb_printf("paddr=%lx pfn=%lx asid=%x cnp=%s\n",
 	    mmu_ptob(baddr), baddr, asid,
