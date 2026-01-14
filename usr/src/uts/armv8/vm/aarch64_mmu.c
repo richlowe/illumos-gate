@@ -127,6 +127,9 @@ hat_kmap_init(uintptr_t base, size_t len)
 /*
  * Routine to pre-allocate data structures for hat_kern_setup(). It computes
  * how many pagetables it needs by walking the boot loader's page tables.
+ *
+ * NB: This runs while memory is still identity mapped and uses physical
+ * addresses
  */
 void
 hat_kern_alloc(
@@ -137,21 +140,23 @@ hat_kern_alloc(
 	uint_t		table_cnt = 1;
 	uint_t		mapping_cnt;
 
-	pte_t *l3_ptbl = (pte_t *)pa_to_kseg(TTBR_BADDR48(read_ttbr1()));
+	/* After khat is running, we can't access physical memory in this way */
+	VERIFY3U(khat_running, ==, 0);
+
+	pte_t *l3_ptbl = (pte_t *)TTBR_BADDR48(read_ttbr1());
 
 	for (int i = 0; i < NPTEPERPT; i++) {
 		if ((l3_ptbl[i] & PTE_TYPE_MASK) != PTE_TABLE)
 			continue;
 		++table_cnt;
 
-		pte_t *l2_ptbl = (pte_t *)pa_to_kseg(l3_ptbl[i] & PTE_PFN_MASK);
+		pte_t *l2_ptbl = (pte_t *)(l3_ptbl[i] & PTE_PFN_MASK);
 		for (int j = 0; j < NPTEPERPT; j++) {
 			if ((l2_ptbl[j] & PTE_TYPE_MASK) != PTE_TABLE)
 				continue;
 			++table_cnt;
 
-			pte_t *l1_ptbl = (pte_t *)pa_to_kseg(l2_ptbl[j] &
-			    PTE_PFN_MASK);
+			pte_t *l1_ptbl = (pte_t *)(l2_ptbl[j] & PTE_PFN_MASK);
 			for (int k = 0; k < NPTEPERPT; k++) {
 				if ((l1_ptbl[k] & PTE_TYPE_MASK) != PTE_TABLE)
 					continue;
@@ -324,6 +329,10 @@ is_reserved_memory(paddr_t pa)
 	return (B_TRUE);
 }
 
+/*
+ * NB: This runs while memory is still identity mapped and uses physical
+ * addresses
+ */
 void
 boot_reserve(void)
 {
@@ -343,8 +352,10 @@ boot_reserve(void)
 	uintptr_t va = _kernelbase;
 	pte_t *ptbl[MMU_PAGE_LEVELS] = {0};
 
-	ptbl[MMU_PAGE_LEVELS - 1] =
-	    (pte_t *)pa_to_kseg(TTBR_BADDR48(read_ttbr1()));
+	/* After khat is running, we can't access physical memory in this way */
+	VERIFY3U(khat_running, ==, 0);
+
+	ptbl[MMU_PAGE_LEVELS - 1] = (pte_t *)TTBR_BADDR48(read_ttbr1());
 
 	ASSERT(MMFR0_PARANGE(read_id_aa64mmfr0()) < ARRAY_SIZE(pa_size_array));
 
@@ -376,8 +387,7 @@ boot_reserve(void)
 
 		if (l > 0 && (*ptbl[l] & PTE_TYPE_MASK) == PTE_TABLE) {
 			ASSERT(ptbl[l - 1] == NULL);
-			ptbl[l - 1] = (pte_t *)pa_to_kseg(*ptbl[l] &
-			    PTE_PFN_MASK);
+			ptbl[l - 1] = (pte_t *)(*ptbl[l] & PTE_PFN_MASK);
 
 			ASSERT(is_reserved_memory(*ptbl[l] & PTE_PFN_MASK));
 
