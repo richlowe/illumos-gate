@@ -54,11 +54,14 @@ typedef uint64_t pte_t;
 #define	MAIR_NORMAL_MEMORY_UC	4
 #define	MAIR_UNORDERED		5
 
-#define	PTE_BLOCK		0x1
-#define	PTE_TABLE		0x3
-#define	PTE_PAGE		0x3
-#define	PTE_TYPE_MASK		0x3
 #define	PTE_VALID		0x1
+
+/* Note that this includes the valid bit */
+#define	PTE_TYPE_MASK		0x3
+
+#define	PTE_BLOCK		0x1 /* valid = 1, type = 0 */
+#define	PTE_TABLE		0x3 /* valid = 1, type = 1 */
+#define	PTE_PAGE		0x3 /* valid = 1, type = 1 */
 
 #define	PTE_SFW_SHIFT		(55)
 #define	PTE_SFW_MASK		(0xFull << PTE_SFW_SHIFT)
