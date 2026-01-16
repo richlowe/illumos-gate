@@ -289,16 +289,15 @@ retry:
 	return (pp);
 }
 
-/*
- * This procedure is callable only while the boot loader is in charge of the
- * MMU. It assumes that PA == VA for page table pointers.  It doesn't live in
- * kboot_mmu.c since it's used from common code.
- */
 pfn_t
 va_to_pfn(void *vaddr)
 {
 	uintptr_t va = ALIGN2PAGE(vaddr);
 
+	/*
+	 * On x86 this is only usable during early boot, and to avoid booby
+	 * trapping common code, we pretend to be too
+	 */
 	if (khat_running)
 		panic("va_to_pfn(): called too late\n");
 
