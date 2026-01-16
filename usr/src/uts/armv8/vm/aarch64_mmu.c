@@ -139,9 +139,13 @@ hat_kern_alloc(
 {
 	uint_t		table_cnt = 1;
 	uint_t		mapping_cnt;
+	extern size_t	kpm_size;
 
 	/* After khat is running, we can't access physical memory in this way */
 	VERIFY3U(khat_running, ==, 0);
+
+	/* KPM is not optional on ARM */
+	VERIFY3U(kpm_size, >, 0);
 
 	pte_t *l3_ptbl = (pte_t *)TTBR_BADDR48(read_ttbr1());
 
