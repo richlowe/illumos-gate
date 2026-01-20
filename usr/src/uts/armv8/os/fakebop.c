@@ -65,6 +65,9 @@
 #include <netinet/inetutil.h>	/* for hexascii_to_octet */
 #include <sys/boot_console.h>
 #include <sys/sunddi.h>
+
+#include <vm/hat_aarch64.h>
+
 #if defined(_USE_FDT)
 #include <libfdt.h>
 #endif
@@ -179,9 +182,13 @@ static paddr_t
 pt_alloc(bootops_t *bop)
 {
 	extern int physMemInit;
+
+	/* We rely on being identity mapped */
+	VERIFY3U(khat_running, ==, 0);
+
 	paddr_t pa = do_bop_phys_alloc(bop, MMU_PAGESIZE, MMU_PAGESIZE);
 	if (pa == 0)
-		bop_panic("phy alloc error for L2 PT\n");
+		bop_panic("failed to allocate physical page table\n");
 	if (physMemInit) {
 		page_t *pp = page_numtopp(mmu_btop(pa), SE_EXCL);
 		ASSERT(pp != NULL);
@@ -202,6 +209,8 @@ map_phys(bootops_t *bop, pte_t pte_attr, uintptr_t vaddr, uint64_t paddr)
 	int l2_idx = LEVEL_INDEX(vaddr, 2);
 	int l1_idx = LEVEL_INDEX(vaddr, 1);
 	int l0_idx = LEVEL_INDEX(vaddr, 0);
+
+	VERIFY3U(khat_running, ==, 0);
 
 	pte_t *l3_ptbl = (pte_t *)(IS_KERNEL_MAPPING((uintptr_t)vaddr) ?
 	    read_ttbr1() : read_ttbr0());
