@@ -67,6 +67,7 @@
 #include <sys/sunddi.h>
 
 #include <vm/hat_aarch64.h>
+#include <vm/kboot_mmu.h>
 
 #if defined(_USE_FDT)
 #include <libfdt.h>
@@ -178,90 +179,6 @@ boot_compinfo(int fd, struct compinfo *cbp)
 	return (0);
 }
 
-static paddr_t
-pt_alloc(bootops_t *bop)
-{
-	extern int physMemInit;
-
-	/* We rely on being identity mapped */
-	VERIFY3U(khat_running, ==, 0);
-
-	paddr_t pa = do_bop_phys_alloc(bop, MMU_PAGESIZE, MMU_PAGESIZE);
-	if (pa == 0)
-		bop_panic("failed to allocate physical page table\n");
-	if (physMemInit) {
-		page_t *pp = page_numtopp(mmu_btop(pa), SE_EXCL);
-		ASSERT(pp != NULL);
-		page_pp_lock(pp, 0, 1);
-		ASSERT(pp != NULL);
-		ASSERT(!PP_ISFREE(pp));
-		ASSERT(pp->p_lckcnt == 1);
-		ASSERT(PAGE_EXCL(pp));
-	}
-	bzero((void *)(uintptr_t)pa, MMU_PAGESIZE);
-	return (pa);
-}
-
-static void
-map_phys(bootops_t *bop, pte_t pte_attr, uintptr_t vaddr, uint64_t paddr)
-{
-	int l3_idx = LEVEL_INDEX(vaddr, 3);
-	int l2_idx = LEVEL_INDEX(vaddr, 2);
-	int l1_idx = LEVEL_INDEX(vaddr, 1);
-	int l0_idx = LEVEL_INDEX(vaddr, 0);
-
-	VERIFY3U(khat_running, ==, 0);
-
-	pte_t *l3_ptbl = (pte_t *)(IS_KERNEL_MAPPING((uintptr_t)vaddr) ?
-	    read_ttbr1() : read_ttbr0());
-
-	if (!PTE_ISVALID(l3_ptbl[l3_idx])) {
-		paddr_t pa = pt_alloc(bop);
-		dsb(ish);
-		l3_ptbl[l3_idx] =
-		    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER | pa | PTE_TABLE;
-	}
-
-	if (!PTE_ISTABLE(l3_ptbl[l3_idx], 3)) {
-		bop_panic("invalid L2 PT\n");
-	}
-
-	pte_t *l2_ptbl = (pte_t *)(uintptr_t)(l3_ptbl[l3_idx] & PTE_PFN_MASK);
-
-	if (!PTE_ISVALID(l2_ptbl[l2_idx])) {
-		paddr_t pa = pt_alloc(bop);
-		dsb(ish);
-		l2_ptbl[l2_idx] =
-		    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER | pa | PTE_TABLE;
-	}
-
-	if (!PTE_ISTABLE(l2_ptbl[l2_idx], 2)) {
-		bop_panic("invalid L2 PT\n");
-	}
-
-	pte_t *l1_ptbl = (pte_t *)(uintptr_t)(l2_ptbl[l2_idx] & PTE_PFN_MASK);
-
-	if (!PTE_ISVALID(l1_ptbl[l1_idx])) {
-		paddr_t pa = pt_alloc(bop);
-		bzero((void *)(uintptr_t)pa, MMU_PAGESIZE);
-		dsb(ish);
-		l1_ptbl[l1_idx] =
-		    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER | pa | PTE_TABLE;
-	}
-
-	if (!PTE_ISTABLE(l1_ptbl[l1_idx], 1)) {
-		bop_panic("invalid L1 PT\n");
-	}
-
-	pte_t *l0_ptbl = (pte_t *)(uintptr_t)(l1_ptbl[l1_idx] & PTE_PFN_MASK);
-	if (PTE_ISVALID(l0_ptbl[l0_idx])) {
-		bop_panic("L0 page table entry in use\n");
-	}
-	l0_ptbl[l0_idx] = paddr | pte_attr | PTE_PAGE;
-	dsb(ish);
-	isb();
-}
-
 void
 bop_relocate(void)
 {
@@ -323,6 +240,8 @@ bop_init(struct xboot_info *xbp)
 	bootops->bsys_printf = bop_printf;
 
 	bcons_init(xbp);
+
+	kbm_init();
 
 	/*
 	 * enable debugging
@@ -424,8 +343,7 @@ do_bsys_alloc(bootops_t *bop, caddr_t virthint, size_t size, int align)
 	va = (uintptr_t)virthint;
 	s = size;
 	while (s > 0) {
-		map_phys(bop, PTE_NOCONSIST | PTE_AF | PTE_SH_INNER | PTE_UXN |
-		    PTE_AP_KRWUNA | PTE_ATTR_NORMEM, va, pa);
+		kbm_map(va, pa, 0); /* XXX: level 0 until we fix support */
 		va += MMU_PAGESIZE;
 		pa += MMU_PAGESIZE;
 		s -= MMU_PAGESIZE;
@@ -1681,7 +1599,8 @@ bmemlist_find(struct memlist **listp, uint64_t size, int align)
 static void
 bmemlist_init(struct xboot_info *xbp)
 {
-	static memlist_t boot_list[MMU_PAGESIZE * 8 /sizeof (memlist_t)];
+	/* XXX: This has been made huge to support the small-mapped kpm */
+	static memlist_t boot_list[(MMU_PAGESIZE * 1024) / sizeof (memlist_t)];
 	int i;
 	extern struct memlist *phys_install;
 	extern struct memlist *phys_avail;

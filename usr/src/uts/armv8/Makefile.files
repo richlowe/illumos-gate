@@ -80,7 +80,8 @@ CORE_OBJS +=			\
 	cpuinfo.o		\
 	pci_cfgacc.o		\
 	pci_cfgacc_armv8.o	\
-	softhostid.o
+	softhostid.o		\
+	kboot_mmu.o
 
 #
 #	Add the SMBIOS subsystem object files directly to the list of objects
