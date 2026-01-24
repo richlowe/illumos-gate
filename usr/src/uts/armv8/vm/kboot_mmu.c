@@ -1,0 +1,131 @@
+/*
+ * This file and its contents are supplied under the terms of the
+ * Common Development and Distribution License ("CDDL"), version 1.0.
+ * You may only use this file in accordance with the terms of version
+ * 1.0 of the CDDL.
+ *
+ * A full copy of the text of the CDDL should have accompanied this
+ * source.  A copy of the CDDL is also available via the Internet at
+ * http://www.illumos.org/license/CDDL.
+ */
+
+/*
+ * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Richard Lowe
+ */
+
+/*
+ * Early boot MMU management to map pages prior to the HAT running
+ */
+
+#include <sys/bootconf.h>
+#include <sys/controlregs.h>
+#include <sys/debug.h>
+#include <sys/sunddi.h>
+#include <sys/types.h>
+
+#include <vm/hat_aarch64.h>
+
+#define	KBM_ASSERT(EX) \
+	((void)((EX) || (bop_panic("%s:%d: %s: assertion failed: %s\n", \
+	    __FILE__, __LINE__, __func__, #EX), 0)))
+
+
+/*
+ * Discover enough hardware parameters for kbm.
+ *
+ * This is a cutdown `mmu_init` which is not callable soon enough, which
+ * discovers just enough MMU parameters for kbm to function.
+ *
+ * XXX: At present, we don't actually _discover_ anything.
+ */
+static uint8_t kbm_max_page_level;
+static uint8_t kbm_max_level;
+
+void
+kbm_init(void)
+{
+	kbm_max_page_level = MAX_PAGE_LEVEL;
+	kbm_max_level = MAX_NUM_LEVEL;
+}
+
+/* Allocate a physical page for use as a page table */
+static paddr_t
+pt_alloc(bootops_t *bop)
+{
+	extern int physMemInit;
+	paddr_t pa = BOP_PALLOC(bop, MMU_PAGESIZE, MMU_PAGESIZE);
+
+	/* We rely on being identity mapped */
+	KBM_ASSERT(khat_running == 0);
+
+	if (pa == 0)
+		bop_panic("failed to allocate physical page table\n");
+
+	if (physMemInit) {
+		/*
+		 * XXX: This is basically is_reserved_memory() isn't it?  And
+		 * why do we use this _sometimes_ after kernel physmem is
+		 * live? does it come live exclusively before the hat?
+		 *
+		 * yeah, we can exist after phsymem but before the hat, for eg
+		 * segkmem as kmem comes up (before the hat!!!)
+		 */
+		page_t *pp = page_numtopp(mmu_btop(pa), SE_EXCL);
+		KBM_ASSERT(pp != NULL);
+		page_pp_lock(pp, 0, 1);
+		KBM_ASSERT(pp != NULL);
+		KBM_ASSERT(!PP_ISFREE(pp));
+		KBM_ASSERT(pp->p_lckcnt == 1);
+		KBM_ASSERT(PAGE_EXCL(pp));
+	}
+	bzero((void *)(uintptr_t)pa, MMU_PAGESIZE);
+	return (pa);
+}
+
+/*
+ * Map virtual address `va` to physical `pa`.  `level` denotes the size of the
+ * mapping in terms of the level of page table used.
+ */
+void
+kbm_map(uintptr_t vaddr, paddr_t paddr, uint_t level)
+{
+	KBM_ASSERT(kbm_max_level > 0);
+	KBM_ASSERT(IS_KERNEL_MAPPING(vaddr));
+	KBM_ASSERT(IS_PAGEALIGNED(vaddr));
+	KBM_ASSERT(IS_PAGEALIGNED(paddr));
+	KBM_ASSERT(level <= kbm_max_page_level);
+
+	pte_t *ptbl = (pte_t *)TTBR_BADDR48(read_ttbr1());
+
+	for (int l = kbm_max_level; l > level; l--) {
+		/* Need a new entry */
+		if (!PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, l)])) {
+			paddr_t pa = pt_alloc(bootops);
+
+			/* XXX: MAKEPTE(...) */
+			ptbl[LEVEL_INDEX(vaddr, l)] = pa |
+			    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER |
+			    PTE_TABLE;
+		} else if (!PTE_ISTABLE(ptbl[LEVEL_INDEX(vaddr, l)], l)) {
+			bop_panic("overlapping %s allocation for 0x%lx at "
+			    "level %d (needed a table)\n", __func__, vaddr, l);
+		}
+
+		ptbl = (pte_t *)(ptbl[LEVEL_INDEX(vaddr, l)] & PTE_PFN_MASK);
+	}
+
+	if (PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, level)])) {
+		bop_panic("overlapping %s allocation for 0x%lx at level %d\n",
+		    __func__, vaddr, level);
+	}
+
+	/*
+	 * XXX: MAKEPTE
+	 */
+	uint_t type = (level == 0) ? PTE_PAGE : PTE_BLOCK;
+	ptbl[LEVEL_INDEX(vaddr, level)] = paddr |
+	    PTE_NOCONSIST | PTE_AF | PTE_SH_INNER | PTE_UXN | PTE_AP_KRWUNA |
+	    PTE_ATTR_NORMEM | type;
+}
