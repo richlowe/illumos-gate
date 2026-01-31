@@ -139,7 +139,7 @@ extern struct hatstats hatstat;
 #define	HATSTAT_INC(x)	(0)
 #endif
 
-#if defined(_KERNEL)
+#if defined(_KERNEL) || defined(_BOOT)
 
 /*
  * Useful macro to align hat_XXX() address arguments to a page boundary
@@ -147,6 +147,9 @@ extern struct hatstats hatstat;
 #define	ALIGN2PAGE(a)		((uintptr_t)(a) & MMU_PAGEMASK)
 #define	IS_PAGEALIGNED(a)	(((uintptr_t)(a) & MMU_PAGEOFFSET) == 0)
 
+#endif /* _KERNEL | _BOOT */
+
+#if defined(_KERNEL)
 extern uint_t	khat_running;	/* set at end of hat_kern_setup() */
 extern cpuset_t khat_cpuset;	/* cpuset for kernal address demap Xcalls */
 extern kmutex_t hat_list_lock;
