@@ -270,6 +270,8 @@ map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 			ptbl[LEVEL_INDEX(vaddr, l)] = pa |
 			    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER |
 			    PTE_TABLE;
+			dsb(ish);
+			isb();
 		} else if (!PTE_ISTABLE(ptbl[LEVEL_INDEX(vaddr, l)], l)) {
 			panic("overlapping %s allocation for 0x%lx at "
 			    "level %d (needed a table)\n", __func__, vaddr, l);
@@ -292,6 +294,8 @@ map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 	}
 
 	ptbl[LEVEL_INDEX(vaddr, level)] = newpte;
+	dsb(ish);
+	isb();
 }
 
 void
