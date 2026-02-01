@@ -342,12 +342,22 @@ do_bsys_alloc(bootops_t *bop, caddr_t virthint, size_t size, int align)
 	 */
 	va = (uintptr_t)virthint;
 	s = size;
-	while (s > 0) {
-		kbm_map(va, pa, 0); /* XXX: level 0 until we fix support */
-		va += MMU_PAGESIZE;
-		pa += MMU_PAGESIZE;
-		s -= MMU_PAGESIZE;
+	while (s >= MMU_PAGESIZE) {
+		int l = 0;
+		/* find the largest page size */
+		for (l = mmu.max_page_level; l > 0; l--) {
+			if ((pa & LEVEL_OFFSET(l)) == 0 &&
+			    (va & LEVEL_OFFSET(l)) == 0 &&
+			    s >= LEVEL_SIZE(l))
+				break;
+		}
+
+		kbm_map(va, pa, l);
+		va += LEVEL_SIZE(l);
+		pa += LEVEL_SIZE(l);
+		s -= LEVEL_SIZE(l);
 	}
+	ASSERT(s == 0);
 	memset(virthint, 0, size);
 	return (virthint);
 }
