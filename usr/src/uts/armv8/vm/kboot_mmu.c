@@ -108,6 +108,8 @@ kbm_map(uintptr_t vaddr, paddr_t paddr, uint_t level)
 			ptbl[LEVEL_INDEX(vaddr, l)] = pa |
 			    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER |
 			    PTE_TABLE;
+			dsb(ish);
+			isb();
 		} else if (!PTE_ISTABLE(ptbl[LEVEL_INDEX(vaddr, l)], l)) {
 			bop_panic("overlapping %s allocation for 0x%lx at "
 			    "level %d (needed a table)\n", __func__, vaddr, l);
@@ -128,4 +130,6 @@ kbm_map(uintptr_t vaddr, paddr_t paddr, uint_t level)
 	ptbl[LEVEL_INDEX(vaddr, level)] = paddr |
 	    PTE_NOCONSIST | PTE_AF | PTE_SH_INNER | PTE_UXN | PTE_AP_KRWUNA |
 	    PTE_ATTR_NORMEM | type;
+	dsb(ish);
+	isb();
 }
