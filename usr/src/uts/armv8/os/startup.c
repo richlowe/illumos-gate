@@ -757,9 +757,11 @@ startup_memlist(void)
 	 * Use leftover large page nucleus text/data space for loadable modules.
 	 * Use at most MODTEXT/MODDATA.
 	 */
-	len = MMU_PAGESIZE2M;
-	ASSERT(len > MMU_PAGESIZE);
-
+	/*
+	 * XXX: This is not doing what it claims, re: nucleus text _or_
+         * MODTEXT/MODDATA
+	 */
+	len = LEVEL_SIZE(1);
 	econtig = (caddr_t)P2ROUNDUP((uintptr_t)e_data, (uintptr_t)len);
 
 	PRM_DEBUG(econtig);
