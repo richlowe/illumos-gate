@@ -440,8 +440,15 @@ boot_reserve(void)
 				ASSERT(pp->p_lckcnt == 1);
 
 				if (pp->p_vnode == NULL) {
-					page_hashin(pp, &kvp,
+					int r = page_hashin(pp, &kvp,
 					    va + MMU_PAGESIZE * x, NULL);
+
+					/* NB: Really 1 on success */
+					if (r != 1) {
+						panic("%s: failed to "
+						    "hashin %lx", __func__,
+						    va + MMU_PAGESIZE * x);
+					}
 				}
 				count++;
 			}
