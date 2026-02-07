@@ -759,7 +759,7 @@ startup_memlist(void)
 	 */
 	/*
 	 * XXX: This is not doing what it claims, re: nucleus text _or_
-         * MODTEXT/MODDATA
+	 * MODTEXT/MODDATA
 	 */
 	len = LEVEL_SIZE(1);
 	econtig = (caddr_t)P2ROUNDUP((uintptr_t)e_data, (uintptr_t)len);
@@ -905,7 +905,11 @@ startup_memlist(void)
 	 * Now that page_t's have been initialized, remove all the
 	 * initial allocation pages from the kernel free page lists.
 	 */
-	boot_reserve();
+	int cnt = reserve_boot_pages((pte_t *)TTBR_BADDR48(read_ttbr1()),
+	    _kernelbase, mmu.max_level);
+	if (page_resv(cnt, KM_NOSLEEP) == 0)
+		panic("%s: page_resv failed", __func__);
+
 	PRM_POINT("startup_memlist() done");
 
 	PRM_DEBUG(valloc_sz);
