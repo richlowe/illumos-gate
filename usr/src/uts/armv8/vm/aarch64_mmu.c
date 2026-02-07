@@ -362,105 +362,65 @@ is_reserved_memory(paddr_t pa)
 }
 
 /*
+ * Synchronize our state with the upper, kernel, page tables inherited from
+ * boot, return the number of page_t-sized pages taken in.
+ *
  * NB: This runs while memory is still identity mapped and uses physical
  * addresses
+ *
+ * XXX: Why are we not using `boot_mapin`?  (does it set the NOCONSIST flag?)
  */
-void
-boot_reserve(void)
+uint64_t
+reserve_boot_pages(pte_t *ptbl, uintptr_t base, uint_t level)
 {
-	size_t count = 0;
+	uint64_t count = 0;
 
-	size_t pa_size_array[] = {
-		[MMFR0_PARANGE_4G] =	(1ul << 32),	/* 4G */
-		[MMFR0_PARANGE_64G] =	(1ul << 36),	/* 64G */
-		[MMFR0_PARANGE_1T] =	(1ul << 40),	/* 1TB */
-		[MMFR0_PARANGE_4T] =	(1ul << 42),	/* 4TB */
-		[MMFR0_PARANGE_16T] =	(1ul << 44),	/* 16TB */
-		[MMFR0_PARANGE_256T] =	(1ul << 48),	/* 256TB */
-		[MMFR0_PARANGE_4P] =	(1ul << 52),	/* 4PB */
-		[MMFR0_PARANGE_64P] =	(1ul << 56)	/* 64PB */
-	};
-
-	uintptr_t va = _kernelbase;
-	pte_t *ptbl[MMU_PAGE_LEVELS] = {0};
-
-	/* After khat is running, we can't access physical memory in this way */
 	VERIFY3U(khat_running, ==, 0);
+	ASSERT(is_reserved_memory((paddr_t)(uintptr_t)ptbl));
 
-	ptbl[MMU_PAGE_LEVELS - 1] = (pte_t *)TTBR_BADDR48(read_ttbr1());
-
-	ASSERT(MMFR0_PARANGE(read_id_aa64mmfr0()) < ARRAY_SIZE(pa_size_array));
-
-	size_t pa_size = pa_size_array[MMFR0_PARANGE(read_id_aa64mmfr0())];
-
-	ASSERT(is_reserved_memory(TTBR_BADDR48(read_ttbr1())));
-
-	int l = 0;
-	while (va != 0) {
-		if (ptbl[l] == NULL) {
-			l++;
+	for (uint64_t i = 0; i < NPTEPERPT; i++) {
+		if (!PTE_ISVALID(ptbl[i]))
 			continue;
-		}
 
-		size_t page_size = LEVEL_SIZE(l);
+		ptbl[i] |= PTE_NOCONSIST; /* XXX: Why do we do this here? */
 
-		if (!PTE_ISVALID(*ptbl[l])) {
-			va += page_size;
-			++ptbl[l];
-			if (((uintptr_t)ptbl[l] & MMU_PAGEOFFSET) == 0) {
-				ptbl[l] = NULL;
-			}
-			continue;
-		}
+		if (PTE_ISTABLE(ptbl[i], level)) {
+			count += reserve_boot_pages(
+			    (pte_t *)(ptbl[i] & PTE_PFN_MASK),
+			    base + (i << LEVEL_SHIFT(level)),
+			    level - 1);
+		} else {
+			for (uint64_t j = 0;
+			    j < LEVEL_SIZE(level) / MMU_PAGESIZE;
+			    j++) {
+				pfn_t pfn = mmu_btop((ptbl[i] & PTE_PFN_MASK) +
+				    (MMU_PAGESIZE * j));
 
-		if (PTE_ISTABLE(*ptbl[l], l)) {
-			ASSERT(ptbl[l - 1] == NULL);
-			ptbl[l - 1] = (pte_t *)(*ptbl[l] & PTE_PFN_MASK);
+				page_t *pp = page_numtopp_nolock(pfn);
+				VERIFY3P(pp, !=, NULL);
 
-			ASSERT(is_reserved_memory(*ptbl[l] & PTE_PFN_MASK));
-
-			++ptbl[l];
-			if (((uintptr_t)ptbl[l] & MMU_PAGEOFFSET) == 0) {
-				ptbl[l] = NULL;
-			}
-
-			l--;
-			continue;
-		}
-
-		*ptbl[l] |= PTE_NOCONSIST;
-
-		uint64_t pa = P2PHASE(*ptbl[l] & LEVEL_MASK(l), pa_size);
-
-		for (uint64_t x = 0; x < page_size / MMU_PAGESIZE; x++) {
-			pfn_t pfn = mmu_btop(pa + MMU_PAGESIZE * x);
-			page_t *pp = page_numtopp_nolock(pfn);
-			if (pp != NULL) {
-				ASSERT(PAGE_EXCL(pp));
-				ASSERT(pp->p_lckcnt == 1);
+				/*
+				 * XXX: This is the opposite of
+				 * `is_reserved_memory`
+				 */
+				VERIFY(PAGE_EXCL(pp));
+				VERIFY(pp->p_lckcnt == 1);
 
 				if (pp->p_vnode == NULL) {
-					int r = page_hashin(pp, &kvp,
-					    va + MMU_PAGESIZE * x, NULL);
+					uintptr_t va = base +
+					    (i << LEVEL_SHIFT(level)) +
+					    (MMU_PAGESIZE * j);
 
 					/* NB: Really 1 on success */
-					if (r != 1) {
+					if (page_hashin(pp, &kvp, va,
+					    NULL) != 1) {
 						panic("%s: failed to "
-						    "hashin %lx", __func__,
-						    va + MMU_PAGESIZE * x);
+						    "hashin %lx", __func__, va);
 					}
 				}
-				count++;
 			}
-		}
-
-		va += page_size;
-		++ptbl[l];
-		if (((uintptr_t)ptbl[l] & MMU_PAGEOFFSET) == 0) {
-			ptbl[l] = NULL;
 		}
 	}
 
-	if (page_resv(count, KM_NOSLEEP) == 0)
-		panic("boot_reserve: page_resv failed");
+	return (count);
 }
