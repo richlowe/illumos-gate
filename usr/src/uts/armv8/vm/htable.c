@@ -1303,9 +1303,10 @@ htable_attach(
 	if (pp->p_vnode == NULL) {
 		/* match offset calculation in page_get_physical() */
 		u_offset_t offset = (uintptr_t)ht;
-		offset &= (HOLE_START - 1);
+		ASSERT3U(hole_start, !=, 0);
+		offset &= (hole_start - 1);
 		offset <<= MMU_PAGESHIFT;
-		offset += HOLE_START;	/* something in VA hole */
+		offset += hole_start;	/* something in VA hole */
 		ASSERT(page_exists(&kvp, offset) == NULL);
 		(void) page_hashin(pp, &kvp, offset, NULL);
 	}

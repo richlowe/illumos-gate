@@ -1247,10 +1247,11 @@ page_get_physical(uintptr_t seed)
 	 * For 32 bits, we need an offset > 4Gig
 	 * For 64 bits, need an offset somewhere in the VA hole.
 	 */
+	ASSERT3U(hole_start, !=, 0);
 	offset = seed;
-	offset &= (HOLE_START - 1);
+	offset &= (hole_start - 1);
 	offset <<= MMU_PAGESHIFT;
-	offset += HOLE_START;	/* something in VA hole */
+	offset += hole_start;	/* something in VA hole */
 
 	if (page_resv(1, KM_NOSLEEP) == 0)
 		return (NULL);
