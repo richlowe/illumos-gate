@@ -126,8 +126,8 @@ int	l2cache_linesz = 0x40;
 int	l2cache_assoc = 1;
 static size_t	textrepl_min_gb = 10;
 
-uintptr_t	hole_start = HOLE_START;
-uintptr_t	hole_end = HOLE_END;
+uintptr_t	hole_start;
+uintptr_t	hole_end;
 caddr_t kpm_vbase;
 size_t  kpm_size;
 static uintptr_t segkpm_base = (uintptr_t)SEGKPM_BASE;

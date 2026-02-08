@@ -81,9 +81,6 @@ extern "C" {
  */
 #define	VA_BITS		(MMU_PAGESHIFT + NPTESHIFT * MMU_PAGE_LEVELS)
 
-#define	HOLE_START	(ADDRESS_C(1) << VA_BITS)
-#define	HOLE_END	(~(HOLE_START - 1))
-
 /*
  * KERNELBASE is the virtual address at which the kernel segments start in
  * all contexts.
@@ -100,8 +97,10 @@ extern "C" {
 							// ...
 #define	VALLOC_BASE	(MISC_VA_BASE + MISC_VA_SIZE)
 #define	MISC_VA_BASE	(SEGKPM_BASE + SEGKPM_SIZE)
-#define	SEGKPM_BASE	HOLE_END
-#define	KERNELBASE	HOLE_END
+
+/* XXX: Each of these is HOLE_END */
+#define	SEGKPM_BASE	(~((ADDRESS_C(1) << VA_BITS) - 1))
+#define	KERNELBASE	(~((ADDRESS_C(1) << VA_BITS) - 1))
 
 /*
  * default and boundary sizes for segkp
@@ -118,7 +117,8 @@ extern "C" {
 /*
  * Define upper limit on user address space
  */
-#define	USERLIMIT	HOLE_START
+/* XXX: The start of the VA hole */
+#define	USERLIMIT	(ADDRESS_C(1) << VA_BITS)
 
 /*
  * This limit, traditionally for ILP32 processes, may also be applied to LP64
