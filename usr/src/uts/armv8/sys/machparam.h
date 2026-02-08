@@ -69,7 +69,7 @@ extern "C" {
 /*
  * DEFAULT KERNEL THREAD stack size.
  */
-#define	DEFAULTSTKSZ	(5*PAGESIZE)
+#define	DEFAULTSTKSZ	(5 * PAGESIZE)
 
 /*
  * DEFAULT initial thread stack size.
@@ -91,7 +91,6 @@ extern "C" {
 
 #define	SEGDEBUGSIZE	(8L * 1024L * 1024L)
 #define	MISC_VA_SIZE	(1L * 1024L * 1024L * 1024L)
-#define	SEGKPM_SIZE	(1ull << (VA_BITS - 1))
 
 #define	BOOT_VEC_SIZE	(8L * 1024L * 1024L)
 #define	BOOT_VEC_BASE	(- BOOT_VEC_SIZE)		// 0xffffffff_ff800000
@@ -100,7 +99,11 @@ extern "C" {
 #define	KERNEL_TEXT	ADDRESS_C(0xfffffffffe000000)	// 0xffffffff_fe000000
 							// ...
 #define	VALLOC_BASE	(MISC_VA_BASE + MISC_VA_SIZE)
-#define	MISC_VA_BASE	(SEGKPM_BASE + SEGKPM_SIZE)
+
+/*
+ * Allow 128TB of space for segkpm
+ */
+#define	MISC_VA_BASE	(SEGKPM_BASE + (1ull << (VA_BITS - 1)))
 
 /* The end of the 48bit VA hole */
 #define	SEGKPM_BASE	(~((ADDRESS_C(1) << VA_BITS) - 1))
