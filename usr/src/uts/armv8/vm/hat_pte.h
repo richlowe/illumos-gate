@@ -122,7 +122,7 @@ extern struct hat_mmu_info mmu;
 
 #define	pfn_to_pa(pfn)		mmu_ptob((paddr_t)(pfn))
 
-#define	IN_VA_HOLE(va)		(HOLE_START <= (va) && (va) < HOLE_END)
+#define	IN_VA_HOLE(va)		(hole_start <= (va) && (va) < hole_end)
 #define	FMT_PTE			"0x%lx"
 #define	GET_PTE(ptr)		(*(volatile pte_t *)(ptr))
 #define	SET_PTE(ptr, pte)	(*(volatile pte_t *)(ptr) = (pte))

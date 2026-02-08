@@ -225,7 +225,7 @@ init_pt(void)
 		dboot_printf("Lower Memory Tables\n");
 		dump_tables((uint64_t)ptbl_low, 0);
 		dboot_printf("Upper Memory Tables\n");
-		dump_tables((uint64_t)ptbl_high, HOLE_END);
+		dump_tables((uint64_t)ptbl_high, (~((1ull << VA_BITS) - 1)));
 	}
 #endif
 
