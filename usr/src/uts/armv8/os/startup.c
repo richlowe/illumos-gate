@@ -1212,7 +1212,9 @@ layout_kernel_va(void)
 	 */
 
 	kpm_vbase = (caddr_t)segkpm_base;
-	kpm_size = SEGKPM_SIZE;
+	/* XXX: Worth taking level 2 pages? */
+	kpm_size = ROUND_UP_LPAGE(mmu_ptob(physmax + 1));
+
 	if ((uintptr_t)kpm_vbase + kpm_size > (uintptr_t)valloc_base)
 		panic("not enough room for kpm!");
 	PRM_DEBUG(kpm_size);
