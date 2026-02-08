@@ -256,9 +256,6 @@ hat_free_end(hat_t *hat)
 void
 mmu_init(void)
 {
-	hole_start = HOLE_START;
-	hole_end = HOLE_END;
-
 	uint64_t tcr = read_tcr();
 
 	mmu.max_asid = ((tcr & TCR_AS) ? 0xFFFF : 0xFF);
@@ -271,6 +268,9 @@ mmu_init(void)
 	mmu.pa_size = TCR_IPS(tcr);
 
 	VERIFY3U(mmu.va_size, ==, VA_BITS);
+
+	hole_start = (1ull << mmu.va_size);
+	hole_end = (~((1ull << mmu.va_size) - 1));
 
 	/*
 	 * Compute how many hash table entries to have per process for htables.
