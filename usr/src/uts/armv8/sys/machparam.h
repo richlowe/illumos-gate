@@ -88,15 +88,14 @@ extern "C" {
  * KERNELBASE is the virtual address at which the kernel segments start in
  * all contexts.
  */
-#define	CONSOLE_SIZE	(8L * 1024L * 1024L)
 #define	SEGDEBUGSIZE	(8L * 1024L * 1024L)
 #define	MISC_VA_SIZE	(1L * 1024L * 1024L * 1024L)
 #define	SEGKPM_SIZE	(1ull << (VA_BITS - 1))
 
-#define	CONSOLE_BASE	(- CONSOLE_SIZE)		// 0xffffffff_ff800000
-#define	BOOT_VEC_BASE	(CONSOLE_BASE)
+#define	BOOT_VEC_SIZE	(8L * 1024L * 1024L)
+#define	BOOT_VEC_BASE	(- BOOT_VEC_SIZE)		// 0xffffffff_ff800000
 
-#define	SEGDEBUGBASE	(CONSOLE_BASE - SEGDEBUGSIZE)	// 0xffffffff_ff000000
+#define	SEGDEBUGBASE	(BOOT_VEC_BASE - SEGDEBUGSIZE)	// 0xffffffff_ff000000
 #define	KERNEL_TEXT	ADDRESS_C(0xfffffffffe000000)	// 0xffffffff_fe000000
 							// ...
 #define	VALLOC_BASE	(MISC_VA_BASE + MISC_VA_SIZE)
