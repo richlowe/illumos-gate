@@ -1609,8 +1609,7 @@ bmemlist_find(struct memlist **listp, uint64_t size, int align)
 static void
 bmemlist_init(struct xboot_info *xbp)
 {
-	/* XXX: This has been made huge to support the small-mapped kpm */
-	static memlist_t boot_list[(MMU_PAGESIZE * 1024) / sizeof (memlist_t)];
+	static memlist_t boot_list[MMU_PAGESIZE * 8 / sizeof (memlist_t)];
 	int i;
 	extern struct memlist *phys_install;
 	extern struct memlist *phys_avail;
