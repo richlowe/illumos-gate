@@ -1013,22 +1013,12 @@ startup_kmem(void)
 {
 	PRM_POINT("startup_kmem() starting...");
 
-	kernelbase = segkpm_base;
+	kernelbase = _kernelbase;
+
 	PRM_DEBUG(kernelbase);
 
 	ekernelheap = (char *)KERNEL_TEXT;
 	PRM_DEBUG(ekernelheap);
-
-	/*
-	 * Now that we know the real value of kernelbase,
-	 * update variables that were initialized with a value of
-	 * KERNELBASE (in common/conf/param.c).
-	 */
-
-	_kernelbase = kernelbase;
-	_userlimit = USERLIMIT;
-	PRM_DEBUG(_kernelbase);
-	PRM_DEBUG(_userlimit);
 
 	layout_kernel_va();
 

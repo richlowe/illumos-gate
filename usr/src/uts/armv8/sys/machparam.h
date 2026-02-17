@@ -84,7 +84,11 @@ extern "C" {
 /*
  * KERNELBASE is the virtual address at which the kernel segments start in
  * all contexts.
+ *
+ * The default is unused and set to a poisonous value.
  */
+#define	DEFAULT_KERNELBASE	-1ull
+
 #define	SEGDEBUGSIZE	(8L * 1024L * 1024L)
 #define	MISC_VA_SIZE	(1L * 1024L * 1024L * 1024L)
 #define	SEGKPM_SIZE	(1ull << (VA_BITS - 1))
@@ -98,9 +102,8 @@ extern "C" {
 #define	VALLOC_BASE	(MISC_VA_BASE + MISC_VA_SIZE)
 #define	MISC_VA_BASE	(SEGKPM_BASE + SEGKPM_SIZE)
 
-/* XXX: Each of these is HOLE_END */
+/* The end of the 48bit VA hole */
 #define	SEGKPM_BASE	(~((ADDRESS_C(1) << VA_BITS) - 1))
-#define	KERNELBASE	(~((ADDRESS_C(1) << VA_BITS) - 1))
 
 /*
  * default and boundary sizes for segkp
@@ -115,10 +118,10 @@ extern "C" {
 #define	SEGZIOMINSIZE	(400L * 1024 * 1024L)			/* 400M */
 
 /*
- * Define upper limit on user address space
+ * Define upper limit on user address space.
+ * The default is unused and set to a poisonous value.
  */
-/* XXX: The start of the VA hole */
-#define	USERLIMIT	(ADDRESS_C(1) << VA_BITS)
+#define	DEFAULT_USERLIMIT	0
 
 /*
  * This limit, traditionally for ILP32 processes, may also be applied to LP64
