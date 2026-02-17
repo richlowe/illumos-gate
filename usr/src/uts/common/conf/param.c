@@ -108,8 +108,13 @@ const unsigned long	_mmu_pagesize	= (unsigned long)MMU_PAGESIZE;
 const unsigned int	_mmu_pageshift	= (unsigned int)MMU_PAGESHIFT;
 const unsigned long	_mmu_pageoffset	= (unsigned long)MMU_PAGEOFFSET;
 const unsigned long	_mmu_pagemask	= (unsigned long)MMU_PAGEMASK;
+#if !defined(__aarch64__)
 uintptr_t		_kernelbase	= (uintptr_t)KERNELBASE;
 uintptr_t		_userlimit	= (uintptr_t)USERLIMIT;
+#else
+uintptr_t		_kernelbase	= (uintptr_t)DEFAULT_KERNELBASE;
+uintptr_t		_userlimit	= (uintptr_t)DEFAULT_USERLIMIT;
+#endif
 uintptr_t		_userlimit32	= (uintptr_t)USERLIMIT32;
 const unsigned int	_diskrpm	= (unsigned int)DISKRPM;
 const unsigned long	_pgthresh	= (unsigned long)PGTHRESH;
