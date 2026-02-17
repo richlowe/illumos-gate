@@ -53,6 +53,7 @@
 #include <sys/bitmap.h>
 #include <sys/controlregs.h>
 #include <sys/archsystm.h>
+#include <sys/prom_debug.h>
 
 #include <vm/seg_kmem.h>
 #include <vm/hat_aarch64.h>
@@ -259,7 +260,6 @@ mmu_init(void)
 	uint64_t tcr = read_tcr();
 
 	mmu.max_asid = ((tcr & TCR_AS) ? 0xFFFF : 0xFF);
-
 	mmu.max_level = MAX_PAGE_LEVEL; /* XXX: num_level - 1 */
 	mmu.num_level = MMU_PAGE_LEVELS;
 	mmu.max_page_level = MAX_PAGE_LEVEL;
@@ -270,7 +270,21 @@ mmu_init(void)
 	VERIFY3U(mmu.va_size, ==, VA_BITS);
 
 	hole_start = (1ull << mmu.va_size);
-	hole_end = (~((1ull << mmu.va_size) - 1));
+	hole_end = ~(hole_start - 1);
+
+	/*
+	 * The kernel starts at the bottom of the ttbr1 address space
+	 * userspace ends at end of the ttbr0 address space.
+	 *
+	 * We initialize these early, so they may be used as early as
+	 * `startup_memlist`.
+	 */
+	_kernelbase = hole_end;
+	_userlimit = hole_start;
+	/* _userlimit32 does not move  */
+
+	PRM_DEBUG(_kernelbase);
+	PRM_DEBUG(_userlimit);
 
 	/*
 	 * Compute how many hash table entries to have per process for htables.
