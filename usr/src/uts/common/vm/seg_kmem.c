@@ -80,10 +80,9 @@
  *   heap32_arena is for allocations that require 32-bit absolute
  *   virtual addresses (e.g. code that uses 32-bit pointers/offsets).
  *
- *   heap_core is for allocations that require 2GB *relative*
- *   offsets; in other words all memory from heap_core is within
- *   2GB of all other memory from the same arena. This is a requirement
- *   of the addressing modes of some processors in supervisor code.
+ *   heap_core is for allocations that require limited *relative* offsets; due
+ *   to displacements of processor call or load instructions.  Commonly used
+ *   for module text.
  *
  *   heap_arena is the general heap arena.
  *
