@@ -159,6 +159,7 @@ struct seg *segkmap = &kmapseg;	/* Kernel generic mapping segment */
 static struct seg *segmap = &kmapseg;	/* easier to use name for in here */
 struct seg *segkp = &kpseg;	/* Pageable kernel virtual memory segment */
 
+extern struct seg kvseg_core;	/* Segment used for the core heap */
 struct seg kpmseg;		/* Segment used for physical mapping */
 struct seg *segkpm = &kpmseg;	/* 64bit kernel physical mapping segment */
 
@@ -1014,6 +1015,8 @@ startup_kmem(void)
 	PRM_POINT("startup_kmem() starting...");
 
 	kernelbase = _kernelbase;
+	core_base = COREHEAP_BASE;
+	core_size = KERNEL_TEXT - COREHEAP_BASE;
 
 	PRM_DEBUG(kernelbase);
 
@@ -1320,6 +1323,13 @@ kvm_init(void)
 	(void) seg_attach(&kas, kernelheap,
 	    ekernelheap - kernelheap, &kvseg);
 	(void) segkmem_create(&kvseg);
+
+	if (core_size > 0) {
+		PRM_POINT("attaching kvseg_core");
+		(void) seg_attach(&kas, (caddr_t)core_base, core_size,
+		    &kvseg_core);
+		(void) segkmem_create(&kvseg_core);
+	}
 
 	if (segziosize > 0) {
 		PRM_POINT("attaching segzio");

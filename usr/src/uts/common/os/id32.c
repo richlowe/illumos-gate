@@ -38,9 +38,10 @@ static kmem_cache_t *id32_cache;
 #define	ID32_ALIGN	(1 << ID32_BITS)
 #define	ID32_MOD	(ID32_ALIGN - 1)
 
-#if defined(__amd64)
+#if defined(__amd64) || defined(__aarch64__)
 /*
- * For amd64 the 32 bit id is the offset of the entry in the arena.
+ * For systems with a core heap the 32 bit id is the offset of the entry in
+ * the arena.
  */
 extern char *heap_core_base;
 #define	ID32_ENCODE(x)	(((x) - (uintptr_t)heap_core_base) | \
