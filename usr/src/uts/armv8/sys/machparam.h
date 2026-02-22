@@ -96,8 +96,13 @@ extern "C" {
 #define	BOOT_VEC_BASE	(- BOOT_VEC_SIZE)		// 0xffffffff_ff800000
 
 #define	SEGDEBUGBASE	(BOOT_VEC_BASE - SEGDEBUGSIZE)	// 0xffffffff_ff000000
-#define	KERNEL_TEXT	ADDRESS_C(0xfffffffffe000000)	// 0xffffffff_fe000000
-							// ...
+
+// 0xffffffff_fe000000 (top - 31MB)
+#define	KERNEL_TEXT	ADDRESS_C(0xfffffffffe000000)
+
+/* 0xffffffff_fc000000 (top - 64MB) */
+#define	COREHEAP_BASE	ADDRESS_C(0xfffffffffc000000)
+
 #define	VALLOC_BASE	(MISC_VA_BASE + MISC_VA_SIZE)
 
 /*
@@ -136,7 +141,7 @@ extern "C" {
  * The heap has a region allocated from it of HEAPTEXT_SIZE bytes specifically
  * for module text.
  */
-#define	HEAPTEXT_SIZE	(64 * 1024 * 1024)	/* bytes */
+#define	HEAPTEXT_SIZE	(32 * 1024 * 1024)	/* bytes */
 
 /*
  * Use a slightly larger thread stack size for interrupt threads rather than
