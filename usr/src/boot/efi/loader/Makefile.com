@@ -25,7 +25,6 @@ i386_OBJS=\
 aarch64_OBJS=
 
 OBJS=	\
-	acpi.o \
 	autoload.o \
 	bootinfo.o \
 	conf.o \
