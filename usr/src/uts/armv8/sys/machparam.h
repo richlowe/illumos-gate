@@ -103,12 +103,21 @@ extern "C" {
 /* 0xffffffff_fc000000 (top - 64MB) */
 #define	COREHEAP_BASE	ADDRESS_C(0xfffffffffc000000)
 
-#define	VALLOC_BASE	(MISC_VA_BASE + MISC_VA_SIZE)
+/*
+ * The so called "Misc VA" is the address space carved out for early boot to
+ * allocate from before any of the virtual memory system is available.
+ *
+ * We put it immediately below the core heap used for module text, so that its
+ * address is fixed regardless of kernelbase.
+ */
+#define	MISC_VA_SIZE	(1L * 1024L * 1024L * 1024L) /* 1G */
+#define	MISC_VA_BASE	(COREHEAP_BASE - MISC_VA_SIZE)
 
 /*
- * Allow 128TB of space for segkpm
+ * XXX: The 2nd part is the old SEGKPM_SIZE, which allows 128TB/47 bits of
+ * physical space.
  */
-#define	MISC_VA_BASE	(SEGKPM_BASE + (1ull << (VA_BITS - 1)))
+#define	VALLOC_BASE	(_kernelbase + (1ull << (VA_BITS - 1)))
 
 /* The end of the 48bit VA hole */
 #define	SEGKPM_BASE	(~((ADDRESS_C(1) << VA_BITS) - 1))
