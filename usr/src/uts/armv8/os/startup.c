@@ -1020,7 +1020,7 @@ startup_kmem(void)
 
 	PRM_DEBUG(kernelbase);
 
-	ekernelheap = (char *)KERNEL_TEXT;
+	ekernelheap = (char *)MISC_VA_BASE;
 	PRM_DEBUG(ekernelheap);
 
 	layout_kernel_va();
