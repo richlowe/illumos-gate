@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-// x30(pc), sp, x19 - x29
+/* x30(pc), sp, x19 - x29 */
 #define	LABEL_REG_PC	0
 #define	LABEL_REG_SP	1
 #define	LABEL_REG_X19	2
