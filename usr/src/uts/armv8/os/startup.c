@@ -739,7 +739,6 @@ startup_memlist(void)
 	size_t memseg_sz;
 	size_t pagehash_sz;
 	size_t pp_sz;
-	uintptr_t va __unused;	/* XXXARM */
 	size_t len;
 	int memblocks;
 	caddr_t pagecolor_mem;
@@ -792,7 +791,6 @@ startup_memlist(void)
 	 * memory mapped at or above above the start of the kernel text segment.
 	 */
 	npages = physinstalled;
-	va = KERNEL_TEXT;
 	PRM_DEBUG(npages);
 
 	/*
