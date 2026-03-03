@@ -113,12 +113,6 @@ extern "C" {
 #define	MISC_VA_SIZE	(1L * 1024L * 1024L * 1024L) /* 1G */
 #define	MISC_VA_BASE	(COREHEAP_BASE - MISC_VA_SIZE)
 
-/*
- * XXX: The 2nd part is the old SEGKPM_SIZE, which allows 128TB/47 bits of
- * physical space.
- */
-#define	VALLOC_BASE	(_kernelbase + (1ull << (VA_BITS - 1)))
-
 /* The end of the 48bit VA hole */
 #define	SEGKPM_BASE	(~((ADDRESS_C(1) << VA_BITS) - 1))
 
