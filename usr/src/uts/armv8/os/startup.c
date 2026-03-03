@@ -128,9 +128,17 @@ static size_t	textrepl_min_gb = 10;
 
 uintptr_t	hole_start;
 uintptr_t	hole_end;
+
 caddr_t kpm_vbase;
 size_t  kpm_size;
-static uintptr_t segkpm_base = (uintptr_t)SEGKPM_BASE;
+
+/*
+ * Initialized early to the address we'd like to put segkpm.  Distinct from
+ * kpm_vbase at which kpm actually _is_, rather than segkpm_base, where we
+ * hope to put it.
+ */
+static uintptr_t segkpm_base = 0;
+
 static page_t *rd_pages;
 
 uintptr_t	kernelbase;
@@ -861,8 +869,15 @@ startup_memlist(void)
 	pse_table_alloc_size = pse_table_size * sizeof (pad_mutex_t);
 	ADD_TO_ALLOCATIONS(pse_mutex, pse_table_alloc_size);
 
+	/*
+	 * Now we're initialized this far, we know where kernelbase is for
+	 * real, and can put valloc there.
+	 */
+
 	valloc_sz = ROUND_UP_LPAGE(valloc_sz);
-	valloc_base = VALLOC_BASE;
+	valloc_base = _kernelbase;
+
+	segkpm_base = valloc_base + valloc_sz;
 
 	/*
 	 * do all the initial allocations
@@ -1209,22 +1224,30 @@ static void
 layout_kernel_va(void)
 {
 	PRM_POINT("layout_kernel_va() starting...");
+
 	/*
 	 * Establish the final size of the kernel's heap, size of segmap,
 	 * segkp, etc.
 	 */
-
 	kpm_vbase = (caddr_t)segkpm_base;
+
 	/* XXX: Worth taking level 2 pages? */
 	kpm_size = ROUND_UP_LPAGE(mmu_ptob(physmax + 1));
 
-	if ((uintptr_t)kpm_vbase + kpm_size > (uintptr_t)valloc_base)
-		panic("not enough room for kpm!");
 	PRM_DEBUG(kpm_size);
 	PRM_DEBUG(kpm_vbase);
 
 	size_t sz = mmu_ptob(segkpsize);
-	segkp_base = (caddr_t)valloc_base + valloc_sz;
+	/*
+	 * XXX: We reserve extra space for kpm, to allow for the possible
+	 * appearance of memory later.  Though this seems, at best, unlikely.
+	 *
+	 * 128TB is the amount the initial port, and later SPARC cpus
+	 * reserved.  Some rounded `physmax` would be the minimum (and
+	 * realistic default), if we cared to be compact.
+	 */
+	segkp_base = (caddr_t)kpm_vbase + 0x0000800000000000ull;
+
 	/*
 	 * determine size of segkp
 	 */
