@@ -91,11 +91,11 @@ pt_alloc(bootops_t *bop)
 void
 kbm_map(uintptr_t vaddr, paddr_t paddr, uint_t level)
 {
-	KBM_ASSERT(kbm_max_level > 0);
-	KBM_ASSERT(IS_KERNEL_MAPPING(vaddr));
-	KBM_ASSERT(IS_PAGEALIGNED(vaddr));
-	KBM_ASSERT(IS_PAGEALIGNED(paddr));
+	KBM_ASSERT(kbm_max_page_level > 0);
 	KBM_ASSERT(level <= kbm_max_page_level);
+	KBM_ASSERT(IS_KERNEL_MAPPING(vaddr));
+	KBM_ASSERT((paddr & LEVEL_OFFSET(level)) == 0);
+	KBM_ASSERT((vaddr & LEVEL_OFFSET(level)) == 0);
 
 	pte_t *ptbl = (pte_t *)TTBR_BADDR48(read_ttbr1());
 
