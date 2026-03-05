@@ -181,9 +181,12 @@ hat_kern_alloc(
 
 		while (psize >= MMU_PAGESIZE) {
 			int l = 0;
+			uintptr_t vaddr = (uintptr_t)kpm_vbase + paddr;
+
 			/* find the largest page size */
 			for (l = mmu.max_page_level; l > 0; l--) {
 				if ((paddr & LEVEL_OFFSET(l)) == 0 &&
+				    (vaddr & LEVEL_OFFSET(l)) == 0 &&
 				    psize >= LEVEL_SIZE(l))
 					break;
 			}
