@@ -77,9 +77,9 @@ extern "C" {
 #define	T0STKSZ		(2 * DEFAULTSTKSZ)
 
 /*
- * Virtual Address Spaces
+ * Effective virtual address size
  */
-#define	VA_BITS		(MMU_PAGESHIFT + NPTESHIFT * MMU_PAGE_LEVELS)
+#define	VA_BITS		48
 
 /*
  * KERNELBASE is the virtual address at which the kernel segments start in
@@ -89,19 +89,23 @@ extern "C" {
  */
 #define	DEFAULT_KERNELBASE	-1ull
 
-#define	SEGDEBUGSIZE	(8L * 1024L * 1024L)
-#define	MISC_VA_SIZE	(1L * 1024L * 1024L * 1024L)
-
 #define	BOOT_VEC_SIZE	(8L * 1024L * 1024L)
 #define	BOOT_VEC_BASE	(- BOOT_VEC_SIZE)		// 0xffffffff_ff800000
 
 #define	SEGDEBUGBASE	(BOOT_VEC_BASE - SEGDEBUGSIZE)	// 0xffffffff_ff000000
+#define	SEGDEBUGSIZE	(8L * 1024L * 1024L)
 
 // 0xffffffff_fe000000 (top - 31MB)
 #define	KERNEL_TEXT	ADDRESS_C(0xfffffffffe000000)
 
 /* 0xffffffff_fc000000 (top - 64MB) */
 #define	COREHEAP_BASE	ADDRESS_C(0xfffffffffc000000)
+
+/*
+ * The heap has a region allocated from it of HEAPTEXT_SIZE bytes specifically
+ * for module text (the core heap)
+ */
+#define	HEAPTEXT_SIZE	(KERNEL_TEXT - COREHEAP_BASE)
 
 /*
  * The so called "Misc VA" is the address space carved out for early boot to
@@ -139,12 +143,6 @@ extern "C" {
  * processes with the SF1_SUNW_ADDR32 flag set.
  */
 #define	USERLIMIT32	((ADDRESS_C(1) << 32) - 0x1000)
-
-/*
- * The heap has a region allocated from it of HEAPTEXT_SIZE bytes specifically
- * for module text.
- */
-#define	HEAPTEXT_SIZE	(32 * 1024 * 1024)	/* bytes */
 
 /*
  * Use a slightly larger thread stack size for interrupt threads rather than
