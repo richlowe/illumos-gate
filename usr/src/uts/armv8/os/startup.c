@@ -221,6 +221,52 @@ int prom_debug = 0;
 	((uintptr_t)P2ROUNDUP((uintptr_t)(x), (uintptr_t)(2 * 1024 * 1024)))
 #define	ROUND_UP_LPAGE(x)	ROUND_UP_2MEG(x)
 
+/*
+ * Kernel virtual memory layout
+ *
+ *		       +-------------------------+
+ *		       | CPU bootstrap mappings	 |
+ * 0xFFFFFFFF.FF800000 |-------------------------|- BOOT_VEC_BASE
+ *		       |     kmdb if present	 |
+ * 0xFFFFFFFF.FF000000 |-------------------------|- SEGDEBUGBASE
+ *		       |    Kernel Text / Data	 |
+ * 0xFFFFFFFF_FE000000 |-------------------------|- KERNEL_TEXT
+ *		       |   Core Heap (modules)	 |
+ * 0xFFFFFFFF_FC000000 |-------------------------|- COREHEAP_BASE
+ *		       | Early/"Misc" heap space |
+ * 0xFFFFFFFF_BC000000 |- - - - - - - - - - - - -|- MISC_VA_BASE / ekernelheap
+ *		       |	Kernel		 |
+ *		       |	 Heap		 |
+ *		       |	(kvseg)		 |
+ * 0xFFFFxxxx_xxx00000 |-------------------------|- kernelheap (floating)
+ *		       |	segkmap		 |
+ * 0xFFFFxxxx_xxx00000 |-------------------------|- segmap_start (floating)
+ *		       |    device mappings	 |
+ * 0xFFFFxxxx_xxx00000 |-------------------------|- toxic_addr (floating)
+ *		       |     ZFS I/O (segzio)	 |
+ * 0xFFFFxxxx_xxx00000 |-------------------------|- segzio_base (floating)
+ *		       |  Pageable Kernel Memory |
+ *		       |	 (segkp)	 |
+ * 0xFFFFxxxx_xxx00000 |-------------------------|- segkp_base (floating)
+ *		       | Physical-based mappings |
+ *		       |	(segkpm)	 |
+ * 0xFFFF0000_xxx00000 |-------------------------|- segkpm_base (floating)
+ *		       |   page_t structures	 |
+ *		       |   memsegs, memlists,	 |
+ *		       |   page hash, etc.	 |
+ * 0xFFxx0000_00000000 |-------------------------|- kernelbase, hole_end
+ *		       |     ARCHITECTURAL	 |
+ *		       |	 VA		 |
+ *		       |	HOLE		 |
+ * 0x00xx0000_00000000 |-------------------------|- userlimit
+ *		       |    ... Userland ...	 |
+ * 0x00000000_fffff000 |-------------------------|- userlimit32
+ *		       |    ................	 |
+ *		       |    ................	 |
+ *		       +-------------------------+
+ *
+ */
+
 extern int size_pse_array(pgcnt_t, int);
 
 /*
