@@ -205,8 +205,21 @@ init_pt(void)
 	    (MAIR_ATTR_INC_ONC	<< (MAIR_NORMAL_MEMORY_UC * 8)) |
 	    (MAIR_ATTR_nGRE	<< (MAIR_UNORDERED * 8)));
 
-	uint64_t tcr =
-	    ((uint64_t)MMFR0_PARANGE(read_id_aa64mmfr0()) << TCR_IPS_SHIFT) |
+	/*
+	 * Writing back a higher value than we support into TCR.IPS appears to
+	 * be fine, as long as TCR.DS==0, but let's be cautious.
+	 *
+	 * > 48 bit physicals in vmsav8-64 require reassembling
+	 */
+	uint64_t parange = MMFR0_PARANGE(read_id_aa64mmfr0());
+
+	if (parange > MMFR0_PARANGE_256T) {
+		dboot_printf("WARNING: capping physical address space to "
+		    "48 bits / 256 terabytes");
+		parange = MMFR0_PARANGE_256T;
+	}
+
+	uint64_t tcr = (parange << TCR_IPS_SHIFT) |
 	    TCR_TG1_4K | TCR_SH1_ISH | TCR_ORGN1_WBWA | TCR_IRGN1_WBWA |
 	    TCR_T1SZ_256T | TCR_TG0_4K | TCR_SH0_ISH | TCR_ORGN0_WBWA |
 	    TCR_IRGN0_WBWA | TCR_T0SZ_256T;
