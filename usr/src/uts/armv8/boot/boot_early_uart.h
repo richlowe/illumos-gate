@@ -35,6 +35,7 @@
  *        qemu virt is: 0x09000000ULL, 0x000eULL
  *   Raspberry Pi 4 is: 0xfe201000ULL, 0x000eULL
  * Ampere Altra Max is: 0x100002620000ULL, 0x0003ULL
+ *    FreeBSD Bhyve is: 0x10000ULL, 0x0003ULL
  */
 #define	EARLY_UART_PA	0x0ULL
 #define	EARLY_UART_TYPE	0x0ULL
