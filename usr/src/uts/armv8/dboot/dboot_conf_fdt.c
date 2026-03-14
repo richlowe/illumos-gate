@@ -44,6 +44,22 @@ typedef enum {
 
 #define	CPUNODE_BAD_PARKED_ADDRESS	0xffffffffffffffffull
 
+/*
+ * FreeBSD Bhyve does not provide the generic arm,psci compatible.
+ */
+static const char *psci_names[] = {
+	"arm,psci",
+	"arm,psci-0.2",
+	"arm,psci-1.0",
+	"arm,psci-1.1",
+	"arm,psci-1.2",
+	"arm,psci-1.3",
+	"arm,psci-1.4",
+	"arm,psci-1.5",
+	NULL,
+};
+static size_t num_psci_names = sizeof (psci_names) / sizeof (psci_names[0]);
+
 static const void *
 get_fdtp(void)
 {
@@ -309,8 +325,10 @@ dboot_configure_fdt_cpuinfo(const void *fdtp, struct xboot_info *bi)
 	struct xboot_cpu_info *xci;
 
 	bi->bi_cpuinfo_cnt = 0;
-	if ((xci = (struct xboot_cpu_info *)bi->bi_cpuinfo) == NULL)
+	if ((xci = (struct xboot_cpu_info *)bi->bi_cpuinfo) == NULL) {
+		dboot_printf("dboot: no cpuinfo memory allocated\n");
 		return (-1);
+	}
 
 	boot_cpu_affinity = (read_mpidr() & MPIDR_AFF_MASK);
 
@@ -425,16 +443,21 @@ dboot_configure_fdt(void)
 {
 	const void *fdtp;
 	int nodeoff;
+	size_t i;
 	const char *method;
 	const uint32_t *pval;
 	int plen;
 	extern struct xboot_info *bi;
 
-	if (bi == NULL)
+	if (bi == NULL) {
+		dboot_printf("dboot: xboot_info is NULL\n");
 		return (-1);
+	}
 
-	if ((fdtp = get_fdtp()) == NULL)
+	if ((fdtp = get_fdtp()) == NULL) {
+		dboot_printf("dboot: FDT is NULL\n");
 		return (-1);
+	}
 
 	/*
 	 * Extract PSCI configuration from the FDT.
@@ -443,12 +466,22 @@ dboot_configure_fdt(void)
 	 * while the legacy function identifiers are optional.
 	 */
 
-	nodeoff = fdt_node_offset_by_compatible(fdtp, -1, "arm,psci");
-	if (nodeoff < 0)
+	nodeoff = -1;
+	i = 0;
+
+	while (nodeoff < 0 && psci_names[i] != NULL) {
+		nodeoff =
+		    fdt_node_offset_by_compatible(fdtp, -1, psci_names[i++]);
+	}
+
+	if (nodeoff < 0) {
+		dboot_printf("dboot: no PSCI FDT node found\n");
 		return (-1);
+	}
 
 	if ((method = fdt_getprop(fdtp, nodeoff, "method", &plen)) == NULL ||
 	    plen == 0) {
+		dboot_printf("dboot: no PSCI method found\n");
 		return (-1);
 	}
 
