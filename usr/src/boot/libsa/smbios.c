@@ -424,6 +424,15 @@ smbios_probe(const caddr_t addr)
 		return;
 	smbios.probed = 1;
 
+#if defined(__aarch64__)
+	/*
+	 * On aarch64 systems we can't blindly poke around in low memory to
+	 * locate firmware tables.
+	 */
+	if (addr == NULL)
+		return;
+#endif
+
 	/* Search signatures and validate checksums. */
 	if (smbios_sigsearch(paddr, SMBIOS_LENGTH) == NULL)
 		return;
