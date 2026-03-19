@@ -380,10 +380,13 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 				int l = 0;
 				uintptr_t va = (uintptr_t)virthint;
 
-				/* find the largest page size */
+				/*
+				 * find the largest page size that fits the
+				 * address and size, the physical address is
+				 * constrained when we allocate it.
+				 */
 				for (l = MAX_PAGE_LEVEL; l > 0; l--) {
-					if (((paddr & LEVEL_OFFSET(l)) == 0) &&
-					    ((va & LEVEL_OFFSET(l)) == 0) &&
+					if (((va & LEVEL_OFFSET(l)) == 0) &&
 					    bytes >= LEVEL_SIZE(l))
 						break;
 				}
