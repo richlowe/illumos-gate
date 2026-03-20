@@ -771,17 +771,13 @@ kphysm_init(page_t *pp)
 		pp += num;
 	}
 
-	/*
-	 * Free the avail list
-	 */
+	/* Add all installed memory */
 	for (pmem = phys_install; pmem != NULL; pmem = pmem->ml_next)
 		kphysm_add(pmem->ml_address, pmem->ml_size, 0);
 
 	build_pfn_hash();
 
-	/*
-	 * Erase pages from free list
-	 */
+	/* Erase any pages not on the avail list */
 	diff_memlists(phys_install, phys_avail, kphysm_erase);
 
 	physMemInit = 1;
