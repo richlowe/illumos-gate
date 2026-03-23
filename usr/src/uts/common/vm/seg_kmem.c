@@ -64,9 +64,9 @@
  * They must never be paged out since segkmem_fault() is a no-op to
  * prevent recursive faults.
  *
- * Currently, seg_kmem pages are sharelocked (p_sharelock == 1) on
- * __x86 and are unlocked (p_sharelock == 0) on __sparc.  Once __x86
- * supports relocation the #ifdef kludges can be removed.
+ * Currently, seg_kmem pages are sharelocked (p_selock == 1) on __x86 and
+ * aarch64 and are unlocked (p_selock == 0) on __sparc.  Once other platforms
+ * support relocation the #ifdef kludges can be removed.
  *
  * seg_kmem pages may be subject to relocation by page_relocate(),
  * provided that the HAT supports it; if this is so, segkmem_reloc
