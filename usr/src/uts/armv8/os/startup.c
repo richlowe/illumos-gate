@@ -193,6 +193,8 @@ struct memlist *phys_avail;	/* Total available physical memory */
 struct bootops		*bootops = 0;
 int physMemInit = 0;
 struct memlist *boot_scratch;
+struct memlist *boot_allocated;
+struct memlist *boot_freelist;
 
 pgcnt_t		orig_npages;
 struct memseg *memseg_base;

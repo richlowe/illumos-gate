@@ -1612,13 +1612,17 @@ bmemlist_init(struct xboot_info *xbp)
 	static memlist_t boot_list[MMU_PAGESIZE * 8 / sizeof (memlist_t)];
 	extern struct memlist *phys_install;
 	extern struct memlist *phys_avail;
+	extern struct memlist *boot_allocated;
 	extern struct memlist *boot_scratch;
+	extern struct memlist *boot_freelist;
 
 	for (int i = 0; i < ARRAY_SIZE(boot_list); i++) {
 		bmemlist_free(&boot_list[i]);
 	}
 
 	phys_avail = bmemlist_dup((memlist_t *)xbp->bi_phys_avail);
+	boot_allocated = bmemlist_dup((memlist_t *)xbp->bi_phys_alloc);
+	boot_freelist = bmemlist_dup((memlist_t *)xbp->bi_phys_freelist);
 	phys_install = bmemlist_dup((memlist_t *)xbp->bi_phys_installed);
 	boot_scratch = bmemlist_dup((memlist_t *)xbp->bi_boot_scratch);
 
