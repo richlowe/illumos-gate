@@ -288,9 +288,14 @@ do_bsys_free(bootops_t *bop __unused, caddr_t virt, size_t size)
 static paddr_t
 do_bop_phys_alloc(bootops_t *bop, size_t size, int align)
 {
+	extern struct memlist *boot_freelist;
 	extern struct memlist *phys_avail;
 	extern int physMemInit;
-	paddr_t pa = bmemlist_find(&phys_avail, size, align);
+	paddr_t pa = bmemlist_find(&boot_freelist, size, align);
+
+	/* XXXARM: Remove it from the avail list too, for now, though it's wrong */
+	bmemlist_remove(&phys_avail, pa, size);
+
 	if (pa == 0) {
 		bop_panic("do_bop_phys_alloc(0x%lx, 0x%x) Out of memory\n",
 		    size, align);
