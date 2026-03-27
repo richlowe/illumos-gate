@@ -779,8 +779,8 @@ kphysm_init(page_t *pp)
 
 	build_pfn_hash();
 
-	/* Erase any pages not on the avail list */
-	diff_memlists(phys_install, phys_avail, kphysm_erase);
+	/* Erase any pages not on the free list list */
+	diff_memlists(phys_install, boot_freelist, kphysm_erase);
 
 	physMemInit = 1;
 }
