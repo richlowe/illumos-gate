@@ -743,7 +743,7 @@ kphysm_init(page_t *pp)
 	 * Build the memsegs entry
 	 */
 	cur_memseg = memseg_base;
-	for (pmem = phys_install; pmem; pmem = pmem->ml_next) {
+	for (pmem = phys_avail; pmem != NULL; pmem = pmem->ml_next) {
 		addr = pmem->ml_address;
 		size = pmem->ml_size;
 
@@ -773,14 +773,17 @@ kphysm_init(page_t *pp)
 		pp += num;
 	}
 
-	/* Add all installed memory */
-	for (pmem = phys_install; pmem != NULL; pmem = pmem->ml_next)
+	/* Add all usable memory */
+	for (pmem = phys_avail; pmem != NULL; pmem = pmem->ml_next)
 		kphysm_add(pmem->ml_address, pmem->ml_size, 0);
 
 	build_pfn_hash();
 
-	/* Erase any pages not on the free list list */
-	diff_memlists(phys_install, boot_freelist, kphysm_erase);
+	/*
+	 * Memory in the avail list but not the freelist needs to be adopted
+	 * by segkmem
+	 */
+	diff_memlists(phys_avail, boot_freelist, kphysm_erase);
 
 	physMemInit = 1;
 }
