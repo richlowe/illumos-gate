@@ -66,7 +66,7 @@ exitto(int (*entrypoint)(struct xboot_info *), struct xboot_info *bi)
 	efifb = NULL;
 
 	bi->bi_phys_installed = (uint64_t)pinstalledp;
-	bi->bi_phys_avail = (uint64_t)pfreelistp;
+	bi->bi_phys_avail = (uint64_t)pmappablep;
 	bi->bi_phys_alloc = (uint64_t)pallocp;
 	bi->bi_phys_freelist = (uint64_t)pfreelistp;
 	bi->bi_boot_scratch = (uint64_t)pscratchlistp;
