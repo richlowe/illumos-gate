@@ -669,32 +669,13 @@ memseg_find(pfn_t base, pfn_t *next)
 }
 
 static void
-kphysm_erase(uint64_t addr, uint64_t len)
+kphysm_mapin(uint64_t addr, uint64_t len)
 {
-	pfn_t pfn = btop(addr);
-	pgcnt_t num = btop(len);
-	page_t *pp;
-	while (num--) {
-#ifdef DEBUG
-		pp = page_numtopp_nolock(pfn);
-		ASSERT(pp != NULL);
-		ASSERT(PP_ISFREE(pp));
-#endif
-		pp = page_numtopp(pfn, SE_EXCL);
-		ASSERT(pp != NULL);
-		page_pp_lock(pp, 0, 1);
-		ASSERT(pp != NULL);
-		ASSERT(!PP_ISFREE(pp));
-		ASSERT(pp->p_lckcnt == 1);
-		ASSERT(PAGE_EXCL(pp));
-		pfn++;
-		availrmem_initial--;
-		availrmem--;
-	}
+	boot_mapin((caddr_t)addr, len);
 }
 
 static void
-kphysm_add(uint64_t addr, uint64_t len, int reclaim)
+kphysm_add(uint64_t addr, uint64_t len)
 {
 	struct page *pp;
 	struct memseg *seg;
@@ -704,24 +685,6 @@ kphysm_add(uint64_t addr, uint64_t len, int reclaim)
 	seg = memseg_find(base, NULL);
 	ASSERT(seg != NULL);
 	pp = seg->pages + (base - seg->pages_base);
-
-	if (reclaim) {
-		struct page *rpp = pp;
-		struct page *lpp = pp + num;
-
-		/*
-		 * page should be locked on prom_ppages
-		 * unhash and unlock it
-		 */
-		while (rpp < lpp) {
-			ASSERT(PP_ISNORELOC(rpp));
-			PP_CLRNORELOC(rpp);
-			page_pp_unlock(rpp, 0, 1);
-			page_hashout(rpp, NULL);
-			page_unlock(rpp);
-			rpp++;
-		}
-	}
 
 	add_physmem(pp, num, base);
 	availrmem_initial += num;
@@ -775,7 +738,7 @@ kphysm_init(page_t *pp)
 
 	/* Add all usable memory */
 	for (pmem = phys_avail; pmem != NULL; pmem = pmem->ml_next)
-		kphysm_add(pmem->ml_address, pmem->ml_size, 0);
+		kphysm_add(pmem->ml_address, pmem->ml_size);
 
 	build_pfn_hash();
 
@@ -783,7 +746,7 @@ kphysm_init(page_t *pp)
 	 * Memory in the avail list but not the freelist needs to be adopted
 	 * by segkmem
 	 */
-	diff_memlists(phys_avail, boot_freelist, kphysm_erase);
+	diff_memlists(phys_avail, boot_freelist, kphysm_mapin);
 
 	physMemInit = 1;
 }
@@ -958,13 +921,11 @@ startup_memlist(void)
 	PRM_DEBUG(freemem);
 
 	/*
-	 * Now that page_t's have been initialized, remove all the
-	 * initial allocation pages from the kernel free page lists.
+	 * XXXARM: Now that page_t's have been initialized, we can effect a horrific
+	 * hack whereby we set all these pages PT_NOCONSIST
 	 */
-	int cnt = reserve_boot_pages((pte_t *)TTBR_BADDR48(read_ttbr1()),
-	    _kernelbase, mmu.max_level);
-	if (page_resv(cnt, KM_NOSLEEP) == 0)
-		panic("%s: page_resv failed", __func__);
+	hack_boot_table_noconsist((pte_t *)TTBR_BADDR48(read_ttbr1()),
+	    mmu.max_level);
 
 	PRM_POINT("startup_memlist() done");
 
@@ -1661,9 +1622,16 @@ release_bootstrap(void)
 		for (uintptr_t i = 0; i < mmu_btop(sz); i++) {
 			extern uint64_t ramdisk_start, ramdisk_end;
 			page_t *pp = page_numtopp_nolock(pfn + i);
-			ASSERT(pp);
-			ASSERT(PAGE_LOCKED(pp));
+
+			if (page_tryupgrade(pp) != 1) {
+				panic("%s: boot page can't be locked excl, %p",
+				    __func__, pp);
+			}
+
+			ASSERT3P(pp, !=, NULL);
 			ASSERT(!PP_ISFREE(pp));
+			ASSERT3P(pp->p_vnode, ==, &kvp);
+
 			if ((root_is_ramdisk && pp_in_range(pp, ramdisk_start,
 			    ramdisk_end)) || pp_in_module(pp, modranges)) {
 				pp->p_next = rd_pages;
@@ -1675,10 +1643,6 @@ release_bootstrap(void)
 			PP_CLRBOOTPAGES(pp);
 			page_pp_unlock(pp, 0, 1);
 			page_free(pp, 1);
-			mutex_enter(&freemem_lock);
-			availrmem_initial++;
-			availrmem++;
-			mutex_exit(&freemem_lock);
 		}
 	}
 

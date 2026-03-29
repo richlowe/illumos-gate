@@ -1289,28 +1289,17 @@ htable_attach(
 	if (page_resv(1, KM_NOSLEEP) == 0)
 		panic("page_resv() failed in ptable alloc");
 
-	pp = page_numtopp_nolock(pfn);
-	ASSERT(pp != NULL);
-	ASSERT(!PP_ISFREE(pp));
-	ASSERT(pp->p_lckcnt == 1);
-	ASSERT(PAGE_EXCL(pp));
-
 	/*
-	 * Page table pages that were allocated by dboot or
-	 * in very early startup didn't go through boot_mapin()
-	 * and so won't have vnode/offsets. Fix that here.
+	 * We're inheriting page tables from boot and are still single
+	 * threaded, the hat isn't yet live so we don't need the lock, but we
+	 * do want to ensure the state is as we expect for seg_kmem
 	 */
-	if (pp->p_vnode == NULL) {
-		/* match offset calculation in page_get_physical() */
-		u_offset_t offset = (uintptr_t)ht;
-		ASSERT3U(hole_start, !=, 0);
-		offset &= (hole_start - 1);
-		offset <<= MMU_PAGESHIFT;
-		offset += hole_start;	/* something in VA hole */
-		ASSERT(page_exists(&kvp, offset) == NULL);
-		(void) page_hashin(pp, &kvp, offset, NULL);
-	}
-	page_downgrade(pp);
+	pp = page_numtopp_nolock(pfn);
+	ASSERT3P(pp, !=, NULL);
+	ASSERT(!PP_ISFREE(pp));
+	ASSERT3P(pp->p_lckcnt, ==, 1);
+	ASSERT3P(pp->p_vnode, !=, NULL);
+	ASSERT(PAGE_SHARED(pp));
 
 	/*
 	 * Count valid mappings and recursively attach lower level pagetables.
