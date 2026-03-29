@@ -350,80 +350,25 @@ va_to_pfn(void *vaddr)
 	return (mmu_btop(pa));
 }
 
-static boolean_t
-is_reserved_memory(paddr_t pa)
-{
-	pfn_t pfn = mmu_btop(pa);
-	page_t *pp = page_numtopp_nolock(pfn);
-	if (pp == NULL)
-		return (B_FALSE);
-	if (!PAGE_EXCL(pp))
-		return (B_FALSE);
-	if (pp->p_lckcnt != 1)
-		return (B_FALSE);
-	return (B_TRUE);
-}
-
 /*
- * Synchronize our state with the upper, kernel, page tables inherited from
- * boot, return the number of page_t-sized pages taken in.
- *
- * NB: This runs while memory is still identity mapped and uses physical
- * addresses
- *
- * XXX: Why are we not using `boot_mapin`?  (does it set the NOCONSIST flag?)
+ * XXXARM: recursively walk the page tables below `ptbl` (which is at `level`)
+ * and set the `PTE_NOCONSIST` flag on every page.  We should not be doing this.
  */
-uint64_t
-reserve_boot_pages(pte_t *ptbl, uintptr_t base, uint_t level)
+void
+hack_boot_table_noconsist(pte_t *ptbl, uint_t level)
 {
-	uint64_t count = 0;
-
 	VERIFY3U(khat_running, ==, 0);
-	ASSERT(is_reserved_memory((paddr_t)(uintptr_t)ptbl));
 
 	for (uint64_t i = 0; i < NPTEPERPT; i++) {
 		if (!PTE_ISVALID(ptbl[i]))
 			continue;
 
-		ptbl[i] |= PTE_NOCONSIST; /* XXX: Why do we do this here? */
+		ptbl[i] |= PTE_NOCONSIST;
 
 		if (PTE_ISTABLE(ptbl[i], level)) {
-			count += reserve_boot_pages(
+			hack_boot_table_noconsist(
 			    (pte_t *)(ptbl[i] & PTE_PFN_MASK),
-			    base + (i << LEVEL_SHIFT(level)),
 			    level - 1);
-		} else {
-			for (uint64_t j = 0;
-			    j < LEVEL_SIZE(level) / MMU_PAGESIZE;
-			    j++) {
-				pfn_t pfn = mmu_btop((ptbl[i] & PTE_PFN_MASK) +
-				    (MMU_PAGESIZE * j));
-
-				page_t *pp = page_numtopp_nolock(pfn);
-				VERIFY3P(pp, !=, NULL);
-
-				/*
-				 * XXX: This is the opposite of
-				 * `is_reserved_memory`
-				 */
-				VERIFY(PAGE_EXCL(pp));
-				VERIFY(pp->p_lckcnt == 1);
-
-				if (pp->p_vnode == NULL) {
-					uintptr_t va = base +
-					    (i << LEVEL_SHIFT(level)) +
-					    (MMU_PAGESIZE * j);
-
-					/* NB: Really 1 on success */
-					if (page_hashin(pp, &kvp, va,
-					    NULL) != 1) {
-						panic("%s: failed to "
-						    "hashin %lx", __func__, va);
-					}
-				}
-			}
 		}
 	}
-
-	return (count);
 }
