@@ -349,26 +349,3 @@ va_to_pfn(void *vaddr)
 
 	return (mmu_btop(pa));
 }
-
-/*
- * XXXARM: recursively walk the page tables below `ptbl` (which is at `level`)
- * and set the `PTE_NOCONSIST` flag on every page.  We should not be doing this.
- */
-void
-hack_boot_table_noconsist(pte_t *ptbl, uint_t level)
-{
-	VERIFY3U(khat_running, ==, 0);
-
-	for (uint64_t i = 0; i < NPTEPERPT; i++) {
-		if (!PTE_ISVALID(ptbl[i]))
-			continue;
-
-		ptbl[i] |= PTE_NOCONSIST;
-
-		if (PTE_ISTABLE(ptbl[i], level)) {
-			hack_boot_table_noconsist(
-			    (pte_t *)(ptbl[i] & PTE_PFN_MASK),
-			    level - 1);
-		}
-	}
-}

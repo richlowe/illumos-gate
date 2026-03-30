@@ -293,7 +293,7 @@ map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 			/* XXX: MAKEPTE(...) */
 			ptbl[LEVEL_INDEX(vaddr, l)] = pa |
 			    PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER |
-			    PTE_TABLE;
+			    PTE_NOCONSIST | PTE_TABLE;
 			dsb(ish);
 			isb();
 		} else if (!PTE_ISTABLE(ptbl[LEVEL_INDEX(vaddr, l)], l)) {
@@ -306,7 +306,7 @@ map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 
 	/* XXX: MAKEPTE */
 	uint_t type = (level == 0) ? PTE_PAGE : PTE_BLOCK;
-	pte_t newpte = paddr | pte_attr | type;
+	pte_t newpte = paddr | pte_attr | PTE_NOCONSIST | type;
 
 	if (PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, level)]) &&
 	    !PTE_EQUIV(ptbl[LEVEL_INDEX(vaddr, level)], newpte)) {
