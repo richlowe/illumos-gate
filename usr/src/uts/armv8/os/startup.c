@@ -884,7 +884,12 @@ startup_memlist(void)
 	valloc_sz = ROUND_UP_LPAGE(valloc_sz);
 	valloc_base = _kernelbase;
 
+	PRM_DEBUG(valloc_base);
+	PRM_DEBUG(valloc_sz);
+
 	segkpm_base = valloc_base + valloc_sz;
+
+	PRM_DEBUG(segkpm_base);
 
 	/*
 	 * do all the initial allocations
@@ -920,22 +925,13 @@ startup_memlist(void)
 	PRM_DEBUG(availrmem);
 	PRM_DEBUG(freemem);
 
-	/*
-	 * XXXARM: Now that page_t's have been initialized, we can effect a horrific
-	 * hack whereby we set all these pages PT_NOCONSIST
-	 */
-	hack_boot_table_noconsist((pte_t *)TTBR_BADDR48(read_ttbr1()),
-	    mmu.max_level);
-
-	PRM_POINT("startup_memlist() done");
-
-	PRM_DEBUG(valloc_sz);
-
 	if ((availrmem >> (30 - MMU_PAGESHIFT)) >=
 	    textrepl_min_gb && l2cache_sz <= 2 << 20) {
 		extern size_t textrepl_size_thresh;
 		textrepl_size_thresh = (16 << 20) - 1;
 	}
+
+	PRM_POINT("startup_memlist() done");
 }
 
 static void
