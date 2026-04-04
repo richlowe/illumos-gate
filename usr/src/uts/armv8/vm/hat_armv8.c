@@ -3166,9 +3166,14 @@ hat_dup_region(struct hat *hat, hat_region_cookie_t rcookie)
 	panic("No shared region support on aarch64");
 }
 
-
+/*
+ * Handle access flag trap for addr.
+ *
+ * It is import this code not do anything except handle flipping the AF bit,
+ * with FEAT_HAF/FEAT_HAFDBS don't ever get here.
+ */
 int
-hat_page_fault(hat_t *hat, caddr_t vaddr)
+hati_access_fault(hat_t *hat, caddr_t vaddr)
 {
 	int rv = -1;
 
