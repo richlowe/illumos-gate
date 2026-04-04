@@ -311,6 +311,8 @@
 #define	TCR_E0PD1	(1ul << 56)
 #define	TCR_E0PD0	(1ul << 55)
 
+#define	TCR_HA		(1ul << 39) /* Hardware access flag updates */
+
 #define	TCR_AS		(1ul<<36)
 
 #define	TCR_IPS_SHIFT	32
