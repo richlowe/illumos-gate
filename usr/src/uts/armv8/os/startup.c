@@ -798,6 +798,10 @@ startup_memlist(void)
 	 */
 	mmu_init();
 
+	/* Check hardware page table update support */
+	extern void init_hafdbs(void);
+	maybe_enable_hardware_table_updates();
+
 	startup_build_mem_nodes(phys_install);
 
 	/*

@@ -539,35 +539,30 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		uint32_t fsc = ISS_IABORT_IFSC(iss);
 
 		/*
-		 * XXXARM: The original code said (0x9 <= fsc && fsc <= 0xc)
-		 * which seems like a typo, as this covers:
+		 * Access Flag traps, call into the hat to flip the bit on the
+		 * PTE.  Only happen on armv8.0 without FEAT_HAFDBS.
 		 *
-		 * 0x9 ACCESS_L1
-		 * 0xa ACCESS_L2
-		 * 0xb ACCESS_L3
-		 * 0xc PERM_L0
-		 *
-		 * and misses ACCESS_L0
+		 * If it's taken at our EL it's a kernel fault, at other EL
+		 * it's a user fault and must be to a user address.
 		 */
 		if (ISS_IABORT_IFSC_ACCESS(fsc) &&
-		    (ISS_IABORT_FNV(iss) == ISS_IABORT_FAR_VALID) &&
-		    ((ec == T_INSTRUCTION_ABORT_EL) || (addr < (caddr_t)kernelbase)) &&
-		    hat_page_fault(addr < (caddr_t)kernelbase ? curproc->p_as->a_hat : kas.a_hat, addr) == 0) {
-			return (1);
+		    (ISS_IABORT_FNV(iss) == ISS_IABORT_FAR_VALID)) {
+			if ((ec == T_INSTRUCTION_ABORT_EL) &&
+			    (addr >= (caddr_t)_kernelbase)) {
+				if (hati_access_fault(kas.a_hat, addr) == 0) {
+					return (1);
+				}
+			} else if (addr < (caddr_t)_userlimit) {
+				if (hati_access_fault(curproc->p_as->a_hat,
+				    addr) == 0) {
+					return (1);
+				}
+			}
+
+			/* Failed AF update */
+			fault_type = F_INVAL;
 		} else if (ISS_IABORT_IFSC_PERM(fsc)) {
-			/*
-			 * Access flag fault or Permission fault.
-			 *
-			 * XXXARM: The comment above is not actually true,
-			 * The original code said: (0xd <= fsc && fsc <= 0xF)
-			 *
-			 * 0xd - PERM_L1,
-			 * 0xe - PERM_L2
-			 * 0xf - PERM_L3
-			 *
-			 * Access flag isn't covered here at all, nor is
-			 * permission at L0.
-			 */
+			/* Permission fault */
 			fault_type = F_PROT;
 		} else {
 			fault_type = F_INVAL;
@@ -594,21 +589,28 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		uint32_t fsc = ISS_DABORT_DFSC(iss);
 
 		/*
-		 * XXXARM: The original code said (0x9 <= fsc && fsc <= 0xc)
-		 * which seems like a typo, as this covers:
+		 * Access Flag traps, call into the hat to flip the bit on the
+		 * PTE.  Only happen on armv8.0 without FEAT_HAFDBS.
 		 *
-		 * 0x9 ACCESS_L1
-		 * 0xa ACCESS_L2
-		 * 0xb ACCESS_L3
-		 * 0xc PERM_L0
-		 *
-		 * and misses ACCESS_L0
+		 * If it's taken at our EL it's a kernel fault, at other EL
+		 * it's a user fault and must be to a user address.
 		 */
 		if (ISS_DABORT_DFSC_ACCESS(fsc) &&
-		    (ISS_DABORT_FNV(iss) == ISS_DABORT_FAR_VALID) &&
-		    ((ec == T_NV2_DATA_ABORT) || (addr < (caddr_t)kernelbase)) &&
-		    hat_page_fault(addr < (caddr_t)kernelbase ? curproc->p_as->a_hat : kas.a_hat, addr) == 0) {
-			return (1);
+		    (ISS_DABORT_FNV(iss) == ISS_DABORT_FAR_VALID)) {
+			if ((ec == T_NV2_DATA_ABORT) &&
+			    (addr >= (caddr_t)_kernelbase)) {
+				if (hati_access_fault(kas.a_hat, addr) == 0) {
+					return (1);
+				}
+			} else if (addr < (caddr_t)_userlimit) {
+				if (hati_access_fault(curproc->p_as->a_hat,
+				    addr) == 0) {
+					return (1);
+				}
+			}
+
+			/* Failed AF update */
+			fault_type = F_INVAL;
 		} else if (ISS_DABORT_DFSC_PERM(fsc)) {
 			/*
 			 * Access flag fault or Permission fault.

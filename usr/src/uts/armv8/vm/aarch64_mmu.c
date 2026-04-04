@@ -349,3 +349,24 @@ va_to_pfn(void *vaddr)
 
 	return (mmu_btop(pa));
 }
+
+/*
+ * Determine what hardware support for page table updates we have, and enable
+ * the ones we want.
+ *
+ * Currently:
+ *    - if FEAT_HAFDBS, hardware AF updates
+ */
+void
+maybe_enable_hardware_table_updates(void)
+{
+	/*
+	 * We get called before cpu features are determined, so we have to do
+	 * this by hand
+	 */
+	uint8_t hafdbs = MMFR1_HAFDBS(read_id_aa64mmfr1());
+
+	if (hafdbs >= MMFR1_FEAT_HAFDBS_HAFDBS) {
+		write_tcr(read_tcr() | TCR_HA);
+	}
+}

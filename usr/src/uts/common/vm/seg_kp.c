@@ -571,23 +571,9 @@ segkp_get_internal(
 
 		/*
 		 * Load and lock an MMU translation for the page.
-		 *
-		 * XXXARM: The `HAT_NOSYNC` here is load-bearing, it makes its
-		 * way down to set `PT_NOSYNC` on the pages, treating them as
-		 * always ref/mod.  This implies our state tracking is
-		 * entirely bad.
-		 *
-		 * XXXARM: I'm also not sure why this gets snuck in in the
-		 * protections not the flags.
 		 */
-#if defined(__aarch64__)
-		hat_memload(seg->s_as->a_hat, va, pp,
-		    (PROT_READ|PROT_WRITE|HAT_NOSYNC),
-		    ((flags & KPD_LOCKED) ? HAT_LOAD_LOCK : HAT_LOAD));
-#else
 		hat_memload(seg->s_as->a_hat, va, pp, (PROT_READ|PROT_WRITE),
 		    ((flags & KPD_LOCKED) ? HAT_LOAD_LOCK : HAT_LOAD));
-#endif
 
 		/*
 		 * Now, release lock on the page.
@@ -1168,13 +1154,8 @@ segkp_load(
 		/*
 		 * Load an MMU translation for the page.
 		 */
-#if defined(__aarch64__)
-		hat_memload(hat, va, pl[0], (PROT_READ|PROT_WRITE|HAT_NOSYNC),
-		    lock ? HAT_LOAD_LOCK : HAT_LOAD);
-#else
 		hat_memload(hat, va, pl[0], (PROT_READ|PROT_WRITE),
 		    lock ? HAT_LOAD_LOCK : HAT_LOAD);
-#endif
 
 		if (!lock) {
 			/*

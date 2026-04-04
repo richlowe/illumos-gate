@@ -307,6 +307,8 @@
 
 #define	CPUECTLR_SMP	(1<<6)
 
+#define	TCR_HA		(1ul << 39) /* Hardware access flag updates */
+
 #define	TCR_AS		(1ul<<36)
 
 #define	TCR_IPS_SHIFT	32

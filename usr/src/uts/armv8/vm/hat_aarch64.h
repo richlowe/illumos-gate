@@ -229,7 +229,9 @@ extern void tlb_service(void);
  */
 extern void hat_switch(struct hat *hat);
 
-extern int hat_page_fault(hat_t *hat, caddr_t vaddr);
+extern int hati_access_fault(hat_t *hat, caddr_t vaddr);
+
+extern void maybe_enable_hardware_table_updates(void);
 
 #endif	/* _KERNEL */
 
