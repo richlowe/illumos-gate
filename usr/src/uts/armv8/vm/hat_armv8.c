@@ -55,6 +55,7 @@
 #include <sys/archsystm.h>
 #include <sys/prom_debug.h>
 #include <sys/cpuid.h>
+#include <sys/arm_features.h>
 
 #include <vm/seg_kmem.h>
 #include <vm/hat_armv8.h>
@@ -268,6 +269,12 @@ mmu_init(void)
 	/* FEAT_E0PD: User fault on kernel VA in constant time */
 	if (MMFR2_E0PD(read_id_aa64mmfr2()) != 0)
 		tcr |= TCR_E0PD1;
+
+	uint64_t mmfr1 = read_id_aa64mmfr1();
+
+	/* FEAT_HAF/FEAT_HAFDBS: hardware updates to pte access flag */
+	if (MMFR1_HAFDBS(mmfr1) >= MMFR1_FEAT_HAFDBS_HAFDBS)
+		tcr |= TCR_HA;
 
 	write_tcr(tcr);
 
@@ -3151,6 +3158,9 @@ int
 hat_page_fault(hat_t *hat, caddr_t vaddr)
 {
 	int rv = -1;
+
+	ASSERT(!has_arm_feature(arm_features, ARM_FEAT_HAFDBS));
+
 	vaddr = (caddr_t)((uintptr_t)vaddr & ~(MMU_PAGESIZE - 1));
 	for (;;) {
 		uint_t entry;
