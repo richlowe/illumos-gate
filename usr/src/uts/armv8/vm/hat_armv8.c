@@ -3175,39 +3175,45 @@ hat_dup_region(struct hat *hat, hat_region_cookie_t rcookie)
 int
 hati_access_fault(hat_t *hat, caddr_t vaddr)
 {
-	int rv = -1;
-
 	ASSERT(!has_arm_feature(arm_features, ARM_FEAT_HAFDBS));
 
 	vaddr = (caddr_t)((uintptr_t)vaddr & ~(MMU_PAGESIZE - 1));
 	for (;;) {
 		uint_t entry;
 		pte_t oldpte;
+
 		htable_t *ht = htable_getpte(hat, (uintptr_t)vaddr, &entry,
 		    &oldpte, mmu.max_page_level);
 		if (ht == NULL)
-			break;
+			return (-1);
 
 		if (!PTE_ISVALID(oldpte)) {
 			htable_release(ht);
-			break;
+			return (-1);
 		}
+
 		if (PTE_GET(oldpte, PTE_SOFTWARE) >= PTE_NOSYNC) {
 			htable_release(ht);
-			break;
+			return (-1);
 		}
+
 		if (PTE_GET(oldpte, PTE_AF) == 0) {
 			page_t *pp = page_numtopp_nolock(PTE2PFN(oldpte,
 			    ht->ht_level));
+
 			if (pp == NULL) {
 				htable_release(ht);
-				break;
+				return (-1);
 			}
 
 			hm_enter(pp);
 
 			pte_t newpte = pte_get(ht, entry);
 
+			/*
+			 * If they don't match, we're racing with another
+			 * thread, go around again
+			 */
 			if (newpte != oldpte) {
 				hm_exit(pp);
 				htable_release(ht);
@@ -3220,9 +3226,8 @@ hati_access_fault(hat_t *hat, caddr_t vaddr)
 			hm_exit(pp);
 		}
 		htable_release(ht);
-		rv = 0;
-		break;
+		return (0);
 	}
 
-	return (rv);
+	return (-1);
 }
