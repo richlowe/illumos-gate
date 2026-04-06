@@ -670,8 +670,10 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 			ASSERT(!(curthread->t_flag & T_WATCHPT));
 			res = pagefault(addr, fault_type, rw, 0);
 
-			if (res == 0 ||
-			    (res == FC_NOMAP && addr < p->p_usrstack && grow(addr))) {
+			if ((res == 0) ||
+			    ((res == FC_NOMAP) &&
+			    (addr < p->p_usrstack) &&
+			    (grow(addr) != 0))) {
 				lwp->lwp_lastfault = FLTPAGE;
 				lwp->lwp_lastfaddr = addr;
 				if (prismember(&p->p_fltmask, FLTPAGE)) {
@@ -758,10 +760,11 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		case T_AST:
 			if (lwp->lwp_pcb.pcb_flags & ASYNC_HWERR) {
 				proc_t *p = ttoproc(curthread);
+				cont_process_t *pc = p->p_ct_process;
 
 				lwp->lwp_pcb.pcb_flags &= ~ASYNC_HWERR;
-				print_msg_hwerr(p->p_ct_process->conp_contract.ct_id, p);
-				contract_process_hwerr(p->p_ct_process, p);
+				print_msg_hwerr(pc->conp_contract.ct_id, p);
+				contract_process_hwerr(pc, p);
 				siginfo.si_signo = SIGKILL;
 				siginfo.si_code = SI_NOINFO;
 			} else if (lwp->lwp_pcb.pcb_flags & CPC_OVERFLOW) {
@@ -830,20 +833,21 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 
 			ct->t_sig_check = 0;
 
-	 		/*
-	 		 * As in other code paths that check against
-	 		 * TP_CHANGEBIND, we perform the check first without
-	 		 * p_lock held -- only acquiring p_lock in the
-	 		 * unlikely event that it is indeed set.  This is safe
-	 		 * because we are doing this after the astoff(); if we
-	 		 * are racing another thread setting TP_CHANGEBIND on
-	 		 * us, we will pick it up on a subsequent lap through.
-	 		 */
+			/*
+			 * As in other code paths that check against
+			 * TP_CHANGEBIND, we perform the check first without
+			 * p_lock held -- only acquiring p_lock in the
+			 * unlikely event that it is indeed set.  This is safe
+			 * because we are doing this after the astoff(); if we
+			 * are racing another thread setting TP_CHANGEBIND on
+			 * us, we will pick it up on a subsequent lap through.
+			 */
 			if (curthread->t_proc_flag & TP_CHANGEBIND) {
 				mutex_enter(&p->p_lock);
 				if (curthread->t_proc_flag & TP_CHANGEBIND) {
 					timer_lwpbind();
-					curthread->t_proc_flag &= ~TP_CHANGEBIND;
+					curthread->t_proc_flag &=
+					    ~TP_CHANGEBIND;
 				}
 				mutex_exit(&p->p_lock);
 			}
@@ -919,12 +923,14 @@ out:
 				}
 
 				/*
-				 * See if we can handle as pagefault. Save lofault and onfault
-				 * across this. Here we assume that an address less than
-				 * KERNELBASE is a user fault.  We can do this as copy.s
-				 * routines verify that the starting address is less than
-				 * KERNELBASE before starting and because we know that we
-				 * always have KERNELBASE mapped as invalid to serve as a
+				 * See if we can handle as pagefault. Save
+				 * lofault and onfault across this. Here we
+				 * assume that an address less than KERNELBASE
+				 * is a user fault.  We can do this as copy.s
+				 * routines verify that the starting address
+				 * is less than KERNELBASE before starting and
+				 * because we know that we always have
+				 * KERNELBASE mapped as invalid to serve as a
 				 * "barrier".
 				 */
 				lofault = ct->t_lofault;
@@ -949,8 +955,9 @@ out:
 				new_mstate(ct, mstate);
 
 				/*
-				 * Restore lofault and onfault. If we resolved the fault, exit.
-				 * If we didn't and lofault wasn't set, die.
+				 * Restore lofault and onfault. If we resolved
+				 * the fault, exit.  If we didn't and lofault
+				 * wasn't set, die.
 				 */
 				ct->t_lofault = lofault;
 				ct->t_onfault = onfault;

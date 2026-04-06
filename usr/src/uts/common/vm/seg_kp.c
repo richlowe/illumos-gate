@@ -644,7 +644,7 @@ segkp_release_internal(struct seg *seg, struct segkp_data *kpd, size_t len)
 	long		redzone;
 	size_t		np;
 	page_t		*pp;
-	struct vnode 	*vp;
+	struct vnode	*vp;
 	anoff_t		off;
 	struct anon	*ap;
 	pgcnt_t		segkpindex;
