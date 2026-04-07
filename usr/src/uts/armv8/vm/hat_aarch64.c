@@ -3177,44 +3177,26 @@ hati_access_fault(hat_t *hat, uintptr_t vaddr)
 
 		/*
 		 * NOSYNC/NOCONSIST pages should never have lost their AF, nor
-		 * been recycled in such a way that we could have raced
-		 * here and be looking at something else.
+		 * been recycled in such a way that we could have raced here
+		 * and be looking at something else.
 		 *
 		 * We also do hold the tables
 		 */
 		VERIFY3U(PTE_GET(oldpte, PTE_SOFTWARE), <, PTE_NOSYNC);
 
 		if (PTE_GET(oldpte, PTE_AF) == 0) {
-			page_t *pp = page_numtopp_nolock(PTE2PFN(oldpte,
-			    ht->ht_level));
-
-			if (pp == NULL) {
-				htable_release(ht);
-				return (-1);
-			}
-
-			/*
-			 * XXX: I'm not sure why this needs this lock, or a pp
-			 * in general, as compared to a pure htable lock
-			 */
-			hm_enter(pp);
-
 			pte_t newpte = pte_get(ht, entry);
 
+			PTE_SET(newpte, PTE_AF);
+
 			/*
-			 * If they don't match, we're racing with another
-			 * thread, go around again
+			 * If the CAS fails we're racing with another thread,
+			 * go around again
 			 */
-			if (newpte != oldpte) {
-				hm_exit(pp);
+			if (pte_update(ht, entry, oldpte, newpte) != oldpte) {
 				htable_release(ht);
 				continue;
 			}
-
-			PTE_SET(newpte, PTE_AF);
-			pte_update(ht, entry, oldpte, newpte);
-
-			hm_exit(pp);
 		}
 		htable_release(ht);
 		return (0);
