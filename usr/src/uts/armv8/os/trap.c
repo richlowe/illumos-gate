@@ -549,12 +549,13 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		    (ISS_IABORT_FNV(iss) == ISS_IABORT_FAR_VALID)) {
 			if ((ec == T_INSTRUCTION_ABORT_EL) &&
 			    (addr >= (caddr_t)_kernelbase)) {
-				if (hati_access_fault(kas.a_hat, addr) == 0) {
+				if (hati_access_fault(kas.a_hat,
+				    (uintptr_t)addr) == 0) {
 					return (1);
 				}
 			} else if (addr < (caddr_t)_userlimit) {
 				if (hati_access_fault(curproc->p_as->a_hat,
-				    addr) == 0) {
+				    (uintptr_t)addr) == 0) {
 					return (1);
 				}
 			}
@@ -599,12 +600,13 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		    (ISS_DABORT_FNV(iss) == ISS_DABORT_FAR_VALID)) {
 			if ((ec == T_NV2_DATA_ABORT) &&
 			    (addr >= (caddr_t)_kernelbase)) {
-				if (hati_access_fault(kas.a_hat, addr) == 0) {
+				if (hati_access_fault(kas.a_hat,
+				    (uintptr_t)addr) == 0) {
 					return (1);
 				}
 			} else if (addr < (caddr_t)_userlimit) {
 				if (hati_access_fault(curproc->p_as->a_hat,
-				    addr) == 0) {
+				    (uintptr_t)addr) == 0) {
 					return (1);
 				}
 			}

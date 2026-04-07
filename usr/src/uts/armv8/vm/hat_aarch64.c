@@ -3155,16 +3155,17 @@ hat_dup_region(struct hat *hat, hat_region_cookie_t rcookie)
  * armv8.1 or armv8.0 with FEAT_HAFDBS don't ever get here.
  */
 int
-hati_access_fault(hat_t *hat, caddr_t vaddr)
+hati_access_fault(hat_t *hat, uintptr_t vaddr)
 {
 	ASSERT(!has_arm_feature(arm_features, ARM_FEAT_HAFDBS));
 
-	vaddr = (caddr_t)((uintptr_t)vaddr & ~(MMU_PAGESIZE - 1));
+	vaddr = P2ALIGN(vaddr, MMU_PAGESIZE);
+
 	for (;;) {
 		uint_t entry;
 		pte_t oldpte;
 
-		htable_t *ht = htable_getpte(hat, (uintptr_t)vaddr, &entry,
+		htable_t *ht = htable_getpte(hat, vaddr, &entry,
 		    &oldpte, mmu.max_page_level);
 		if (ht == NULL)
 			return (-1);
