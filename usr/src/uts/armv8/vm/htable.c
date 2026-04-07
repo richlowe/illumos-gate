@@ -1772,7 +1772,7 @@ done:
 }
 
 /*
- * Change a page table entry af it currently matches the value in expect.
+ * Change a page table entry if it currently matches the value in expect.
  */
 pte_t
 pte_update(
