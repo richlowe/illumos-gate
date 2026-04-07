@@ -3192,10 +3192,14 @@ hati_access_fault(hat_t *hat, caddr_t vaddr)
 			return (-1);
 		}
 
-		if (PTE_GET(oldpte, PTE_SOFTWARE) >= PTE_NOSYNC) {
-			htable_release(ht);
-			return (-1);
-		}
+		/*
+		 * NOSYNC/NOCONSIST pages should never have lost their AF, nor
+		 * been recycled in such a way that we could have raced
+		 * here and be looking at something else.
+		 *
+		 * We also do hold the tables
+		 */
+		VERIFY3U(PTE_GET(oldpte, PTE_SOFTWARE), <, PTE_NOSYNC);
 
 		if (PTE_GET(oldpte, PTE_AF) == 0) {
 			page_t *pp = page_numtopp_nolock(PTE2PFN(oldpte,
@@ -3206,6 +3210,10 @@ hati_access_fault(hat_t *hat, caddr_t vaddr)
 				return (-1);
 			}
 
+			/*
+			 * XXX: I'm not sure why this needs this lock, or a pp
+			 * in general, as compared to a pure htable lock
+			 */
 			hm_enter(pp);
 
 			pte_t newpte = pte_get(ht, entry);
