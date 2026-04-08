@@ -876,10 +876,10 @@ hati_load_common(
 	 *
 	 * This means most importantly we won't get an access flag trap for
 	 * the stack pages of interrupt threads (which we need to handle the
-	 * access flag trap).  This is a crock, but none of access-flag
-	 * handling is correct at all.
+	 * access flag trap).  This is kind of a crock.
 	 *
 	 * XXXARM: maybe we should pre-set AF on all mappings?
+	 * XXXARM: maybe we should set PTE_NOSYNC if HAT_LOAD_LOCK?
 	 */
 	if ((flags & HAT_LOAD_LOCK) != 0)
 		PTE_SET(pte, PTE_AF);
@@ -3161,46 +3161,41 @@ hati_access_fault(hat_t *hat, uintptr_t vaddr)
 
 	vaddr = P2ALIGN(vaddr, MMU_PAGESIZE);
 
-	for (;;) {
-		uint_t entry;
-		pte_t oldpte;
+	pte_t oldpte;
+	uint_t entry;
+	htable_t *ht = htable_getpte(hat, vaddr, &entry, &oldpte,
+	    mmu.max_page_level);
 
-		htable_t *ht = htable_getpte(hat, vaddr, &entry,
-		    &oldpte, mmu.max_page_level);
-		if (ht == NULL)
-			return (-1);
+	if (ht == NULL)
+		return (-1);
 
-		if (!PTE_ISVALID(oldpte)) {
-			htable_release(ht);
-			return (-1);
-		}
-
-		/*
-		 * NOSYNC/NOCONSIST pages should never have lost their AF, nor
-		 * been recycled in such a way that we could have raced here
-		 * and be looking at something else.
-		 *
-		 * We also do hold the tables
-		 */
-		VERIFY3U(PTE_GET(oldpte, PTE_SOFTWARE), <, PTE_NOSYNC);
-
-		if (PTE_GET(oldpte, PTE_AF) == 0) {
-			pte_t newpte = pte_get(ht, entry);
-
-			PTE_SET(newpte, PTE_AF);
-
-			/*
-			 * If the CAS fails we're racing with another thread,
-			 * go around again
-			 */
-			if (pte_update(ht, entry, oldpte, newpte) != oldpte) {
-				htable_release(ht);
-				continue;
-			}
-		}
+	/* Lost a race against the mapping vanishing */
+	if (!PTE_ISVALID(oldpte)) {
 		htable_release(ht);
-		return (0);
+		return (-1);
 	}
 
-	return (-1);
+	/*
+	 * NOSYNC/NOCONSIST pages should never have lost their AF, nor
+	 * been recycled in such a way that we could have raced here
+	 * and be looking at something else.
+	 */
+	VERIFY3U(PTE_GET(oldpte, PTE_SOFTWARE), <, PTE_NOSYNC);
+
+	/* Otherwise compare-and-swap in the AF bit */
+	pte_t newpte = oldpte;
+	PTE_SET(newpte, PTE_AF);
+
+	/*
+	 * If the CAS fails we've raced with another thread, unless the
+	 * existing entry is the new one + AF, in which case we're fine.
+	 */
+	pte_t was = pte_update(ht, entry, oldpte, newpte);
+	if ((was != oldpte) && (was != newpte)) {
+		htable_release(ht);
+		return (-1);
+	}
+
+	htable_release(ht);
+	return (0);
 }
