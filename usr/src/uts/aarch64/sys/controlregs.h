@@ -307,6 +307,10 @@
 
 #define	CPUECTLR_SMP	(1<<6)
 
+/* EL0 accesses via TTBR1/TTBR0 should trap immediately */
+#define	TCR_E0PD1	(1ul << 56)
+#define	TCR_E0PD0	(1ul << 55)
+
 #define	TCR_AS		(1ul<<36)
 
 #define	TCR_IPS_SHIFT	32
