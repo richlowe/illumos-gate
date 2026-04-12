@@ -54,6 +54,7 @@
 #include <sys/controlregs.h>
 #include <sys/archsystm.h>
 #include <sys/prom_debug.h>
+#include <sys/cpuid.h>
 
 #include <vm/seg_kmem.h>
 #include <vm/hat_aarch64.h>
@@ -259,6 +260,18 @@ mmu_init(void)
 {
 	uint64_t tcr = read_tcr();
 
+	/*
+	 * If we have optional global MMU features enable them, unfortunately
+	 * we haven't initialized the feature infra yet.
+	 */
+
+	/* FEAT_E0PD: User fault on kernel VA in constant time */
+	if (MMFR2_E0PD(read_id_aa64mmfr2()) != 0)
+		tcr |= TCR_E0PD1;
+
+	write_tcr(tcr);
+
+	/* Initialize mmu and kernel memory characteristics */
 	mmu.max_asid = ((tcr & TCR_AS) ? 0xFFFF : 0xFF);
 	mmu.max_level = MAX_PAGE_LEVEL; /* XXX: num_level - 1 */
 	mmu.num_level = MMU_PAGE_LEVELS;
