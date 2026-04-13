@@ -126,6 +126,9 @@ int	l2cache_linesz = 0x40;
 int	l2cache_assoc = 1;
 static size_t	textrepl_min_gb = 10;
 
+/* XXXARM: This really does default disabled even on x86, sigh */
+int	auto_lpg_disable = 1;
+
 uintptr_t	hole_start;
 uintptr_t	hole_end;
 
@@ -1453,11 +1456,12 @@ startup_vm(void)
 	/*
 	 * disable automatic large pages for small memory systems or
 	 * when the disable flag is set.
-	 *
-	 * Do not yet consider page sizes larger than 2m/4m.
 	 */
-	use_brk_lpg = 0;
-	use_stk_lpg = 0;
+	if (physmem < privm_lpg_min_physmem || mmu.max_page_level == 0 ||
+	    auto_lpg_disable) {
+		use_brk_lpg = 0;
+		use_stk_lpg = 0;
+	}
 
 	PRM_POINT("Calling hat_init_finish()...");
 	hat_init_finish();
