@@ -57,7 +57,7 @@
 #include <sys/cpuid.h>
 
 #include <vm/seg_kmem.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <vm/as.h>
 #include <vm/seg.h>
 #include <vm/page.h>

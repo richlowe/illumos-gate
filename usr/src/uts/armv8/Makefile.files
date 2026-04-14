@@ -39,13 +39,13 @@ CORE_OBJS +=			\
 	mem_config_arch.o	\
 	memnode.o		\
 	lgrpplat.o		\
-	hat_aarch64.o		\
+	hat_armv8.o		\
 	hat_kdi.o		\
 	hat_kpm.o		\
 	hment.o			\
 	htable.o		\
 	vm_machdep.o		\
-	aarch64_mmu.o		\
+	armv8_mmu.o		\
 	ddi_impl.o		\
 	exceptions.o		\
 	swtch.o			\

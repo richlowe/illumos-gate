@@ -42,7 +42,6 @@
 #include <sys/efifb.h>
 
 #include <vm/hat_pte.h>
-#include <vm/hat_aarch64.h>
 
 #include "saio.h"
 #include "dboot.h"
@@ -279,8 +278,8 @@ init_pt(void)
 static void
 map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 {
-	DBOOT_ASSERT(IS_PAGEALIGNED(vaddr));
-	DBOOT_ASSERT(IS_PAGEALIGNED(paddr));
+	DBOOT_ASSERT(IS_P2ALIGNED(vaddr, MMU_PAGESIZE));
+	DBOOT_ASSERT(IS_P2ALIGNED(vaddr, MMU_PAGESIZE));
 
 	pte_t *ptbl = IS_KERNEL_MAPPING(vaddr) ? ptbl_high : ptbl_low;
 

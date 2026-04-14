@@ -83,7 +83,7 @@
 #include <sys/clconf.h>
 #include <sys/kdi.h>
 #include <sys/vm_machparam.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <sys/sysconf.h>
 #include <sys/sunndi.h>
 #include <sys/syspic.h>

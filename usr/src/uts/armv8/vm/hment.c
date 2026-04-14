@@ -33,7 +33,7 @@
 #include <vm/seg_kmem.h>
 #include <vm/hat.h>
 #include <vm/vm_dep.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <sys/cmn_err.h>
 #include <sys/avl.h>
 

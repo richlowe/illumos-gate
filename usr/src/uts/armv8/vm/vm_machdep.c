@@ -77,7 +77,7 @@
 #include <sys/vm_machparam.h>
 #include <sys/memlist.h>
 #include <sys/bootconf.h> /* XXX the memlist stuff belongs in memlist_plat.h */
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <sys/cmn_err.h>
 #include <sys/archsystm.h>
 #include <sys/machsystm.h>
