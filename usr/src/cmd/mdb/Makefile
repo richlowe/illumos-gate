@@ -34,7 +34,7 @@ i386_MACHDIR = intel
 i386_SUBDIRS = intel i86pc i86xpv
 
 aarch64_MACHDIR = aarch64
-aarch64_SUBDIRS = aarch64
+aarch64_SUBDIRS = aarch64 armv8
 
 MACHDIR = $($(MACH)_MACHDIR)
 SUBDIRS = tools $($(MACH)_SUBDIRS) demo

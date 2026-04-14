@@ -25,7 +25,7 @@
 #include <sys/types.h>
 
 #include <vm/as.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 
 #include <stdbool.h>
 

@@ -66,7 +66,6 @@
 #include <sys/boot_console.h>
 #include <sys/sunddi.h>
 
-#include <vm/hat_aarch64.h>
 #include <vm/kboot_mmu.h>
 
 #if defined(_USE_FDT)

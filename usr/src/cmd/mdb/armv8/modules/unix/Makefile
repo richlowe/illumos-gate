@@ -35,10 +35,13 @@ MODSRCS =		\
 
 include ../../../../Makefile.cmd
 include ../../../../Makefile.cmd.64
-include ../../Makefile.aarch64
+include ../../../aarch64/Makefile.aarch64
+include ../../Makefile.armv8
 include ../../../Makefile.module
 
 CPPFLAGS += -DMP -D_MACHDEP
 CPPFLAGS += -I../../../../common
 CPPFLAGS += -I$(SRC)/uts/aarch64
 CPPFLAGS += -I$(SRC)/uts/armv8
+
+.KEEP_STATE:

@@ -27,7 +27,7 @@
 #include <sys/machsystm.h>
 
 #include <vm/hat.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <vm/seg_kpm.h>
 
 

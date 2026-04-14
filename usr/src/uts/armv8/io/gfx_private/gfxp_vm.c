@@ -54,7 +54,7 @@
 #include <vm/hat.h>
 #include <vm/seg.h>
 #include <vm/seg_kmem.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>	/* for HAT_PLAT_NOCACHE and pfn_to_pa */
 #include <sys/vmsystm.h>
 #include <sys/ddi.h>
 #include <sys/devops.h>
