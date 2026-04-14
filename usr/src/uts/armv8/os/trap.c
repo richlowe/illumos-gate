@@ -58,7 +58,7 @@
 #include <sys/contract/process_impl.h>
 #include <sys/aio_impl.h>
 #include <sys/prsystm.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <sys/frame.h>
 #include <sys/dtrace.h>
 #include <sys/x_call.h>

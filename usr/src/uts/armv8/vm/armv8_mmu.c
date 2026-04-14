@@ -42,7 +42,7 @@
 #include <vm/seg.h>
 #include <vm/seg_kmem.h>
 #include <vm/seg_map.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <sys/promif.h>
 #include <sys/systm.h>
 #include <sys/archsystm.h>

@@ -62,7 +62,7 @@
 #include <sys/atomic.h>
 #include <sys/sdt.h>
 #include <sys/rootnex.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>	/* for segkpm support */
 #include <sys/ddifm.h>
 #include <sys/ddi_isa.h>
 #include <sys/ddi_subrdefs.h>

@@ -37,7 +37,7 @@
 #include <vm/hat.h>
 #include <vm/seg.h>
 #include <vm/seg_dev.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>	/* For HAT_PLAT_NOCACHE */
 #include <sys/ddi.h>
 #include <sys/devops.h>
 #include <sys/sunddi.h>

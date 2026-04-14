@@ -25,7 +25,7 @@
 #include <sys/sunddi.h>
 #include <sys/types.h>
 
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <vm/seg_kmem.h>
 
 #define	KBM_ASSERT(EX) \
