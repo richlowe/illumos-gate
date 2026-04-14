@@ -62,7 +62,7 @@
 #include <sys/vmem.h>
 #include <sys/lgrp.h>
 #include <sys/mach_intr.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>	/* for HAT_PLAT_NOCACHE */
 #include <sys/obpdefs.h>
 #include <sys/framebuffer.h>
 

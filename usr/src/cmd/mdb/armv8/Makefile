@@ -24,6 +24,6 @@
 #
 include $(SRC)/Makefile.master
 
-SUBDIRS = aarch64
+SUBDIRS = modules
 
 include ../Makefile.subdirs

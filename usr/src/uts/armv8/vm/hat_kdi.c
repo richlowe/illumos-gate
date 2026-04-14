@@ -34,7 +34,7 @@
 #include <sys/bootconf.h>
 #include <sys/cmn_err.h>
 #include <vm/seg_kmem.h>
-#include <vm/hat_aarch64.h>
+#include <vm/hat_armv8.h>
 #include <sys/bootinfo.h>
 #include <sys/machsystm.h>
 

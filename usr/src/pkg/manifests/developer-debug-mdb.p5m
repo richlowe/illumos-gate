@@ -71,8 +71,13 @@ file path=kernel/kmdb/$(ARCH64)/sppp group=sys mode=0555
 file path=kernel/kmdb/$(ARCH64)/ufs group=sys mode=0555
 file path=kernel/kmdb/$(ARCH64)/uhci group=sys mode=0555
 file path=kernel/kmdb/$(ARCH64)/usba group=sys mode=0555
-$(aarch64_ONLY)file path=kernel/kmdb/aarch64/unix group=sys mode=0555
 dir  path=platform group=sys variant.opensolaris.zone=global
+$(aarch64_ONLY)dir path=platform/armv8
+$(aarch64_ONLY)dir path=platform/armv8/kernel
+$(aarch64_ONLY)dir path=platform/armv8/kernel/kmdb
+$(aarch64_ONLY)dir path=platform/armv8/kernel/kmdb/$(ARCH64)
+$(aarch64_ONLY)file path=platform/armv8/kernel/kmdb/$(ARCH64)/unix group=sys \
+    mode=0555
 $(i386_ONLY)dir path=platform/i86pc group=sys variant.opensolaris.zone=global
 $(i386_ONLY)dir path=platform/i86pc/kernel group=sys \
     variant.opensolaris.zone=global
@@ -155,7 +160,6 @@ file path=usr/lib/mdb/kvm/$(ARCH64)/sppp.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/ufs.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/uhci.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/usba.so group=sys mode=0555
-$(aarch64_ONLY)file path=usr/lib/mdb/kvm/aarch64/unix.so group=sys mode=0555
 dir  path=usr/lib/mdb/proc group=sys
 dir  path=usr/lib/mdb/proc/$(ARCH64)
 file path=usr/lib/mdb/proc/$(ARCH64)/ld.so group=sys mode=0555
@@ -197,6 +201,13 @@ dir  path=usr/lib/mdb/raw/$(ARCH64) group=sys
 file path=usr/lib/mdb/raw/$(ARCH64)/disk_label.so group=sys mode=0555
 $(MULTILIB_ONLY)file path=usr/lib/mdb/raw/disk_label.so group=sys mode=0555
 dir  path=usr/platform group=sys
+$(aarch64_ONLY)dir path=usr/platform/armv8
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib/mdb
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib/mdb/kvm
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib/mdb/kvm/$(ARCH64)
+$(aarch64_ONLY)file path=usr/platform/armv8/lib/mdb/kvm/$(ARCH64)/unix.so \
+    mode=0555
 $(i386_ONLY)dir path=usr/platform/i86pc group=sys
 $(i386_ONLY)dir path=usr/platform/i86pc/lib
 $(i386_ONLY)dir path=usr/platform/i86pc/lib/mdb group=sys
