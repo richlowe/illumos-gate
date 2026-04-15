@@ -23,6 +23,7 @@
 #include <sys/acpi/actypes.h>
 #include <sys/acpi/actbl.h>
 #include <sys/acpi/actbl2.h>
+#include <sys/acpi/actbl3.h>
 #include <sys/cpuinfo.h>
 #include <sys/controlregs.h>
 #include <sys/machparam.h>
@@ -305,5 +306,15 @@ dboot_configure_acpi(void)
 	boot_smccc_init(bi);
 	boot_psci_init(bi);
 	dboot_count_pcierc(bi);
+
+	bi->bi_acpi_srat =
+	    (uint64_t)(uintptr_t)find_acpi_table(ACPI_SIG_SRAT);
+	bi->bi_acpi_slit =
+	    (uint64_t)(uintptr_t)find_acpi_table(ACPI_SIG_SLIT);
+	bi->bi_acpi_msct =
+	    (uint64_t)(uintptr_t)find_acpi_table(ACPI_SIG_MSCT);
+	bi->bi_acpi_pptt =
+	    (uint64_t)(uintptr_t)find_acpi_table(ACPI_SIG_PPTT);
+
 	return (dboot_configure_acpi_cpuinfo(bi));
 }
