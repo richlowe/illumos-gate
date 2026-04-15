@@ -280,9 +280,9 @@ mmu_init(void)
 
 	/* Initialize mmu and kernel memory characteristics */
 	mmu.max_asid = ((tcr & TCR_AS) ? 0xFFFF : 0xFF);
-	mmu.max_level = MAX_PAGE_LEVEL; /* XXX: num_level - 1 */
 	mmu.num_level = MMU_PAGE_LEVELS;
-	mmu.max_page_level = MAX_PAGE_LEVEL;
+	mmu.max_level = mmu.num_level - 1;
+	mmu.max_page_level = (MMU_PAGE_LEVELS - 1);
 
 	mmu.va_size = 64 - TCR_T1SZ(tcr);
 	mmu.pa_size = TCR_IPS(tcr);

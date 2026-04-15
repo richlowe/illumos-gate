@@ -38,9 +38,15 @@ extern "C" {
 
 typedef int32_t level_t;
 
-/* XXX: These two may not always match */
-#define	MAX_PAGE_LEVEL		(MMU_PAGE_LEVELS - 1)
-#define	MAX_NUM_LEVEL		(MMU_PAGE_LEVELS - 1)
+/*
+ * These reflect the true maximum values of these quantities, not the maximum
+ * supported on the given machine.
+ *
+ * XXXARM: I believe this is (effectively) true of SPARC and x86 too, but I'm
+ * not as certain as I'd like.
+ */
+#define	MAX_PAGE_LEVEL		4
+#define	MAX_NUM_LEVEL		5
 
 /*
  * The software bits are used by the HAT to track attributes.
@@ -81,7 +87,7 @@ PTE_ISPAGE(uint64_t pte, uint_t level)
 #define	MAKEPTP(pfn, l, k)	(((pfn) << MMU_PAGESHIFT) | PTE_TABLE | \
 	((k)? (PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER): PTE_TABLE_PXNT))
 
-#define	TOP_LEVEL(hat)		MAX_PAGE_LEVEL
+#define	TOP_LEVEL(hat)		(MMU_PAGE_LEVELS - 1)
 
 /*
  * Bit 55 is guaranteed to fall in the hole, and is specified by ARM as

@@ -46,8 +46,8 @@ static uint8_t kbm_max_level;
 void
 kbm_init(void)
 {
-	kbm_max_page_level = MAX_PAGE_LEVEL;
-	kbm_max_level = MAX_NUM_LEVEL;
+	kbm_max_page_level = MMU_PAGE_LEVELS - 1;
+	kbm_max_level = MMU_PAGE_LEVELS - 1;
 }
 
 /* Allocate a physical page for use as a page table */
