@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -92,6 +92,49 @@ cpuinfo_for_affinity(uint64_t affinity)
 			return (ci);
 
 	return (NULL);
+}
+
+/*
+ * Look up a CPU's processorid_t by its ACPI Processor UID.
+ *
+ * This supports both cpuinfo lifecycle phases:
+ * - Before cpuinfo_init: walks the boot_ci array.
+ * - After cpuinfo_init: walks the cpuinfo linked list.
+ *
+ * Returns the ci_id (processorid_t) on success, or -1 if not found.
+ */
+processorid_t
+cpuinfo_id_for_uid(uint32_t uid)
+{
+	struct cpuinfo *ci;
+	int idx;
+
+	/*
+	 * If boot_ci is still set, we're in the early boot path
+	 * between cpuinfo_bootstrap and cpuinfo_init.
+	 */
+	if (boot_xbp != NULL && boot_ci != NULL) {
+		for (idx = 0; idx < boot_xbp->bi_cpuinfo_cnt; idx++) {
+			if (boot_ci[idx].xci_uid == uid) {
+				return ((processorid_t)idx);
+			}
+		}
+
+		return ((processorid_t)-1);
+	}
+
+	/*
+	 * Post cpuinfo_init path - walk the linked list.
+	 */
+	for (ci = cpuinfo_first();
+	    ci != cpuinfo_end();
+	    ci = cpuinfo_next(ci)) {
+		if (ci->ci_uid == uid) {
+			return (ci->ci_id);
+		}
+	}
+
+	return ((processorid_t)-1);
 }
 
 /*
