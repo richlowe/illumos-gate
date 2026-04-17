@@ -38,6 +38,10 @@ extern "C" {
 
 typedef int32_t level_t;
 
+/* XXX: These two may not always match */
+#define	MAX_PAGE_LEVEL		(MMU_PAGE_LEVELS - 1)
+#define	MAX_NUM_LEVEL		(MMU_PAGE_LEVELS - 1)
+
 /*
  * The software bits are used by the HAT to track attributes.
  * Note that the attributes are inclusive as the values increase.
@@ -48,12 +52,6 @@ typedef int32_t level_t;
  * PT_NOCONSIST - There is no hment entry for this mapping.
  *
  */
-#define	PAGE_LEVEL		(0)
-
-/* XXX: These two may not always match */
-#define	MAX_PAGE_LEVEL		(MMU_PAGE_LEVELS - 1)
-#define	MAX_NUM_LEVEL		(MMU_PAGE_LEVELS - 1)
-
 #define	PTE_SOFTWARE		PTE_SFW_MASK
 #define	PTE_NOSYNC		(0x4ul << PTE_SFW_SHIFT)
 #define	PTE_NOCONSIST		(0x8ul << PTE_SFW_SHIFT)
@@ -79,7 +77,7 @@ PTE_ISPAGE(uint64_t pte, uint_t level)
 }
 
 #define	MAKEPTE(pfn, l)		(((pfn) << MMU_PAGESHIFT) | PTE_SH_INNER | \
-	(l == PAGE_LEVEL? PTE_PAGE: PTE_BLOCK))
+	(l == 0 ? PTE_PAGE : PTE_BLOCK))
 #define	MAKEPTP(pfn, l, k)	(((pfn) << MMU_PAGESHIFT) | PTE_TABLE | \
 	((k)? (PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER): PTE_TABLE_PXNT))
 
