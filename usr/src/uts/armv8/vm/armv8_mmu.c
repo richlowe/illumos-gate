@@ -84,19 +84,19 @@ hat_kmap_init(uintptr_t base, size_t len)
 	 * The PTEs are large page aligned to avoid spurious pagefaults
 	 * on the hypervisor.
 	 */
-	map_addr = base & LEVEL_MASK(PAGE_LEVEL + 1);
-	map_eaddr = (base + len + LEVEL_SIZE(PAGE_LEVEL + 1) - 1) &
-	    LEVEL_MASK(PAGE_LEVEL + 1);
+	map_addr = base & LEVEL_MASK(1);
+	map_eaddr = (base + len + LEVEL_SIZE(1) - 1) &
+	    LEVEL_MASK(1);
 	map_len = map_eaddr - map_addr;
 	window_size = mmu_btop(map_len) * sizeof (pte_t);
-	window_size = (window_size + LEVEL_SIZE(PAGE_LEVEL + 1)) &
-	    LEVEL_MASK(PAGE_LEVEL + 1);
-	htable_cnt = map_len >> LEVEL_SHIFT(PAGE_LEVEL + 1);
+	window_size = (window_size + LEVEL_SIZE(1)) &
+	    LEVEL_MASK(1);
+	htable_cnt = map_len >> LEVEL_SHIFT(1);
 
 	/*
 	 * allocate vmem for the kmap_ptes
 	 */
-	ptes = vmem_xalloc(heap_arena, window_size, LEVEL_SIZE(PAGE_LEVEL + 1),
+	ptes = vmem_xalloc(heap_arena, window_size, LEVEL_SIZE(1),
 	    0, 0, NULL, NULL, VM_SLEEP);
 	mmu.kmap_htables =
 	    kmem_alloc(htable_cnt * sizeof (htable_t *), KM_SLEEP);
@@ -107,8 +107,8 @@ hat_kmap_init(uintptr_t base, size_t len)
 	 * can't ever be stolen, freed, etc.
 	 */
 	for (va = map_addr, i = 0; i < htable_cnt;
-	    va += LEVEL_SIZE(PAGE_LEVEL + 1), ++i) {
-		ht = htable_create(kas.a_hat, va, PAGE_LEVEL, NULL);
+	    va += LEVEL_SIZE(1), ++i) {
+		ht = htable_create(kas.a_hat, va, 0, NULL);
 		if (ht == NULL)
 			panic("hat_kmap_init: ht == NULL");
 		mmu.kmap_htables[i] = ht;
