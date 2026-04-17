@@ -583,7 +583,7 @@ hat_swapout(hat_t *hat)
 		 * If we have a level 0 page table with locked entries,
 		 * skip the entire page table, otherwise skip just one entry.
 		 */
-		if (ht->ht_lock_cnt > 0 && l == PAGE_LEVEL)
+		if (ht->ht_lock_cnt > 0 && l == 0)
 			vaddr = ht->ht_vaddr + LEVEL_SIZE(l + 1);
 		else
 			vaddr += LEVEL_SIZE(l);
