@@ -889,6 +889,19 @@ hati_load_common(
 	else
 		PTE_SET(pte, PTE_UXN);
 
+	/*
+	 * If this is a locked mapping, pre-set the access flag to avoid
+	 * potentially trapping for it.
+	 *
+	 * This means most importantly we won't get an access flag trap for
+	 * the stack pages of interrupt threads (which we need to handle the
+	 * access flag trap).
+	 *
+	 * XXXARM: maybe we should pre-set AF on all mappings?
+	 */
+	if ((flags & HAT_LOAD_LOCK) != 0)
+		PTE_SET(pte, PTE_AF);
+
 	if (((attr & PROT_EXEC) ||
 	    (attr & HAT_ORDER_MASK) != HAT_STORECACHING_OK) &&
 	    pf_is_memory(pfn)) {
