@@ -41,12 +41,8 @@ typedef int32_t level_t;
 /*
  * These reflect the true maximum values of these quantities, not the maximum
  * supported on the given machine.
- *
- * XXXARM: I believe this is (effectively) true of SPARC and x86 too, but I'm
- * not as certain as I'd like.
  */
 #define	MAX_PAGE_LEVEL		4
-#define	MAX_NUM_LEVEL		5
 
 /*
  * The software bits are used by the HAT to track attributes.
