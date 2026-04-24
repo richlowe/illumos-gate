@@ -39,12 +39,6 @@ extern "C" {
 typedef int32_t level_t;
 
 /*
- * These reflect the true maximum values of these quantities, not the maximum
- * supported on the given machine.
- */
-#define	MAX_PAGE_LEVEL		4
-
-/*
  * The software bits are used by the HAT to track attributes.
  * Note that the attributes are inclusive as the values increase.
  *
