@@ -36,7 +36,14 @@ extern "C" {
 #include <sys/pte.h>
 #include <sys/machparam.h>
 
-typedef int32_t level_t;
+/*
+ * The type of "level_t" is signed so that it can be used like:
+ *	level_t	l;
+ *	...
+ *	while (--l >= 0)
+ *		...
+ */
+typedef int8_t level_t;
 
 /* XXX: These two may not always match */
 #define	MAX_PAGE_LEVEL		(MMU_PAGE_LEVELS - 1)
