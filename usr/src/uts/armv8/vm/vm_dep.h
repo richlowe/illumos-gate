@@ -358,8 +358,8 @@ extern void mnodetype_2_pfn(int, int, pfn_t *, pfn_t *);
 /*
  * cpu/mmu-dependent vm variables
  */
-#define	mmu_page_sizes			MMU_PAGE_SIZES
-#define	mmu_exported_page_sizes		MMU_PAGE_SIZES
+#define	mmu_page_sizes			DEFAULT_MMU_PAGE_SIZES
+#define	mmu_exported_page_sizes		DEFAULT_MMU_PAGE_SIZES
 #define	mmu_legacy_page_sizes		mmu_exported_page_sizes
 
 /*

@@ -130,11 +130,11 @@ init_pt(void)
 		}
 	}
 
-	if ((paddr = alloc_pagetable_page(MMU_PAGE_LEVELS - 1)) == 0)
+	if ((paddr = alloc_pagetable_page(DEFAULT_MMU_PAGE_LEVELS - 1)) == 0)
 		panic("phy alloc error for lower top-level PT\n");
 	ptbl_low = (pte_t *)paddr;
 
-	if ((paddr = alloc_pagetable_page(MMU_PAGE_LEVELS - 1)) == 0)
+	if ((paddr = alloc_pagetable_page(DEFAULT_MMU_PAGE_LEVELS - 1)) == 0)
 		panic("phy alloc error for upper top-level PT\n");
 	ptbl_high = (pte_t *)paddr;
 
@@ -284,7 +284,7 @@ map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 	pte_t *ptbl = IS_KERNEL_MAPPING(vaddr) ? ptbl_high : ptbl_low;
 
 	/* XXX: Needs to be dynamic, and match the choice in the kernel */
-	for (int l = MMU_PAGE_LEVELS - 1; l > level; l--) {
+	for (int l = DEFAULT_MMU_PAGE_LEVELS - 1; l > level; l--) {
 		/* Need a new entry */
 		if (!PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, l)])) {
 			paddr_t pa = alloc_pagetable_page(l);
@@ -341,7 +341,7 @@ map_phys(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, size_t bytes)
 
 		/* find the largest page size */
 		/* XXX: I think this is the wrong constant */
-		for (l = MMU_PAGE_LEVELS - 1; l > 0; l--) {
+		for (l = DEFAULT_MMU_PAGE_LEVELS - 1; l > 0; l--) {
 			if (((paddr & LEVEL_OFFSET(l)) == 0) &&
 			    ((vaddr & LEVEL_OFFSET(l)) == 0) &&
 			    bytes >= LEVEL_SIZE(l))
@@ -398,7 +398,7 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 				 *
 				 * XXX: I think this is the rong constant
 				 */
-				for (l = MMU_PAGE_LEVELS - 1; l > 0; l--) {
+				for (l = DEFAULT_MMU_PAGE_LEVELS - 1; l > 0; l--) {
 					if (((va & LEVEL_OFFSET(l)) == 0) &&
 					    bytes >= LEVEL_SIZE(l))
 						break;

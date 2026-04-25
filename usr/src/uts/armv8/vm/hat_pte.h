@@ -84,7 +84,8 @@ PTE_ISPAGE(uint64_t pte, uint_t level)
 #define	MAKEPTP(pfn, l, k)	(((pfn) << MMU_PAGESHIFT) | PTE_TABLE | \
 	((k)? (PTE_TABLE_UXNT | PTE_TABLE_APT_NOUSER): PTE_TABLE_PXNT))
 
-#define	TOP_LEVEL(hat)		(MMU_PAGE_LEVELS - 1)
+/* XXXARM: This seems off? */
+#define	TOP_LEVEL(hat)		(DEFAULT_MMU_PAGE_LEVELS - 1)
 
 /*
  * Bit 55 is guaranteed to fall in the hole, and is specified by ARM as
