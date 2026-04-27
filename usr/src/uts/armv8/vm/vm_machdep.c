@@ -92,9 +92,9 @@
 #include <sys/taskq.h>
 #include <sys/elf_aarch64.h>
 
+/* The cache is presumed to not be virtually addressed */
 uint_t vac_colors = 1;
 
-int largepagesupport = 0;
 extern uint_t page_create_new;
 extern uint_t page_create_exists;
 extern uint_t page_create_putbacks;
