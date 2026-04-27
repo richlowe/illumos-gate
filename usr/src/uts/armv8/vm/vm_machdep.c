@@ -95,6 +95,9 @@
 /* The cache is presumed to not be virtually addressed */
 uint_t vac_colors = 1;
 
+uint_t mmu_page_sizes;
+uint_t mmu_exported_page_sizes;
+
 extern uint_t page_create_new;
 extern uint_t page_create_exists;
 extern uint_t page_create_putbacks;
@@ -979,7 +982,7 @@ page_coloring_init(uint_t l2_sz, int l2_linesz, int l2_assoc)
 	memranges += i;
 	nranges -= i;
 
-	ASSERT(mmu_page_sizes <= MMU_PAGE_SIZES);
+	ASSERT3U(mmu_page_sizes, <=, MMU_PAGE_SIZES);
 
 	ASSERT(ISP2(l2_linesz));
 
