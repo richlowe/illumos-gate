@@ -46,7 +46,7 @@ static uint8_t kbm_max_level;
 void
 kbm_init(void)
 {
-	kbm_max_page_level = DEFAULT_MMU_PAGE_LEVELS - 1;
+	kbm_max_page_level = DEFAULT_MMU_PAGE_SIZES - 1;
 	kbm_max_level = DEFAULT_MMU_PAGE_LEVELS - 1;
 }
 
