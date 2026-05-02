@@ -66,7 +66,8 @@ static caddr_t scratch_used_top;
 
 static pte_t *ptbl_low;
 static pte_t *ptbl_high;
-static uint_t page_levels;	/* Depth of page tables */
+static uint_t table_levels;	/* Depth of page tables */
+static uint_t page_levels;	/* Number of levels that pages may be */
 
 static void init_pt(void);
 
@@ -119,7 +120,8 @@ init_pt(void)
 	extern struct xboot_info *bi;
 	uint_t va_bits = 48;	/* The maximum without FEAT_LPA2 */
 
-	page_levels = vmsav8_paging_levels(va_bits);
+	table_levels = vmsav8_paging_levels(va_bits);
+	page_levels = MIN(table_levels, DEFAULT_MMU_PAGE_SIZES); /* XXX: no LPA2 support yet */
 
 	fbaddr = 0;
 	if (bi != NULL && bi->bi_framebuffer != 0) {
@@ -131,11 +133,11 @@ init_pt(void)
 		}
 	}
 
-	if ((paddr = alloc_pagetable_page(page_levels - 1)) == 0)
+	if ((paddr = alloc_pagetable_page(table_levels - 1)) == 0)
 		panic("phy alloc error for lower top-level PT\n");
 	ptbl_low = (pte_t *)paddr;
 
-	if ((paddr = alloc_pagetable_page(page_levels - 1)) == 0)
+	if ((paddr = alloc_pagetable_page(table_levels - 1)) == 0)
 		panic("phy alloc error for upper top-level PT\n");
 	ptbl_high = (pte_t *)paddr;
 
@@ -270,14 +272,13 @@ init_pt(void)
 static void
 map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 {
-	DBOOT_ASSERT(page_levels != 0);
+	DBOOT_ASSERT(table_levels != 0);
 	DBOOT_ASSERT(IS_P2ALIGNED(vaddr, MMU_PAGESIZE));
 	DBOOT_ASSERT(IS_P2ALIGNED(vaddr, MMU_PAGESIZE));
 
 	pte_t *ptbl = IS_KERNEL_MAPPING(vaddr) ? ptbl_high : ptbl_low;
 
-	/* XXX: Needs to be dynamic, and match the choice in the kernel */
-	for (int l = page_levels - 1; l > level; l--) {
+	for (int l = table_levels - 1; l > level; l--) {
 		/* Need a new entry */
 		if (!PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, l)])) {
 			paddr_t pa = alloc_pagetable_page(l);
@@ -388,8 +389,6 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 				 * find the largest page size that fits the
 				 * address and size, the physical address is
 				 * constrained when we allocate it.
-				 *
-				 * XXX: I think this is the rong constant
 				 */
 				for (l = page_levels - 1; l > 0; l--) {
 					if (((va & LEVEL_OFFSET(l)) == 0) &&
