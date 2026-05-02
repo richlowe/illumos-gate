@@ -23,6 +23,7 @@
 #include <sys/controlregs.h>
 #include <sys/debug.h>
 #include <sys/sunddi.h>
+#include <sys/sysmacros.h>
 #include <sys/types.h>
 
 #include <vm/hat_armv8.h>
@@ -46,8 +47,27 @@ static uint8_t kbm_max_level;
 void
 kbm_init(void)
 {
-	kbm_max_page_level = DEFAULT_MMU_PAGE_SIZES - 1;
-	kbm_max_level = DEFAULT_MMU_PAGE_LEVELS - 1;
+	uint64_t tcr = read_tcr();
+	uint_t bits = 64 - TCR_T1SZ(tcr);
+
+	if (bits > 48) {
+		if ((tcr & TCR_DS) == 0) {
+			bop_panic("%%TCR_EL1 mis-configured for "
+			    "> 48 bit virtual addresses");
+		} else {
+			bop_panic("> 48 bit virtual-addresses not "
+			    "yet supported");
+		}
+	}
+
+	if ((tcr & TCR_DS) != 0) {
+		kbm_max_page_level = MMU_PAGE_SIZES - 1;
+	} else {
+		kbm_max_page_level = DEFAULT_MMU_PAGE_SIZES - 1;
+	}
+
+	kbm_max_level = vmsav8_paging_levels(bits) - 1;
+	kbm_max_page_level = MIN(kbm_max_page_level, kbm_max_level);
 }
 
 /* Allocate a physical page for use as a page table */

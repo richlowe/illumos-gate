@@ -279,20 +279,25 @@ mmu_init(void)
 	write_tcr(tcr);
 
 	/* Initialize mmu and kernel memory characteristics */
-	mmu.max_asid = ((tcr & TCR_AS) ? 0xFFFF : 0xFF);
-
-	mmu.num_level = DEFAULT_MMU_PAGE_LEVELS;
-	mmu.max_level = mmu.num_level - 1;
-
-	mmu.max_page_level = (DEFAULT_MMU_PAGE_SIZES - 1);
-
-	mmu_page_sizes = mmu.max_page_level + 1;
-	mmu_exported_page_sizes = mmu.max_page_level + 1;
-
 	mmu.va_size = 64 - TCR_T1SZ(tcr);
 	mmu.pa_size = TCR_IPS(tcr);
 
 	VERIFY3U(mmu.va_size, ==, VA_BITS);
+
+	mmu.max_asid = ((tcr & TCR_AS) ? 0xFFFF : 0xFF);
+
+	mmu.num_level = vmsav8_paging_levels(mmu.va_size);
+	mmu.max_level = mmu.num_level - 1;
+
+	if ((tcr & TCR_DS) != 0) {
+		mmu_page_sizes = MMU_PAGE_SIZES;
+	} else {
+		mmu_page_sizes = DEFAULT_MMU_PAGE_SIZES;
+	}
+
+	mmu_exported_page_sizes = mmu_page_sizes;
+
+	mmu.max_page_level = MIN(mmu_page_sizes - 1, mmu.max_level);
 
 	hole_start = (1ull << mmu.va_size);
 	hole_end = ~(hole_start - 1);

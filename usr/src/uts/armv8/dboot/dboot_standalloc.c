@@ -66,6 +66,7 @@ static caddr_t scratch_used_top;
 
 static pte_t *ptbl_low;
 static pte_t *ptbl_high;
+static uint_t page_levels;	/* Depth of page tables */
 
 static void init_pt(void);
 
@@ -115,6 +116,9 @@ init_pt(void)
 	uintptr_t paddr;
 	struct memlist *ml;
 	extern struct xboot_info *bi;
+	uint_t va_bits = 48;	/* The maximum without FEAT_LPA2 */
+
+	page_levels = vmsav8_paging_levels(va_bits);
 
 	fbaddr = 0;
 	if (bi != NULL && bi->bi_framebuffer != 0) {
@@ -126,11 +130,11 @@ init_pt(void)
 		}
 	}
 
-	if ((paddr = alloc_pagetable_page(DEFAULT_MMU_PAGE_LEVELS - 1)) == 0)
+	if ((paddr = alloc_pagetable_page(page_levels - 1)) == 0)
 		panic("phy alloc error for lower top-level PT\n");
 	ptbl_low = (pte_t *)paddr;
 
-	if ((paddr = alloc_pagetable_page(DEFAULT_MMU_PAGE_LEVELS - 1)) == 0)
+	if ((paddr = alloc_pagetable_page(page_levels - 1)) == 0)
 		panic("phy alloc error for upper top-level PT\n");
 	ptbl_high = (pte_t *)paddr;
 
@@ -265,13 +269,14 @@ init_pt(void)
 static void
 map_pages(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, int level)
 {
+	DBOOT_ASSERT(page_levels != 0);
 	DBOOT_ASSERT(IS_P2ALIGNED(vaddr, MMU_PAGESIZE));
 	DBOOT_ASSERT(IS_P2ALIGNED(vaddr, MMU_PAGESIZE));
 
 	pte_t *ptbl = IS_KERNEL_MAPPING(vaddr) ? ptbl_high : ptbl_low;
 
 	/* XXX: Needs to be dynamic, and match the choice in the kernel */
-	for (int l = DEFAULT_MMU_PAGE_LEVELS - 1; l > level; l--) {
+	for (int l = page_levels - 1; l > level; l--) {
 		/* Need a new entry */
 		if (!PTE_ISVALID(ptbl[LEVEL_INDEX(vaddr, l)])) {
 			paddr_t pa = alloc_pagetable_page(l);
@@ -328,7 +333,7 @@ map_phys(pte_t pte_attr, uintptr_t vaddr, uint64_t paddr, size_t bytes)
 
 		/* find the largest page size */
 		/* XXX: I think this is the wrong constant */
-		for (l = DEFAULT_MMU_PAGE_LEVELS - 1; l > 0; l--) {
+		for (l = page_levels - 1; l > 0; l--) {
 			if (((paddr & LEVEL_OFFSET(l)) == 0) &&
 			    ((vaddr & LEVEL_OFFSET(l)) == 0) &&
 			    bytes >= LEVEL_SIZE(l))
@@ -385,7 +390,7 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 				 *
 				 * XXX: I think this is the rong constant
 				 */
-				for (l = DEFAULT_MMU_PAGE_LEVELS - 1; l > 0; l--) {
+				for (l = page_levels - 1; l > 0; l--) {
 					if (((va & LEVEL_OFFSET(l)) == 0) &&
 					    bytes >= LEVEL_SIZE(l))
 						break;

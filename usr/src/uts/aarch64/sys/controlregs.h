@@ -307,6 +307,9 @@
 
 #define	CPUECTLR_SMP	(1<<6)
 
+/* 4kB and 16kB granules support 52bit input/output addresses */
+#define	TCR_DS		(1ul << 59)
+
 /* EL0 accesses via TTBR1/TTBR0 should trap immediately */
 #define	TCR_E0PD1	(1ul << 56)
 #define	TCR_E0PD0	(1ul << 55)

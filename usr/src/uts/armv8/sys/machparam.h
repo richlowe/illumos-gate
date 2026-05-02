@@ -37,9 +37,10 @@ extern "C" {
 #if defined(_ASM)
 #define	ADDRESS_C(c)	(c)
 #else
-#include <sys/types.h>
+#include <sys/debug.h>
 #include <sys/int_const.h>
 #include <sys/pte.h>
+#include <sys/types.h>
 
 #define	ADDRESS_C(c)	UINT64_C(c)
 #endif
@@ -73,6 +74,25 @@ extern "C" {
 #define	PAGESIZE		MMU_PAGESIZE
 #define	PAGEOFFSET		MMU_PAGEOFFSET
 #define	PAGEMASK		MMU_PAGEMASK
+
+#if !defined(_ASM) && (defined(_KERNEL) || defined(_BOOT))
+
+/*
+ * The number of levels of page table necessary to translate an `bits` of
+ * address space.
+ */
+extern __GNU_INLINE int
+vmsav8_paging_levels(uint_t bits)
+{
+	const int verbatim_bits = 12; /* log₂(MMU_PAGESIZE) */
+	const int bits_per_level = verbatim_bits - 3; /* x / sizeof (pte_t) */
+
+	VERIFY3U(bits, >, verbatim_bits);
+
+	return (((bits - verbatim_bits) + bits_per_level - 1) / bits_per_level);
+}
+#endif
+
 
 /*
  * DATA_ALIGN is used to define the alignment of the Unix data segment.
