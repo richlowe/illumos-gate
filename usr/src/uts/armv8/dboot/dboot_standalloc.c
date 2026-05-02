@@ -71,7 +71,8 @@ static uint_t page_levels;	/* Depth of page tables */
 static void init_pt(void);
 
 static uintptr_t
-alloc_phys(uint64_t size, uint64_t align) {
+alloc_phys(uint64_t size, uint64_t align)
+{
 	uint64_t pa = memlist_get(size, align, &pfreelistp);
 
 	if (pa == 0)
