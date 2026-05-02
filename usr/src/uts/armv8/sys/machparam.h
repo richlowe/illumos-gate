@@ -54,11 +54,14 @@ extern "C" {
  *
  * The actual value supported at runtime may be less than this.
  */
-#define	MMU_PAGE_SIZES	3	/* levels 0,1,2: 4k, 2M, 1G (in 4k granule) */
-#define	MMU_PAGE_LEVELS	6	/* levels [-2,-1,0,1,2,3] (in ARM terms) */
+#define	MMU_PAGE_SIZES	4	/* levels [0,1,2,3]: 4k, 2M, 1G, 512G */
+#define	MMU_PAGE_LEVELS	5	/* levels [-1,0,1,2,3] (in ARM terms) */
 
-/* The default levels and sizes (48bit VA) */
-#define	DEFAULT_MMU_PAGE_SIZES	MMU_PAGE_SIZES
+/*
+ * The default levels and sizes (48bit VA), the maximum values without
+ * FEAT_LPA2
+ */
+#define	DEFAULT_MMU_PAGE_SIZES	3
 #define	DEFAULT_MMU_PAGE_LEVELS	4 /* levels [0,1,2,3] */
 
 #define	MMU_PAGESHIFT		12
