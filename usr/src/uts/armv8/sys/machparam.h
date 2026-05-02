@@ -59,11 +59,10 @@ extern "C" {
 #define	MMU_PAGE_LEVELS	5	/* levels [-1,0,1,2,3] (in ARM terms) */
 
 /*
- * The default levels and sizes (48bit VA), the maximum values without
- * FEAT_LPA2
+ * The default number of page sizes (4k granule in 48bit VA).
+ * the maximum values without FEAT_LPA2
  */
 #define	DEFAULT_MMU_PAGE_SIZES	3
-#define	DEFAULT_MMU_PAGE_LEVELS	4 /* levels [0,1,2,3] */
 
 #define	MMU_PAGESHIFT		12
 #define	MMU_PAGESIZE		(ADDRESS_C(1) << MMU_PAGESHIFT)
