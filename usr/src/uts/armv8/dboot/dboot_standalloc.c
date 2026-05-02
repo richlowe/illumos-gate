@@ -69,10 +69,6 @@ static pte_t *ptbl_high;
 
 static void init_pt(void);
 
-#if 0
-static void dump_tables(uint64_t tab, uint64_t va_offset);
-#endif
-
 static uintptr_t
 alloc_phys(uint64_t size, uint64_t align) {
 	uint64_t pa = memlist_get(size, align, &pfreelistp);
@@ -253,15 +249,6 @@ init_pt(void)
 	write_ttbr1((uint64_t)ptbl_high);
 	isb();
 
-#if 0
-	if (debug) {
-		dboot_printf("Lower Memory Tables\n");
-		dump_tables((uint64_t)ptbl_low, 0);
-		dboot_printf("Upper Memory Tables\n");
-		dump_tables((uint64_t)ptbl_high, (~((1ull << VA_BITS) - 1)));
-	}
-#endif
-
 	tlbi_allis();
 	dsb(ish);
 	isb();
@@ -437,83 +424,3 @@ void
 resfree(enum RESOURCES type, caddr_t virtaddr, size_t size)
 {
 }
-
-#if 0
-static void
-dump_tables(uint64_t tab, uint64_t va_offset)
-{
-	uint_t shift_amt[] = {12, 21, 30, 39};
-	uint_t save_index[4];   /* for recursion */
-	char *save_table[4];    /* for recursion */
-	uint_t top_level = 3;
-	uint_t ptes_per_table = 512;
-	uint_t  l;
-	uint64_t va;
-	uint64_t pgsize;
-	int index;
-	int i;
-	pte_t pteval;
-	char *table;
-	static char *tablist = "\t\t\t";
-	char *tabs = tablist + 3 - top_level;
-	paddr_t pa, pa1;
-
-	table = (char *)(uintptr_t)tab;
-	l = top_level;
-	va = va_offset;
-
-	for (index = 0; index < ptes_per_table; ++index) {
-		pgsize = 1ull << shift_amt[l];
-		pteval = ((pte_t *)table)[index];
-		if (!PTE_ISVALID(pteval))
-			goto next_entry;
-
-		dboot_printf("%s [L%u] 0x%p[%u] = 0x%" PRIx64 ", va=0x%" PRIx64,
-		    tabs + l, l, (void *)table, index, (uint64_t)pteval, va);
-		pa = pteval & PTE_PFN_MASK;
-		if (PTE_ISPAGE(pteval, l)) {
-			dboot_printf(" physaddr=0x%" PRIx64 "\n", pa);
-		} else {
-			dboot_printf(" => 0x%" PRIx64 "\n", pa);
-		}
-
-		if (PTE_ISTABLE(pteval, l)) {
-			save_table[l] = table;
-			save_index[l] = index;
-			--l;
-			index = -1;
-			table = (char *)(uintptr_t)(pteval & PTE_PFN_MASK);
-			goto recursion;
-		}
-
-		/*
-		 * shorten dump for consecutive mappings
-		 */
-		for (i = 1; index + i < ptes_per_table; ++i) {
-			pteval = ((pte_t *)table)[index + i];
-			if (!PTE_ISVALID(pteval))
-				break;
-			pa1 = (pteval & PTE_PFN_MASK);
-			if (pa1 != pa + (i * pgsize))
-				break;
-		}
-
-		if (i > 2) {
-			dboot_printf("%s...\n", tabs + l);
-			va += pgsize * (i - 2);
-			index += i - 2;
-		}
-next_entry:
-		va += pgsize;
-recursion:
-		;
-	}
-
-	if (l < top_level) {
-		++l;
-		index = save_index[l];
-		table = save_table[l];
-		goto recursion;
-	}
-}
-#endif
