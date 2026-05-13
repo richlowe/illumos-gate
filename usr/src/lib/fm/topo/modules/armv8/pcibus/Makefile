@@ -9,11 +9,12 @@
 # http://www.illumos.org/license/CDDL.
 #
 
-# Copyright 2023 Richard Lowe
+#
+# Copyright 2026 Michael van der Westhuizen
+#
 
-SUBDIRS = armv8pi hostbridge pcibus
+include $(SRC)/Makefile.master
 
-.PARALLEL: $(SUBDIRS)
+SUBDIRS = $(MACH64)
 
-include ../../../Makefile.subdirs
-
+include ../../../../Makefile.subdirs

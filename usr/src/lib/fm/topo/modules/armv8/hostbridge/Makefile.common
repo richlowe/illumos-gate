@@ -1,0 +1,37 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+#
+# Copyright 2026 Michael van der Westhuizen
+#
+
+MODULE = hostbridge
+ARCH = armv8
+CLASS = arch
+UTILDIR = ../../../common/pcibus
+UTILSRCS = did.c did_hash.c did_props.c util.c
+HBDIR = ../../../common/hostbridge
+HBSRCS = hostbridge.c hb_$(ARCH).c
+MODULESRCS = $(HBSRCS) $(UTILSRCS)
+
+include ../../../Makefile.plugin
+
+LDLIBS += -ldevinfo -lsmbios -lpcidb
+
+CPPFLAGS += -I$(UTILDIR) -I$(HBDIR)
+
+%.o: $(UTILDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+%.o: $(HBDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)

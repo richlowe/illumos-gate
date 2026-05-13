@@ -26,8 +26,8 @@ Copyright 2019 Joyent, Inc.
 -->
 
 <!--
- This map file is loaded by the generic enumerator (x86pi.so) when
- an FMA-compliant SMBIOS can't be found.
+ This map file is loaded by the armv8pi enumerator when enumerating
+ the aarch64 hardware topology.
 -->
 
 <topology name='aarch64' scheme='hc'>
@@ -43,6 +43,9 @@ Copyright 2019 Joyent, Inc.
     </node>
 
     <dependents grouping='children'>
+      <range name='hostbridge' min='0' max='254'>
+        <enum-method name='hostbridge' version='1' />
+      </range>
       <range name='usb-mobo' min='0' max='100'>
         <enum-method name='usb' version='1' />
       </range>
