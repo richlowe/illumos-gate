@@ -106,8 +106,35 @@ di_devtype_get(topo_mod_t *mp, di_node_t src, char **devtype)
 typedef struct smbios_slot_cb {
 	int		cb_slotnum;
 	int		cb_bdf;
+#if defined(__aarch64__)
+	uint16_t	cb_sg;
+#endif
 	const char	*cb_label;
 } smbios_slot_cb_t;
+
+#if defined(__aarch64__)
+/*
+ * Walk up the devinfo tree from src to find the PCI segment group number.
+ * PCIRC nodes carry a "pci-segment" and/or "linux,pci-domain" property set
+ * during ACPI/FDT enumeration.  Default to segment 0 if the property is absent.
+ */
+static uint16_t
+di_pci_segment_get(topo_mod_t *mp, di_node_t src)
+{
+	di_node_t dn;
+	uint_t seg;
+
+	for (dn = src; dn != DI_NODE_NIL; dn = di_parent_node(dn)) {
+		if (di_uintprop_get(mp, dn, "pci-segment", &seg) == 0) {
+			return ((uint16_t)seg);
+		}
+		if (di_uintprop_get(mp, dn, "linux,pci-domain", &seg) == 0) {
+			return ((uint16_t)seg);
+		}
+	}
+	return (0);
+}
+#endif /* defined(__aarch64__) */
 
 static int
 di_smbios_find_slot_by_bdf(smbios_hdl_t *shp, const smbios_struct_t *strp,
@@ -124,7 +151,11 @@ di_smbios_find_slot_by_bdf(smbios_hdl_t *shp, const smbios_struct_t *strp,
 	    smbios_info_slot(shp, strp->smbstr_id, &slot) != 0)
 		return (0);
 
-	if (slot.smbl_bus == bus && slot.smbl_df == df) {
+	if (
+#if defined(__aarch64__)
+	    slot.smbl_sg == cbp->cb_sg &&
+#endif
+	    slot.smbl_bus == bus && slot.smbl_df == df) {
 		cbp->cb_label = slot.smbl_name;
 		cbp->cb_slotnum = slot.smbl_id;
 		return (1);
@@ -210,6 +241,9 @@ di_physlotinfo_get(topo_mod_t *mp, di_node_t src, int bdf, int *slotnum,
 
 		cbdata.cb_slotnum = *slotnum;
 		cbdata.cb_bdf = bdf;
+#if defined(__aarch64__)
+		cbdata.cb_sg = di_pci_segment_get(mp, src);
+#endif
 		cbdata.cb_label = NULL;
 
 		/*
