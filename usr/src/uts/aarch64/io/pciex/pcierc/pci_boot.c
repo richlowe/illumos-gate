@@ -1193,6 +1193,8 @@ pci_reprogram(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res)
 	/* All dev programmed, so we can create available prop */
 	for (i = 0; i <= pci_boot_maxbus; i++)
 		add_bus_available_prop(pci_bus_res, i);
+	for (i = 0; i <= pci_boot_maxbus; i++)
+		pci_prd_slot_name(i, pci_bus_res[i].dip);
 }
 
 static struct memlist *
