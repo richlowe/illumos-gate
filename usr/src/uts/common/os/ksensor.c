@@ -399,8 +399,10 @@ ksensor_dip_unbind_taskq(void *arg)
 	    sensor = list_next(&k->ksdip_sensors, sensor)) {
 		mutex_enter(&sensor->ksensor_mutex);
 		if (sensor->ksensor_flags & KSENSOR_F_NOTIFIED) {
-			ksensor_cb_remove(sensor->ksensor_id,
-			    sensor->ksensor_name);
+			if (ksensor_cb_remove != NULL) {
+				ksensor_cb_remove(sensor->ksensor_id,
+				    sensor->ksensor_name);
+			}
 			sensor->ksensor_flags &= ~KSENSOR_F_NOTIFIED;
 		}
 		mutex_exit(&sensor->ksensor_mutex);
