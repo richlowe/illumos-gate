@@ -45,6 +45,7 @@ dir  path=platform/armv8/kernel/drv
 dir  path=platform/armv8/kernel/drv/$(ARCH)
 file path=platform/armv8/kernel/drv/$(ARCH)/acpiged
 file path=platform/armv8/kernel/drv/$(ARCH)/acpinex
+file path=platform/armv8/kernel/drv/$(ARCH)/acpipwrbtn
 file path=platform/armv8/kernel/drv/$(ARCH)/arm_gtmr
 file path=platform/armv8/kernel/drv/$(ARCH)/cpudrv
 file path=platform/armv8/kernel/drv/$(ARCH)/cpunex
@@ -57,6 +58,7 @@ file path=platform/armv8/kernel/drv/$(ARCH)/ns16550a
 file path=platform/armv8/kernel/drv/$(ARCH)/rootnex
 file path=platform/armv8/kernel/drv/$(ARCH)/simple-bus
 file path=platform/armv8/kernel/drv/acpiged.conf
+file path=platform/armv8/kernel/drv/acpipwrbtn.conf
 file path=platform/armv8/kernel/drv/cpudrv.conf
 file path=platform/armv8/kernel/drv/ns16550a.conf
 dir  path=platform/armv8/kernel/misc
@@ -78,6 +80,7 @@ file path=usr/share/man/man4d/ecam.4d
 file path=usr/share/man/man4d/simple-bus.4d
 driver name=acpiged alias=ACPI0013
 driver name=acpinex alias=acpivirtnex
+driver name=acpipwrbtn alias=PNP0C0C
 driver name=arm_gtmr alias=arm,armv8-timer
 driver name=cpudrv \
     alias=arm,armv8 \

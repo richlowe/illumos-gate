@@ -70,6 +70,7 @@ static char *acpidev_device_hid_skiplist[] = {
 static char *acpidev_device_well_known_hids[] = {
 	ACPIDEV_HID_ARM_PL011,
 	ACPIDEV_HID_GED,
+	ACPIDEV_HID_PWRBTN,
 };
 
 static ACPI_STATUS acpidev_device_probe(acpidev_walk_info_t *infop);

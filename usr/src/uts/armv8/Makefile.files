@@ -223,6 +223,8 @@ ACPINEX_OBJS +=			\
 	acpinex_drv.o		\
 	acpinex_event.o
 
+ACPIPWRBTN_OBJS +=	acpipwrbtn.o
+
 ASSYM_DEPS +=			\
 	aarch64_subr.o		\
 	copy.o			\

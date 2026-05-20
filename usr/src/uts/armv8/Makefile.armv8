@@ -234,6 +234,7 @@ DRV_KMODS += pcieb
 DRV_KMODS += cpudrv
 DRV_KMODS += cpunex
 DRV_KMODS += acpiged
+DRV_KMODS += acpipwrbtn
 DRV_KMODS += acpinex
 
 #
