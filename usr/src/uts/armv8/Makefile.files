@@ -217,6 +217,8 @@ ACPIDEV_OBJS +=			\
 	acpidev_osc.o		\
 	acpidev_util.o
 
+ACPIGED_OBJS +=	acpiged.o
+
 ACPINEX_OBJS +=			\
 	acpinex_drv.o		\
 	acpinex_event.o
