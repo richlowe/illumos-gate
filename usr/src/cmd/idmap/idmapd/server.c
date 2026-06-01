@@ -182,7 +182,7 @@ bool_t
 idmap_get_mapped_ids_1_svc(idmap_mapping_batch batch,
     idmap_ids_res *result, struct svc_req *rqstp)
 {
-	sqlite		*cache = NULL, *db = NULL;
+	sqlite3		*cache = NULL, *db = NULL;
 	lookup_state_t	state;
 	idmap_retcode	retcode;
 	uint_t		i;
@@ -659,7 +659,7 @@ bool_t
 idmap_list_mappings_1_svc(int64_t lastrowid, uint64_t limit, int32_t flag,
     idmap_mappings_res *result, struct svc_req *rqstp)
 {
-	sqlite		*cache = NULL;
+	sqlite3		*cache = NULL;
 	char		lbuf[30], rbuf[30];
 	uint64_t	maxlimit;
 	idmap_retcode	retcode;
@@ -704,7 +704,7 @@ idmap_list_mappings_1_svc(int64_t lastrowid, uint64_t limit, int32_t flag,
 	 * will return the requested mappings
 	 */
 
-	sql = sqlite_mprintf("SELECT rowid, sidprefix, rid, pid, w2u, "
+	sql = sqlite3_mprintf("SELECT rowid, sidprefix, rid, pid, w2u, "
 	    "u2w, windomain, canon_winname, unixname, is_user, is_wuser, "
 	    "map_type, map_dn, map_attr, map_value, map_windomain, "
 	    "map_winname, map_unixname, map_is_nt4 "
@@ -728,7 +728,7 @@ idmap_list_mappings_1_svc(int64_t lastrowid, uint64_t limit, int32_t flag,
 
 out:
 	if (sql)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 	if (IDMAP_ERROR(result->retcode))
 		xdr_free(xdr_idmap_mappings_res, (caddr_t)result);
 	result->retcode = idmap_stat4prot(result->retcode);
@@ -813,7 +813,7 @@ idmap_list_namerules_1_svc(idmap_namerule rule, uint64_t lastrowid,
     uint64_t limit, idmap_namerules_res *result, struct svc_req *rqstp)
 {
 
-	sqlite		*db = NULL;
+	sqlite3		*db = NULL;
 	char		lbuf[30], rbuf[30];
 	char		*sql = NULL;
 	char		*expr = NULL;
@@ -854,7 +854,7 @@ idmap_list_namerules_1_svc(idmap_namerule rule, uint64_t lastrowid,
 	 * Combine all the above into a giant SELECT statement that
 	 * will return the requested rules
 	 */
-	sql = sqlite_mprintf("SELECT rowid, is_user, is_wuser, windomain, "
+	sql = sqlite3_mprintf("SELECT rowid, is_user, is_wuser, windomain, "
 	    "winname_display, is_nt4, unixname, w2u_order, u2w_order "
 	    "FROM namerules WHERE "
 	    " %s %s %s;",
@@ -875,9 +875,9 @@ idmap_list_namerules_1_svc(idmap_namerule rule, uint64_t lastrowid,
 
 out:
 	if (expr)
-		sqlite_freemem(expr);
+		sqlite3_free(expr);
 	if (sql)
-		sqlite_freemem(sql);
+		sqlite3_free(sql);
 	if (IDMAP_ERROR(result->retcode))
 		xdr_free(xdr_idmap_namerules_res, (caddr_t)result);
 	result->retcode = idmap_stat4prot(result->retcode);
@@ -938,7 +938,7 @@ bool_t
 idmap_update_1_svc(idmap_update_batch batch, idmap_update_res *res,
     struct svc_req *rqstp)
 {
-	sqlite		*db = NULL;
+	sqlite3		*db = NULL;
 	idmap_update_op	*up;
 	int		i;
 	int		trans = FALSE;

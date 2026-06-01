@@ -201,6 +201,7 @@ $(MULTILIB_ONLY)link path=lib/$(ARCH64)/libsendfile.so target=libsendfile.so.1
 $(MULTILIB_ONLY)file path=lib/$(ARCH64)/libsendfile.so.1
 $(MULTILIB_ONLY)link path=lib/$(ARCH64)/libsocket.so target=libsocket.so.1
 $(MULTILIB_ONLY)file path=lib/$(ARCH64)/libsocket.so.1
+$(MULTILIB_ONLY)file path=lib/$(ARCH64)/libsqlite3-sys.so.3.47.2
 $(MULTILIB_ONLY)link path=lib/$(ARCH64)/libsysevent.so target=libsysevent.so.1
 $(MULTILIB_ONLY)file path=lib/$(ARCH64)/libsysevent.so.1
 $(MULTILIB_ONLY)link path=lib/$(ARCH64)/libtermcap.so target=libtermcap.so.1
@@ -360,6 +361,7 @@ file path=lib/libsendfile.so.1
 link path=lib/libsocket.so target=libsocket.so.1
 file path=lib/libsocket.so.1
 file path=lib/libsqlite-sys.so.2.8.15
+file path=lib/libsqlite3-sys.so.3.47.2
 link path=lib/libsysevent.so target=./libsysevent.so.1
 file path=lib/libsysevent.so.1
 link path=lib/libtermcap.so target=libtermcap.so.1

@@ -30,6 +30,7 @@ usr/src/cmd/pools/poold/libjpool/jpool.h
 usr/src/cmd/pools/poold/libjsyslog/jsyslog.h
 usr/src/common/ficl/ficltokens.h
 usr/src/contrib
+usr/src/common/sqlite3
 usr/src/grub/grub-0.97/stage2/shared.h
 usr/src/lib/libadt_jni/com/sun/audit/AuditSession.h
 usr/src/lib/libdtrace_jni/java/native/LocalConsumer.h

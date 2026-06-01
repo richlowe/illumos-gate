@@ -119,7 +119,7 @@ pre_user=root
 pre = idmap_init
 post_user=root
 post = idmap_fini
-tests = ['idmaptest.32','idmaptest.64']
+tests = ['idmaptest.32','idmaptest.64', 'idmap_db']
 
 [/opt/os-tests/tests/ksid]
 tests = ['ksid.32','ksid.64']

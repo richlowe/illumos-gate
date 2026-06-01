@@ -59,6 +59,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <note.h>
+#include <sys/ccompile.h>
 
 #define	CBUFSIZ 26	/* ctime(3c) */
 
@@ -272,15 +273,24 @@ main(int argc, char **argv)
 		return (-1);
 
 	_idmapdstate.daemon_mode = TRUE;
-	while ((c = getopt(argc, argv, "d")) != -1) {
+
+	/*
+	 * The -R option is an undocumented option to specify an alternate
+	 * root in which to database things.  It DOES NOT affect any other
+	 * paths such as doors.
+	 */
+	while ((c = getopt(argc, argv, "dR:")) != -1) {
 		switch (c) {
-			case 'd':
-				_idmapdstate.daemon_mode = FALSE;
-				break;
-			default:
-				(void) fprintf(stderr,
-				    "Usage: /usr/lib/idmapd [-d]\n");
-				return (SMF_EXIT_ERR_CONFIG);
+		case 'd':
+			_idmapdstate.daemon_mode = FALSE;
+			break;
+		case 'R':
+			db_set_altroot(optarg);
+			break;
+		default:
+			(void) fprintf(stderr,
+			    "Usage: /usr/lib/idmapd [-d]\n");
+			return (SMF_EXIT_ERR_CONFIG);
 		}
 	}
 
@@ -307,7 +317,7 @@ main(int argc, char **argv)
 		rl.rlim_cur = rl.rlim_max;
 		if (setrlimit(RLIMIT_NOFILE, &rl) != 0)
 			idmapdlog(LOG_ERR,
-			    "Unable to raise RLIMIT_NOFILE to %d",
+			    "Unable to raise RLIMIT_NOFILE to %ld",
 			    rl.rlim_cur);
 	}
 
@@ -316,8 +326,9 @@ main(int argc, char **argv)
 			idmapdlog(LOG_ERR, "unable to daemonize");
 			exit(-1);
 		}
-	} else
+	} else {
 		(void) umask(0077);
+	}
 
 	idmap_init_tsd_key();
 
@@ -354,11 +365,18 @@ init_idmapd()
 	int	error;
 	int	connmaxrec = IDMAP_MAX_DOOR_RPC;
 
+	sqlite3_initialize();
+
+	char path[MAXPATHLEN];
+
 
 	/* create directories as root and chown to daemon uid */
-	if (create_directory(IDMAP_DBDIR, DAEMON_UID, DAEMON_GID) < 0)
+	db_altroot_path(IDMAP_DBDIR, path, MAXPATHLEN);
+	if (create_directory(path, DAEMON_UID, DAEMON_GID) < 0)
 		exit(1);
-	if (create_directory(IDMAP_CACHEDIR, DAEMON_UID, DAEMON_GID) < 0)
+
+	db_altroot_path(IDMAP_CACHEDIR, path, MAXPATHLEN);
+	if (create_directory(path, DAEMON_UID, DAEMON_GID) < 0)
 		exit(1);
 
 	/*
@@ -452,6 +470,7 @@ fini_idmapd()
 {
 	(void) __idmap_unreg(dfd);
 	fini_mapping_system();
+	sqlite3_shutdown();
 	if (xprt != NULL)
 		svc_destroy(xprt);
 }
@@ -531,8 +550,6 @@ restore_svc(void)
 	idmapdlog(LOG_NOTICE, "Normal operation restored");
 }
 
-
-/* printflike */
 void
 idmapdlog(int pri, const char *format, ...)
 {

@@ -16,9 +16,10 @@
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
-PROG =	idmaptest.32 idmaptest.64
+PROG =	idmaptest.64
+$(BUILD32) PROG += idmaptest.32
 
-SCRIPTS = idmap_init idmap_fini
+SCRIPTS = idmap_init idmap_fini idmap_db
 
 LDLIBS += -lidmap
 LDLIBS64 += -lidmap

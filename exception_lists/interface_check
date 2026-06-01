@@ -91,6 +91,7 @@ NOVERDEF	^usr/sadm/admin/dhcpmgr/dhcpmgr\.so\.1$
 # Objects that are allowed to deviate from our standard version
 # names.
 NONSTD_VERNAME	^MACH(lib)/libsqlite-sys\.so\.
+NONSTD_VERNAME	^MACH(lib)/libsqlite3-sys\.so\.
 NONSTD_VERNAME	^usr/MACH(lib)/libtecla\.so\.1$
 
 # These libc variants have an SONAME of libc\.so\.1$
