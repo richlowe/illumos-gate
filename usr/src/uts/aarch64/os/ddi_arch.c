@@ -271,6 +271,43 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
 }
 
 /*
+ * Translate a bus-local address to a CPU physical address by walking
+ * i_ddi_apply_range from `dip` up to the root node, composing the
+ * address translation at each level.
+ *
+ * This handles MEM space only (bustype 0).  Returns the translated CPU
+ * physical address in `cpu_addr` on success when `cpu_addr` is non-NULL.
+ *
+ * Returns DDI_SUCCESS when translation succeeded.
+ *
+ * Exported as a private interface to support arbitrary address resolution
+ * in platform drivers.
+ */
+int
+i_ddi_bus_to_cpu(dev_info_t *dip, uint64_t bus_addr, uint64_t size,
+    uint64_t *cpu_addr)
+{
+	struct regspec reg;
+	dev_info_t *dp;
+
+	reg.regspec_bustype = 0;
+	reg.regspec_addr = bus_addr;
+	reg.regspec_size = size;
+
+	for (dp = dip; dp != ddi_root_node(); dp = ddi_get_parent(dp)) {
+		if (i_ddi_apply_range(dp, dip, &reg) != 0) {
+			return (DDI_FAILURE);
+		}
+	}
+
+	if (cpu_addr != NULL) {
+		*cpu_addr = reg.regspec_addr;
+	}
+
+	return (DDI_SUCCESS);
+}
+
+/*
  * i_ddi_map_fault: wrapper for bus_map_fault.
  */
 int
