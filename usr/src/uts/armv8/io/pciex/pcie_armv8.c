@@ -11,21 +11,32 @@
 
 /*
  * Copyright 2024 Richard Lowe
+ * Copyright 2026 Michael van der Westhuizen
  */
 
+#include <sys/types.h>
 #include <sys/ddi.h>
+#include <sys/kmem.h>
 #include <sys/sunddi.h>
+#include <sys/sunndi.h>
+#include <sys/pcie_impl.h>
+#include <sys/pcie_aarch64.h>
 
 #include <sys/plat/pci_prd.h>
 
 void
 pcie_init_plat(dev_info_t *dip)
 {
+	pcie_bus_t	*bus_p = PCIE_DIP2BUS(dip);
+	bus_p->bus_plat_private =
+	    kmem_zalloc(sizeof (pcie_aarch64_priv_t), KM_SLEEP);
 }
 
 void
 pcie_fini_plat(dev_info_t *dip)
 {
+	pcie_bus_t	*bus_p = PCIE_DIP2BUS(dip);
+	kmem_free(bus_p->bus_plat_private, sizeof (pcie_aarch64_priv_t));
 }
 
 int

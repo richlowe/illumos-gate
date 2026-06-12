@@ -55,6 +55,8 @@ struct prom_hwclock;
 #pragma weak	plat_gpio_set
 #pragma weak	plat_clk_get_rate
 #pragma weak	plat_clk_get_rate_by_name
+#pragma weak	plat_pcie_osc_set
+#pragma weak	plat_pcie_osc
 
 /*
  * Called in mp_startup.c from init_cpu_info (twice).
@@ -72,6 +74,28 @@ extern int plat_gpio_set(struct gpio_ctrl *, int);
 
 extern int plat_clk_get_rate(dev_info_t *, uint_t);
 extern int plat_clk_get_rate_by_name(dev_info_t *, const char *);
+
+/*
+ * PCIe _OSC negotiation.
+ *
+ * plat_pcie_osc: Evaluate PCIe Host Bridge _OSC for a given bridge.
+ *   dip:         bridge dev_info_t
+ *   support:     Support Field bits to declare (DWORD 2)
+ *   ctrl_req:    Control Field bits to request (DWORD 3)
+ *   ctrl_ret:    on success, granted Control Field bits
+ *
+ *   Returns DDI_SUCCESS/DDI_FAILURE.
+ *
+ * plat_pcie_osc_set: Called by ACPI layer to register the _OSC
+ *   evaluator.  When the weak symbol is absent (DT platforms),
+ *   pcie_osc.c falls through to grant all requested bits.
+ */
+typedef int (*plat_pcie_osc_func_t)(dev_info_t *dip,
+    uint32_t support, uint32_t ctrl_req, uint32_t *ctrl_ret);
+
+extern void plat_pcie_osc_set(plat_pcie_osc_func_t);
+extern int plat_pcie_osc(dev_info_t *dip,
+    uint32_t support, uint32_t ctrl_req, uint32_t *ctrl_ret);
 
 #endif	/* _KERNEL */
 
