@@ -23,6 +23,7 @@
  * Use is subject to license terms.
  *
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 /* armv8 specific code used by the pcieb driver */
@@ -36,6 +37,8 @@
 #include <sys/pcie.h>
 #include <sys/pci_cap.h>
 #include <sys/pcie_impl.h>
+#include <sys/pcie_osc.h>
+#include <sys/pcie_aarch64.h>
 #include <sys/hotplug/hpctrl.h>
 #include <io/pciex/pcieb.h>
 #include <sys/obpdefs.h>
@@ -67,8 +70,9 @@ pcieb_plat_peekpoke(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 	pcieb_devstate_t *pcieb = ddi_get_soft_state(pcieb_state,
 	    ddi_get_instance(dip));
 
-	if (!PCIE_IS_RP(PCIE_DIP2BUS(dip)))
+	if (!PCIE_IS_RP(PCIE_DIP2BUS(dip))) {
 		return (ddi_ctlops(dip, rdip, ctlop, arg, result));
+	}
 
 	return (pci_peekpoke_check(dip, rdip, ctlop, arg, result,
 	    ddi_ctlops, &pcieb->pcieb_err_mutex,
@@ -77,7 +81,7 @@ pcieb_plat_peekpoke(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 }
 
 void
-pcieb_plat_attach_workaround(dev_info_t *dip)
+pcieb_plat_attach_workaround(dev_info_t *dip __unused)
 {
 }
 
@@ -88,24 +92,82 @@ pcieb_plat_intr_ops(dev_info_t *dip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	return (i_ddi_intr_ops(dip, rdip, intr_op, hdlp, result));
 }
 
-/*ARGSUSED*/
 boolean_t
-pcieb_plat_pwr_disable(dev_info_t *dip)
+pcieb_plat_pwr_disable(dev_info_t *dip __unused)
 {
 	/* Always disable on armv8 */
 	return (B_TRUE);
 }
 
 boolean_t
-pcieb_plat_msi_supported(dev_info_t *dip)
+pcieb_plat_msi_supported(dev_info_t *dip __unused)
 {
 	return (B_TRUE);
+}
+
+/*
+ * Check whether _OSC has been called for this device.
+ * Used to avoid duplicate calls when hotplug init has
+ * already evaluated _OSC.
+ */
+static boolean_t
+pcieb_is_osc(dev_info_t *dip)
+{
+	pcie_bus_t		*bus_p = PCIE_DIP2BUS(dip);
+	pcie_aarch64_priv_t	*osc_p;
+
+	if (bus_p == NULL || bus_p->bus_plat_private == NULL) {
+		return (B_FALSE);
+	}
+
+	osc_p = (pcie_aarch64_priv_t *)bus_p->bus_plat_private;
+	return (osc_p->bus_osc);
+}
+
+static void
+pcieb_init_osc(dev_info_t *devi)
+{
+	pcie_bus_t		*bus_p = PCIE_DIP2UPBUS(devi);
+	pcie_aarch64_priv_t	*osc_p;
+	uint32_t		support = PCIE_OSC_SUPPORT_INIT;
+	uint32_t		ctrl_req = PCIE_OSC_CONTROL_INIT;
+	uint32_t		ctrl_ret = 0;
+
+	if (!PCIE_IS_RP(bus_p)) {
+		return;
+	}
+
+	if (PCIE_HAS_AER(bus_p)) {
+		ctrl_req |= PCIE_OSC_CTL_AER;
+	}
+
+	osc_p = (pcie_aarch64_priv_t *)bus_p->bus_plat_private;
+	if (osc_p == NULL) {
+		return;
+	}
+
+	/* Mark that _OSC has been attempted for this device */
+	osc_p->bus_osc = B_TRUE;
+
+	/*
+	 * TODO: add PCIE_OSC_CTL_NAT_HP | PCIE_OSC_CTL_NAT_PM
+	 * when native PCIe hotplug is implemented.
+	 */
+
+	if (pcie_osc(devi, support, ctrl_req, &ctrl_ret) == DDI_SUCCESS) {
+		osc_p->bus_osc_hp =
+		    (ctrl_ret & PCIE_OSC_CTL_NAT_HP) ? B_TRUE : B_FALSE;
+		osc_p->bus_osc_aer =
+		    (ctrl_ret & PCIE_OSC_CTL_AER) ? B_TRUE : B_FALSE;
+	}
 }
 
 void
 pcieb_plat_intr_attach(pcieb_devstate_t *pcieb)
 {
-
+	if (!pcieb_is_osc(pcieb->pcieb_dip)) {
+		pcieb_init_osc(pcieb->pcieb_dip);
+	}
 }
 
 void
@@ -119,8 +181,9 @@ pcieb_plat_initchild(dev_info_t *child)
 		pdptr->par_intr = (struct intrspec *)(pdptr + 1);
 		pdptr->par_nintr = 1;
 		ddi_set_parent_data(child, pdptr);
-	} else
+	} else {
 		ddi_set_parent_data(child, NULL);
+	}
 }
 
 void
@@ -128,8 +191,9 @@ pcieb_plat_uninitchild(dev_info_t *child)
 {
 	struct ddi_parent_private_data	*pdptr;
 
-	if ((pdptr = ddi_get_parent_data(child)) != NULL)
+	if ((pdptr = ddi_get_parent_data(child)) != NULL) {
 		kmem_free(pdptr, (sizeof (*pdptr) + sizeof (struct intrspec)));
+	}
 
 	ddi_set_parent_data(child, NULL);
 }
@@ -146,8 +210,9 @@ pcieb_plat_ctlops(dev_info_t *rdip, ddi_ctl_enum_t ctlop, void *arg)
 		switch (ds->when) {
 		case DDI_POST:
 			if (ds->cmd == DDI_SUSPEND) {
-				if (pci_post_suspend(rdip) != DDI_SUCCESS)
+				if (pci_post_suspend(rdip) != DDI_SUCCESS) {
 					return (DDI_FAILURE);
+				}
 			}
 			break;
 		default:
@@ -159,8 +224,9 @@ pcieb_plat_ctlops(dev_info_t *rdip, ddi_ctl_enum_t ctlop, void *arg)
 		switch (as->when) {
 		case DDI_PRE:
 			if (as->cmd == DDI_RESUME) {
-				if (pci_pre_resume(rdip) != DDI_SUCCESS)
+				if (pci_pre_resume(rdip) != DDI_SUCCESS) {
 					return (DDI_FAILURE);
+				}
 			}
 			break;
 		case DDI_POST:
