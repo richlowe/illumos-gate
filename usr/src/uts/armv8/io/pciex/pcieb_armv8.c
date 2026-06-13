@@ -99,7 +99,7 @@ pcieb_plat_pwr_disable(dev_info_t *dip)
 boolean_t
 pcieb_plat_msi_supported(dev_info_t *dip)
 {
-	return (B_FALSE);	/* XXXARM: We don't right now, but need to */
+	return (B_TRUE);
 }
 
 void
