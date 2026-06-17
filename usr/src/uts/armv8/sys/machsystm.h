@@ -67,6 +67,9 @@ extern struct cpu	*cpu[];		/* pointer to all cpus */
 extern unsigned int microdata;
 extern uintptr_t hole_start, hole_end;
 
+/* tty[a-z] - sync with libmmio_uart/mmio_uart.h */
+#define	MMIO_UART_MAX_UARTS	(('z' - 'a') + 1)
+
 #define	INVALID_VADDR(a)	\
 	(((a) >= (caddr_t)hole_start && (a) < (caddr_t)hole_end))
 
