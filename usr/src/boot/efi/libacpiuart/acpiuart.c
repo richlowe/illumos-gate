@@ -91,7 +91,7 @@ typedef struct {
 	uint32_t		uad_uid;
 } uart_aux_data_t;
 
-#define	MAX_UARTS	26
+#define	MAX_UARTS	MMIO_UART_MAX_UARTS
 
 typedef struct {
 	uint32_t	data1;
@@ -916,6 +916,8 @@ acpiuart_discover_uarts(void)
 
 	if (getenv("default-uart-name") == NULL && first_tty != NULL)
 		setenv("default-uart-name", first_tty->c_name, 1);
+
+	mmio_uart_set_serial_ports_pa(mmio_uart, num_mmio_uart);
 
 	consoles[c] = NULL;
 }
