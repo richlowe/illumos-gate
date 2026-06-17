@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 /*
@@ -746,4 +746,71 @@ mmio_uart_make_tty(mmio_uart_t *uart)
 		(void) uart->mu_ops->op_getchar(uart);
 
 	return (tty);
+}
+
+/*
+ * Build the "motherboard-serial-ports-pa" environment variable from the
+ * discovered UART list.
+ *
+ * The value is a comma-separated list of hex CPU physical addresses,
+ * positionally indexed by tty letter: ttya = first, ttyb = second, etc.
+ * Interior gaps (missing tty letters) use "0x0" as an unmatchable sentinel.
+ * Trailing missing letters are omitted entirely.
+ *
+ * This is picked up by fakebop and converted to an int64 array property on
+ * the root device node, where asy(4D) uses it to assign COM port numbers
+ * on aarch64.
+ */
+void
+mmio_uart_set_serial_ports_pa(mmio_uart_t *uarts, size_t nuarts)
+{
+	/* "0x" + 16 hex digits + "," = 19 chars max per entry */
+	char buf[MMIO_UART_MAX_UARTS * 20];
+	char *p = buf;
+	uint32_t max_idx = 0;
+	uint32_t pos;
+	size_t i;
+	bool found = false;
+
+	if (nuarts == 0) {
+		return;
+	}
+
+	/* Find the highest serial alias index among valid UARTs */
+	for (i = 0; i < nuarts; i++) {
+		if (!(uarts[i].mu_flags & MMIO_UART_VALID)) {
+			continue;
+		}
+
+		if (uarts[i].mu_serial_idx > max_idx) {
+			max_idx = uarts[i].mu_serial_idx;
+		}
+
+		found = true;
+	}
+
+	if (!found || max_idx >= MMIO_UART_MAX_UARTS) {
+		return;
+	}
+
+	/* Build positional comma-separated hex string */
+	for (pos = 0; pos <= max_idx; pos++) {
+		uint64_t pa = 0;
+
+		for (i = 0; i < nuarts; i++) {
+			if ((uarts[i].mu_flags & MMIO_UART_VALID) &&
+			    uarts[i].mu_serial_idx == pos) {
+				pa = uarts[i].mu_base;
+				break;
+			}
+		}
+
+		if (pos > 0) {
+			*p++ = ',';
+		}
+
+		p += snprintf(p, sizeof (buf) - (p - buf), "0x%lx", pa);
+	}
+
+	setenv("motherboard-serial-ports-pa", buf, 1);
 }
