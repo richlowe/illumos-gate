@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #ifndef _MMIO_UART_MMIO_UART_H
@@ -22,6 +22,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
+
+/* tty[a-z] - sync with sys/machsystm.h */
+#define	MMIO_UART_MAX_UARTS	(('z' - 'a') + 1)
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,6 +155,8 @@ extern void mmio_uart_free_low_page(void *addr);
 
 extern void mmio_uart_puts(const char *s);
 extern void mmio_uart_putn(unsigned long n, int b);
+
+extern void mmio_uart_set_serial_ports_pa(mmio_uart_t *, size_t);
 
 #ifdef __cplusplus
 }
