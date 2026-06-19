@@ -15,6 +15,10 @@
 
 #include <sys/systm.h>
 #include <sys/machclock.h>
+#include <sys/promif.h>
+#include <sys/prom_plat.h>
+#include <sys/byteorder.h>
+#include <sys/sunddi.h>
 #include <sys/efi.h>
 #include <sys/efirt.h>
 
@@ -46,4 +50,50 @@ set_platform_defaults(void)
 	if (efi_get_time(&t, &tc) == EFI_SUCCESS) {
 		tod_module_name = "efitod";
 	}
+}
+
+int
+plat_clk_get_rate(dev_info_t *dip, uint_t clkno)
+{
+	struct prom_hwclock hwclk;
+
+	if (prom_fdt_get_clock_by_index((pnode_t)ddi_get_nodeid(dip),
+	    clkno, &hwclk) != 0) {
+		return (-1);
+	}
+
+	if (prom_fdt_is_compatible(hwclk.node, "fixed-clock")) {
+		uint_t clock;
+		if (prom_getproplen(hwclk.node, "clock-frequency") ==
+		    sizeof (uint_t)) {
+			prom_getprop(hwclk.node, "clock-frequency",
+			    (caddr_t)&clock);
+			return (ntohl(clock));
+		}
+	}
+
+	return (-1);
+}
+
+int
+plat_clk_get_rate_by_name(dev_info_t *dip, const char *clkname)
+{
+	struct prom_hwclock hwclk;
+
+	if (prom_fdt_get_clock_by_name((pnode_t)ddi_get_nodeid(dip),
+	    clkname, &hwclk) != 0) {
+		return (-1);
+	}
+
+	if (prom_fdt_is_compatible(hwclk.node, "fixed-clock")) {
+		uint_t clock;
+		if (prom_getproplen(hwclk.node, "clock-frequency") ==
+		    sizeof (uint_t)) {
+			prom_getprop(hwclk.node, "clock-frequency",
+			    (caddr_t)&clock);
+			return (ntohl(clock));
+		}
+	}
+
+	return (-1);
 }
