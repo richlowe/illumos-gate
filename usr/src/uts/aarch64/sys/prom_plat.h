@@ -45,6 +45,8 @@ struct prom_hwclock {
 };
 
 extern int prom_fdt_get_reg(pnode_t node, int index, uint64_t *base);
+extern int prom_fdt_get_clock_by_index(pnode_t node, int index,
+    struct prom_hwclock *clock);
 extern int prom_fdt_get_clock_by_name(pnode_t node, const char *name,
     struct prom_hwclock *clock);
 extern boolean_t prom_fdt_is_compatible(pnode_t node, const char *name);
