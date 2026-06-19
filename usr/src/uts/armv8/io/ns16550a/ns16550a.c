@@ -984,24 +984,26 @@ ns16550attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	}
 
 	uint_t uart_clock = 0;
+	int err;
 
-	struct prom_hwclock hwclock;
-	if (prom_fdt_get_clock_by_name(ddi_get_nodeid(devi),
-	    "uartclk", &hwclock) == 0) {
-		int err;
+	if (&plat_clk_get_rate_by_name) {
+		if ((err = plat_clk_get_rate_by_name(devi, "uartclk")) > 0) {
+			uart_clock = err;
+		}
+	}
 
-		if (&plat_hwclock_get_rate)
-			if ((err = plat_hwclock_get_rate(&hwclock)) > 0)
-				uart_clock = err;
+	if (uart_clock == 0 && &plat_clk_get_rate) {
+		if ((err = plat_clk_get_rate(devi, 0)) > 0) {
+			uart_clock = err;
+		}
 	}
 
 	if (uart_clock == 0) {
-		int err;
-
 		if ((err = ddi_prop_get_int(DDI_DEV_T_ANY, devi,
 		    DDI_PROP_DONTPASS, "clock-frequency", 0)) !=
-		    DDI_PROP_NOT_FOUND)
+		    DDI_PROP_NOT_FOUND) {
 			uart_clock = err;
+		}
 	}
 
 	ret = ddi_soft_state_zalloc(ns16550_soft_state, instance);
