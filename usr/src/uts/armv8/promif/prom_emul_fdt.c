@@ -599,29 +599,33 @@ promif_get_clock(pnode_t node, int index, struct prom_hwclock *clock)
 	uint32_t *clocks = __builtin_alloca(len);
 	promif_getprop(node, "clocks", (caddr_t)clocks);
 
-	pnode_t clock_node;
-	clock_node = find_by_phandle(ntohl(clocks[0]));
-	if (clock_node < 0)
-		return (-1);
+	int ncells = BYTES_TO_1275_CELLS(len);
+	int pos = 0;
 
-	int clock_cells = get_prop_int(clock_node, "#clock-cells", 1);
-	if (clock_cells != 0 && clock_cells != 1)
-		return (-1);
+	for (int i = 0; pos < ncells; i++) {
+		pnode_t clock_node = find_by_phandle(ntohl(clocks[pos]));
+		if (clock_node < 0)
+			return (-1);
 
-	if (len % (CELLS_1275_TO_BYTES(clock_cells + 1)) != 0)
-		return (-1);
-	if (len <= index * CELLS_1275_TO_BYTES(clock_cells + 1))
-		return (-1);
+		int clock_cells = get_prop_int(clock_node,
+		    "#clock-cells", 1);
+		if (clock_cells != 0 && clock_cells != 1)
+			return (-1);
 
-	clock_node = find_by_phandle(
-	    ntohl(clocks[index * (clock_cells + 1)]));
-	if (clock_node < 0)
-		return (-1);
-	clock->node = clock_node;
-	clock->id = (clock_cells == 0 ? 0:
-	    ntohl(clocks[index * (clock_cells + 1) + 1]));
+		if (pos + 1 + clock_cells > ncells)
+			return (-1);
 
-	return (0);
+		if (i == index) {
+			clock->node = clock_node;
+			clock->id = (clock_cells == 0 ? 0 :
+			    ntohl(clocks[pos + 1]));
+			return (0);
+		}
+
+		pos += 1 + clock_cells;
+	}
+
+	return (-1);
 }
 
 boolean_t
@@ -733,13 +737,22 @@ prom_fdt_get_reg_address(pnode_t node, int index, uint64_t *reg)
 }
 
 int
+prom_fdt_get_clock_by_index(pnode_t node,
+    int index, struct prom_hwclock *clock)
+{
+	if (index >= 0) {
+		return (promif_get_clock(node, index, clock));
+	}
+
+	return (-1);
+}
+
+int
 prom_fdt_get_clock_by_name(pnode_t node,
     const char *name, struct prom_hwclock *clock)
 {
 	int index = get_prop_index(node, "clock-names", name);
-	if (index >= 0)
-		return (promif_get_clock(node, index, clock));
-	return (-1);
+	return (prom_fdt_get_clock_by_index(node, index, clock));
 }
 
 /*
