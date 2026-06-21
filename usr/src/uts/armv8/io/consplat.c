@@ -252,13 +252,18 @@ plat_mousepath(void)
 }
 
 static char *
-plat_ttypath_find(const char *drv, int inum, char *path)
+plat_ttypath(int inum)
 {
+	static char path[MAXPATHLEN];
+	char *bp;
 	major_t major;
 	dev_info_t *dip;
-	char *bp;
 
-	if ((major = ddi_name_to_major(drv)) == (major_t)-1) {
+	if (inum < 0 || inum > 25) {
+		return (NULL);
+	}
+
+	if ((major = ddi_name_to_major("asy")) == (major_t)-1) {
 		return (NULL);
 	}
 
@@ -289,27 +294,6 @@ plat_ttypath_find(const char *drv, int inum, char *path)
 	(void) snprintf(bp, 3, ":%s", DEVI(dip)->devi_minor->ddm_name);
 
 	return (path);
-}
-
-static char *
-plat_ttypath(int inum)
-{
-	static char path[MAXPATHLEN];
-	char *p;
-
-	if (inum < 0 || inum > 25) {
-		return (NULL);
-	}
-
-	/*
-	 * We prefer asy (the new pl011 driver) and fall back to
-	 * ns16550a (the old pl011 driver).
-	 */
-	if ((p = plat_ttypath_find("asy", inum, path)) != NULL) {
-		return (p);
-	}
-
-	return (plat_ttypath_find("ns16550a", inum, path));
 }
 
 /* return path of first usb serial device */
