@@ -48,6 +48,7 @@ MODULE		= asy
 OBJECTS		= $(ASY_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 CONF_SRCDIR	= $(UTSBASE)/common/io
+MAPFILE		= $(UTSBASE)/common/io/$(MODULE).mapfile
 
 #
 #	Include common rules.
@@ -59,6 +60,8 @@ include $(UTSBASE)/intel/Makefile.intel
 #
 ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+
+LDFLAGS		+= -M $(MAPFILE)
 
 #
 #	Default build targets.
