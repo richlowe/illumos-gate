@@ -187,6 +187,7 @@ static void	async_flowcontrol_hw_output(struct asycom *asy,
 static kmutex_t asy_glob_lock; /* lock protecting global data manipulation */
 static void *asy_soft_state;
 
+#if defined(__x86)
 /* Standard COM port I/O addresses */
 static const int standard_com_ports[] = {
 	COM1_IOADDR, COM2_IOADDR, COM3_IOADDR, COM4_IOADDR
@@ -194,6 +195,12 @@ static const int standard_com_ports[] = {
 
 static int *com_ports;
 static uint_t num_com_ports;
+#endif	/* __x86 */
+
+#if defined(__aarch64__)
+static uint64_t *com_ports_pa;
+static uint_t num_com_ports_pa;
+#endif	/* __aarch64__ */
 
 #ifdef	DEBUG
 /*
@@ -343,10 +350,18 @@ _fini(void)
 			    modldrv.drv_linkinfo);
 #endif
 		mutex_destroy(&asy_glob_lock);
+#if defined(__x86)
 		/* free "motherboard-serial-ports" property if allocated */
 		if (com_ports != NULL && com_ports != (int *)standard_com_ports)
 			ddi_prop_free(com_ports);
 		com_ports = NULL;
+#endif	/* __x86 */
+#if defined(__aarch64__)
+		if (com_ports_pa != NULL)
+			ddi_prop_free(com_ports_pa);
+		com_ports_pa = NULL;
+		num_com_ports_pa = 0;
+#endif	/* __aarch64__ */
 		ddi_soft_state_fini(&asy_soft_state);
 	}
 	return (i);
@@ -415,8 +430,29 @@ async_process_suspq(struct asycom *asy)
 int
 asy_get_bus_type(dev_info_t *devinfo)
 {
+#if defined(__aarch64__)
+	const char *bname;
+#endif
 	char *prop;
 	int bustype;
+
+#if defined(__aarch64__)
+	/*
+	 * On aarch64, check for PL011/SBSA compatible strings first.
+	 *
+	 * Platform bus devices may not have device_type or bus-type
+	 * properties.
+	 */
+	bname = ddi_binding_name(devinfo);
+	VERIFY3P(bname, !=, NULL);
+
+	if (strcmp(bname, "ARMH0011") == 0 ||
+	    strcmp(bname, "arm,pl011") == 0 ||
+	    strcmp(bname, "ARMHB000") == 0 ||
+	    strcmp(bname, "arm,sbsa-uart") == 0) {
+		return (ASY_BUS_PLATFORM);
+	}
+#endif
 
 	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, devinfo, 0, "device_type",
 	    &prop) != DDI_PROP_SUCCESS &&
@@ -436,6 +472,11 @@ asy_get_bus_type(dev_info_t *devinfo)
 		return (ASY_BUS_PCI);
 	else
 		bustype = ASY_BUS_UNKNOWN;
+
+#if defined(__aarch64__)
+	if (bustype == ASY_BUS_ISA)
+		bustype = ASY_BUS_UNKNOWN;
+#endif
 
 	ddi_prop_free(prop);
 	return (bustype);
@@ -466,6 +507,14 @@ asy_get_io_regnum_pci(dev_info_t *devi, struct asycom *asy)
 				regnum = i;
 			break;
 
+#if defined(__aarch64__)
+		case PCI_ADDR_MEM32:	/* fallthrough */
+		case PCI_ADDR_MEM64:
+			if (regnum == -1)
+				regnum = i;
+			break;
+#endif
+
 		default:
 			break;
 		}
@@ -482,6 +531,7 @@ asy_get_io_regnum_pci(dev_info_t *devi, struct asycom *asy)
 	return (regnum);
 }
 
+#if defined(__x86)
 static int
 asy_get_io_regnum_isa(dev_info_t *devi, struct asycom *asy)
 {
@@ -522,15 +572,34 @@ asy_get_io_regnum_isa(dev_info_t *devi, struct asycom *asy)
 
 	return (regnum);
 }
+#endif
+
+#if defined(__aarch64__)
+static int
+asy_get_io_regnum_platform(dev_info_t *devi __unused, struct asycom *asy)
+{
+	if (asy->asy_hw == &asy_pl011_ops) {
+		return (0);
+	}
+
+	return (-1);
+}
+#endif
 
 static int
 asy_get_io_regnum(dev_info_t *devinfo, struct asycom *asy)
 {
 	switch (asy_get_bus_type(devinfo)) {
+#if defined(__x86)
 	case ASY_BUS_ISA:
 		return (asy_get_io_regnum_isa(devinfo, asy));
+#endif
 	case ASY_BUS_PCI:
 		return (asy_get_io_regnum_pci(devinfo, asy));
+#if defined(__aarch64__)
+	case ASY_BUS_PLATFORM:
+		return (asy_get_io_regnum_platform(devinfo, asy));
+#endif
 	default:
 		return (-1);
 	}
@@ -917,17 +986,26 @@ asydetach(dev_info_t *devi, ddi_detach_cmd_t cmd)
  * device node is at least vaguely usable, i.e. we have a block of 8 i/o
  * ports. This prevents attempting to attach to bogus serial ports which
  * some BIOSs still partially report when they are disabled in the BIOS.
+ *
+ * On Arm we just trust what the firmware said.
  */
 static int
 asyprobe(dev_info_t *devi)
 {
+#if defined(__aarch64__)
+	return (DDI_PROBE_DONTCARE);
+#else
 	return ((asy_get_io_regnum(devi, NULL) < 0) ?
 	    DDI_PROBE_FAILURE : DDI_PROBE_DONTCARE);
+#endif
 }
 
 static int
 asyattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 {
+#if defined(__aarch64__)
+	const char *bname;
+#endif
 	int instance;
 	int mcr;
 	int ret;
@@ -954,6 +1032,7 @@ asyattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
+#if defined(__x86)
 	mutex_enter(&asy_glob_lock);
 	if (com_ports == NULL) {	/* need to initialize com_ports */
 		if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, devi, 0,
@@ -973,6 +1052,20 @@ asyattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		}
 	}
 	mutex_exit(&asy_glob_lock);
+#endif	/* __x86 */
+
+#if defined(__aarch64__)
+	mutex_enter(&asy_glob_lock);
+	if (com_ports_pa == NULL) {
+		if (ddi_prop_lookup_int64_array(DDI_DEV_T_ANY,
+		    ddi_root_node(), 0, "motherboard-serial-ports-pa",
+		    (int64_t **)&com_ports_pa,
+		    &num_com_ports_pa) != DDI_PROP_SUCCESS) {
+			num_com_ports_pa = 0;
+		}
+	}
+	mutex_exit(&asy_glob_lock);
+#endif	/* __aarch64__ */
 
 	instance = ddi_get_instance(devi);	/* find out which unit */
 	ret = ddi_soft_state_zalloc(asy_soft_state, instance);
@@ -980,7 +1073,28 @@ asyattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	asy = ddi_get_soft_state(asy_soft_state, instance);
 
-	asy->asy_hw = &asy_16550_ops;
+#if defined(__aarch64__)
+	/*
+	 * Check for ARM PL011 or SBSA UART via the binding name.
+	 */
+	bname = ddi_binding_name(devi);
+	VERIFY3P(bname, !=, NULL);
+
+	if (strcmp(bname, "ARMH0011") == 0 ||
+	    strcmp(bname, "arm,pl011") == 0) {
+		asy->asy_hw = &asy_pl011_ops;
+	} else if (strcmp(bname, "ARMHB000") == 0 ||
+	    strcmp(bname, "arm,sbsa-uart") == 0) {
+		asy->asy_hw = &asy_pl011_ops;
+		asy->asy_flags2 |= (ASY2_SBSA|ASY2_NOCLK);
+	}
+#endif
+
+#if defined(__aarch64__)
+	if (asy->asy_hw == NULL)
+#endif
+		asy->asy_hw = &asy_16550_ops;
+
 	asy->asy_dip = devi;
 #ifdef DEBUG
 	asy->asy_debug = debug;
@@ -1002,6 +1116,7 @@ asyattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 
 	ASY_DPRINTF(asy, ASY_DEBUG_INIT, "UART @ %p", (void *)asy->asy_ioaddr);
 
+#if defined(__x86)
 	/*
 	 * Lookup the i/o address to see if this is a standard COM port
 	 * in which case we assign it the correct tty[a-d] to match the
@@ -1015,6 +1130,34 @@ asyattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 			break;
 		}
 	}
+#endif	/* __x86 */
+
+#if defined(__aarch64__)
+	/*
+	 * On aarch64, match the device's CPU physical address against the
+	 * motherboard-serial-ports-pa property (an int64 array on the root
+	 * node, positionally indexed: first entry = ttya, second = ttyb,
+	 * etc.).  Translate the device's bus address to a CPU PA via
+	 * i_ddi_bus_to_cpu() and compare.
+	 */
+	if (num_com_ports_pa > 0) {
+		struct regspec *rp;
+		uint64_t cpu_pa;
+
+		rp = i_ddi_rnumber_to_regspec(devi, 0);
+		if (rp != NULL &&
+		    i_ddi_bus_to_cpu(devi, rp->regspec_addr,
+		    rp->regspec_size, &cpu_pa) == DDI_SUCCESS) {
+			for (i = 0; i < num_com_ports_pa; i++) {
+				if (com_ports_pa[i] != 0 &&
+				    com_ports_pa[i] == cpu_pa) {
+					asy->asy_com_port = i + 1;
+					break;
+				}
+			}
+		}
+	}
+#endif	/* __aarch64__ */
 
 	/*
 	 * It appears that there was async hardware that on reset did not clear
@@ -1023,8 +1166,13 @@ asyattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	 *
 	 * Don't use asy_disable_interrupts() as the mutexes haven't been
 	 * initialized yet.  IER is always at register offset 1 for 16550.
+	 *
+	 * PL011/SBSA interrupts are disabled during aho_identify() instead.
 	 */
-	ddi_put8(asy->asy_iohandle, asy->asy_ioaddr + 1, 0);
+#if defined(__aarch64__)
+	if (asy->asy_hw != &asy_pl011_ops)
+#endif
+		ddi_put8(asy->asy_iohandle, asy->asy_ioaddr + 1, 0);
 
 	/*
 	 * Establish default settings:

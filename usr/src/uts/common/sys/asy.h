@@ -44,6 +44,9 @@ extern "C" {
  */
 #define	ASY_BUS_PCI	(0)
 #define	ASY_BUS_ISA	(1)
+#if defined(__aarch64__)
+#define	ASY_BUS_PLATFORM (2)
+#endif
 #define	ASY_BUS_UNKNOWN	(-1)
 
 #define	ASY_MINOR_LEN	(40)
@@ -69,6 +72,9 @@ extern "C" {
 #define	ASY_16650	0x40016650	/* 32 byte FIFO, auto flow control */
 #define	ASY_16950	0x50016950	/* 128 byte FIFO, auto flow control */
 #define	ASY_MAXCHIP	ASY_16950
+#if defined(__aarch64__)
+#define	ASY_PL011	0x60010011	/* ARM PL011 UART */
+#endif
 
 /*
  * Definitions for INS8250 / 16550  chips
@@ -358,7 +364,11 @@ typedef enum {
 
 /* definitions for asy_flags2 field */
 typedef enum {
-	ASY2_NO_LOOPBACK = 1 << 0	/* Device doesn't support loopback */
+	ASY2_NO_LOOPBACK = 1 << 0,	/* Device doesn't support loopback */
+#if defined(__aarch64__)
+	ASY2_SBSA	= 1 << 1,	/* SBSA subset UART (no baud/lcr) */
+	ASY2_NOCLK	= 1 << 2,	/* No clock freq; no baud changes */
+#endif
 } asy_flags2_t;
 
 /*
@@ -459,6 +469,9 @@ typedef struct asy_hw_ops {
 } asy_hw_ops_t;
 
 extern const asy_hw_ops_t asy_16550_ops;
+#if defined(__aarch64__)
+extern const asy_hw_ops_t asy_pl011_ops;
+#endif
 
 /*
  * Hardware channel common data. One structure per port.
@@ -522,6 +535,10 @@ struct asycom {
 	uchar_t		asy_com_port;	/* COM port number, or zero */
 	uchar_t		asy_fifor;	/* FIFOR register setting */
 	uint8_t		asy_acr;	/* 16950 additional control register */
+#if defined(__aarch64__)
+	uint32_t	asy_clk_freq;	/* UART input clock frequency (Hz) */
+	uint32_t	asy_fw_baud;	/* firmware-configured baud rate */
+#endif
 #ifdef DEBUG
 	int		asy_msint_cnt;	/* number of times in async_msint */
 #endif
