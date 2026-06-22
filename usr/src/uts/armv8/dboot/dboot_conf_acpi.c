@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -298,7 +298,8 @@ dboot_configure_acpi(void)
 	if (!(flags & ACPI_FADT_PSCI_COMPLIANT))
 		panic("dboot: illumos requires PSCI");
 
-	bi->bi_psci_conduit_hvc = (flags & ACPI_FADT_PSCI_USE_HVC) ? 1 : 0;
+	bi->bi_smccc_conduit = (flags & ACPI_FADT_PSCI_USE_HVC) ?
+	    BI_SMCCC_CONDUIT_HVC : BI_SMCCC_CONDUIT_SMC;
 
 	boot_psci_init(bi);
 	dboot_count_pcierc(bi);
