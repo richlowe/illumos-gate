@@ -53,11 +53,11 @@ _Static_assert(sizeof (xbi_bsvc_uart_type_t) == sizeof (int),
 #endif
 /* END CSTYLED */
 
-typedef enum {
-	BI_PSCI_CONDUIT_UNKNOWN,
-	BI_PSCI_CONDUIT_HVC,
-	BI_PSCI_CONDUIT_SMC,
-} bi_psci_conduit;
+typedef enum bi_smccc_conduit {
+	BI_SMCCC_CONDUIT_UNKNOWN,
+	BI_SMCCC_CONDUIT_HVC,
+	BI_SMCCC_CONDUIT_SMC,
+} bi_smccc_conduit_t;
 
 typedef enum boot_module_type {
 	BMT_ROOTFS,
@@ -122,7 +122,8 @@ struct xboot_info {
 	uint32_t		bi_pcierc_cnt;
 	uint32_t		bi_module_cnt;
 	uint32_t		bi_psci_version;
-	uint32_t		bi_psci_conduit_hvc;
+	uint32_t		bi_smccc_conduit;
+	uint32_t		bi_smccc_version;
 	uint32_t		bi_psci_cpu_suspend_id;
 	uint32_t		bi_psci_cpu_off_id;
 	uint32_t		bi_psci_cpu_on_id;

@@ -130,8 +130,8 @@ exitto(int (*entrypoint)(struct xboot_info *), struct xboot_info *bi)
 		dprintf("  %s: 0x%x\n", "bi_pcierc_cnt", bi->bi_pcierc_cnt);
 		dprintf("  %s: 0x%x\n", "bi_module_cnt", bi->bi_module_cnt);
 		dprintf("  %s: 0x%x\n", "bi_psci_version", bi->bi_psci_version);
-		dprintf("  %s: 0x%x\n", "bi_psci_conduit_hvc",
-		    bi->bi_psci_conduit_hvc);
+		dprintf("  %s: 0x%x\n", "bi_smccc_conduit",
+		    bi->bi_smccc_conduit);
 		dprintf("  %s: 0x%x\n", "bi_psci_cpu_suspend_id",
 		    bi->bi_psci_cpu_suspend_id);
 		dprintf("  %s: 0x%x\n", "bi_psci_cpu_off_id",
@@ -159,7 +159,8 @@ exitto(int (*entrypoint)(struct xboot_info *), struct xboot_info *bi)
 		dboot_printf("  %s: %u.%u\n", "PSCI Version",
 		    bi->bi_psci_version >> 16, bi->bi_psci_version & 0xffff);
 		dboot_printf("  %s: %s\n", "PSCI Conduit",
-		    bi->bi_psci_conduit_hvc ? "Hypervisor" : "Secure Monitor");
+		    (bi->bi_smccc_conduit == BI_SMCCC_CONDUIT_HVC) ?
+		    "Hypervisor" : "Secure Monitor");
 		dboot_printf("Exception Level: %lu\n", el);
 		dboot_printf("%s: 0x%p\n", "Kernel Entrypoint", entrypoint);
 	}

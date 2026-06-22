@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -484,7 +484,8 @@ dboot_configure_fdt(void)
 		return (-1);
 	}
 
-	bi->bi_psci_conduit_hvc = strcmp(method, "hvc") == 0 ? 1 : 0;
+	bi->bi_smccc_conduit = strcmp(method, "hvc") == 0 ?
+	    BI_SMCCC_CONDUIT_HVC : BI_SMCCC_CONDUIT_SMC;
 
 	if ((pval = fdt_getprop(fdtp, nodeoff, "cpu_suspend", &plen)) != NULL) {
 		bi->bi_psci_cpu_suspend_id =
