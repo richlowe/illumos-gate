@@ -77,6 +77,7 @@
 #include <sys/platmod.h>
 #include <sys/irq.h>
 #include <sys/psci.h>
+#include <sys/sunddi.h>
 #include <sys/arm_features.h>
 #include <sys/cpuinfo.h>
 
@@ -296,7 +297,7 @@ wakeup_cpu(cpu_t *cp)
 	VERIFY3U(cp->cpu_m.mcpu_ci->ci_ppver, ==, CPUINFO_ENABLE_METHOD_PSCI);
 
 	if (psci_cpu_on(cp->cpu_m.affinity,
-	    secondary_vec_pa, cpu_startup_data_pa) != PSCI_SUCCESS) {
+	    secondary_vec_pa, cpu_startup_data_pa) != DDI_SUCCESS) {
 		return (-1);
 	}
 

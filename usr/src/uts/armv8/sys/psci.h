@@ -21,7 +21,7 @@
  */
 /*
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #ifndef _SYS_PSCI_H
@@ -33,11 +33,20 @@
 extern "C" {
 #endif
 
+/*
+ * PSCI function IDs (SMC64 where available).
+ */
 #define	PSCI_CPU_SUSPEND_ID	0xC4000001
 #define	PSCI_CPU_OFF_ID		0x84000002
 #define	PSCI_CPU_ON_ID		0xC4000003
 #define	PSCI_MIGRATE_ID		0xC4000005
 
+/*
+ * PSCI firmware return codes (DEN0022F Table 14).
+ *
+ * These are kept for internal translation by psci.c.  Callers should
+ * work with DDI error codes returned by the wrapper functions.
+ */
 enum {
 	PSCI_SUCCESS		= 0,
 	PSCI_NOT_SUPPORTED	= -1,
@@ -55,31 +64,38 @@ struct xboot_info;
 
 extern int psci_init(struct xboot_info *xbp);
 #if !defined(_BOOT)
-extern uint32_t psci_version(void);
-extern int32_t psci_cpu_suspend(uint32_t power_state,
+extern int psci_version(uint32_t *versionp);
+extern int psci_cpu_suspend(uint32_t power_state,
 	uint64_t entry_point_address, uint64_t context_id);
-extern int32_t psci_cpu_off(void);
-extern int32_t psci_cpu_on(uint64_t target_cpu,
+extern int psci_cpu_off(void);
+extern int psci_cpu_on(uint64_t target_cpu,
 	uint64_t entry_point_address, uint64_t context_id);
-extern int32_t psci_affinity_info(uint64_t target_affinity,
-	uint32_t lowest_affinity_level);
-extern int32_t psci_migrate(uint64_t target_cpu);
-extern int32_t psci_migrate_info_type(void);
-extern uint64_t psci_migrate_info_up_cpu(void);
+extern int psci_affinity_info(uint64_t target_affinity,
+	uint32_t lowest_affinity_level, uint32_t *statep);
+extern int psci_migrate(uint64_t target_cpu);
+extern int psci_migrate_info_type(uint32_t *typep);
+extern int psci_migrate_info_up_cpu(uint64_t *mpidp);
 #endif
 extern void psci_system_off(void);
 extern void psci_system_reset(void);
 #if !defined(_BOOT)
-extern int32_t psci_features(uint32_t psci_func_id);
-extern int32_t psci_cpu_freeze(void);
-extern int32_t psci_cpu_default_suspend(uint64_t entry_point_address,
+extern int psci_features(uint32_t psci_func_id, uint32_t *flagsp);
+extern int psci_cpu_freeze(void);
+extern int psci_cpu_default_suspend(uint64_t entry_point_address,
 	uint64_t context_id);
-extern int32_t psci_node_hw_state(uint64_t target_cpu, uint32_t power_level);
-extern int32_t psci_system_suspend(uint64_t entry_point_address,
+extern int psci_node_hw_state(uint64_t target_cpu, uint32_t power_level,
+	uint32_t *statep);
+extern int psci_system_suspend(uint64_t entry_point_address,
 	uint64_t context_id);
-extern int32_t psci_set_suspend_mode(uint32_t mode);
-extern uint64_t psci_stat_residency(uint64_t target_cpu, uint32_t power_state);
-extern uint64_t psci_stat_count(uint64_t target_cpu, uint32_t power_state);
+extern int psci_set_suspend_mode(uint32_t mode);
+extern int psci_stat_residency(uint64_t target_cpu, uint32_t power_state,
+	uint64_t *residencyp);
+extern int psci_stat_count(uint64_t target_cpu, uint32_t power_state,
+	uint64_t *countp);
+extern int psci_system_off2(uint32_t type, uint64_t cookie);
+extern int psci_system_reset2(uint32_t reset_type, uint64_t cookie);
+extern int psci_mem_protect(uint32_t enable, uint32_t *prev_statep);
+extern int psci_mem_protect_check_range(uint64_t base, uint64_t length);
 #endif
 
 #ifdef	__cplusplus
