@@ -34,6 +34,7 @@
 #define	ACPI_MADT_ONLINE_CAPABLE	(1 << 3)
 #endif
 
+extern void boot_smccc_init(struct xboot_info *);
 extern void boot_psci_init(struct xboot_info *);
 
 static const ACPI_TABLE_XSDT *
@@ -301,6 +302,7 @@ dboot_configure_acpi(void)
 	bi->bi_smccc_conduit = (flags & ACPI_FADT_PSCI_USE_HVC) ?
 	    BI_SMCCC_CONDUIT_HVC : BI_SMCCC_CONDUIT_SMC;
 
+	boot_smccc_init(bi);
 	boot_psci_init(bi);
 	dboot_count_pcierc(bi);
 	return (dboot_configure_acpi_cpuinfo(bi));
