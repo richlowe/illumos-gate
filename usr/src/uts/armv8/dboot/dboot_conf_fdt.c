@@ -27,6 +27,7 @@
 #include "dboot.h"
 #include "dboot_printf.h"
 
+extern void boot_smccc_init(struct xboot_info *);
 extern void boot_psci_init(struct xboot_info *);
 
 typedef enum {
@@ -507,6 +508,7 @@ dboot_configure_fdt(void)
 		    fdt32_to_cpu(*((const uint32_t *)pval));
 	}
 
+	boot_smccc_init(bi);
 	boot_psci_init(bi);
 
 	/*

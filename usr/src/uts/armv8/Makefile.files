@@ -78,6 +78,8 @@ CORE_OBJS +=			\
 	hold_page.o		\
 	ssp.o			\
 	psci.o			\
+	smccc.o			\
+	smccc_impl.o		\
 	arch_timer.o		\
 	earlybsa.o		\
 	cpuinfo.o		\
@@ -102,6 +104,7 @@ BOOT_DRIVER_OBJS =		\
 	boot_fb.o		\
 	boot_keyboard.o		\
 	boot_psci.o		\
+	boot_smccc.o		\
 	boot_services.o		\
 	boot_uart.o		\
 	$(FONT_OBJS)
@@ -120,6 +123,7 @@ DBOOT_OBJS +=			\
 	dboot_conf_uefi.o	\
 	dboot_memlist.o		\
 	dboot_psci.o		\
+	dboot_smccc.o		\
 	dboot_uefimem.o		\
 	dboot_standalloc.o	\
 	dboot_standalone.o	\

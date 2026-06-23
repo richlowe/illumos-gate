@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 /*
@@ -23,6 +23,7 @@
 #include <sys/bootinfo.h>
 
 extern void boot_uart_init(struct xboot_info *);
+extern void boot_smccc_init(struct xboot_info *);
 extern void boot_psci_init(struct xboot_info *);
 
 extern int boot_uart_ischar(void);
@@ -46,5 +47,6 @@ void
 bsvc_init(struct xboot_info *xbp)
 {
 	boot_uart_init(xbp);
+	boot_smccc_init(xbp);
 	boot_psci_init(xbp);
 }

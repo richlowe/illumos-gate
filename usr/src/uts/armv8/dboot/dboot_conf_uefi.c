@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -24,8 +24,6 @@
 #include <sys/acpi/actbl.h>
 
 #include "dboot.h"
-
-extern void boot_psci_init(struct xboot_info *);
 
 static efi_guid_t acpi2 = EFI_ACPI_TABLE_GUID;
 static efi_guid_t smbios3 = SMBIOS3_TABLE_GUID;
