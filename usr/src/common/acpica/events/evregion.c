@@ -315,6 +315,20 @@ AcpiEvAddressSpaceDispatch (
         }
 
         /*
+         * For FFH OpRegions, populate the handler context with the
+         * region's Offset and Length before calling the setup function.
+         * This follows the upstream ACPICA convention for passing
+         * region metadata to OS-specific FFH handlers.
+         */
+        if (RegionObj->Region.SpaceId == ACPI_ADR_SPACE_FIXED_HARDWARE)
+        {
+            ACPI_FFH_INFO *FfhCtx = HandlerDesc->AddressSpace.Context;
+
+            FfhCtx->Length = RegionObj->Region.Length;
+            FfhCtx->Offset = RegionObj->Region.Address;
+        }
+
+        /*
          * We must exit the interpreter because the region setup will
          * potentially execute control methods (for example, the _REG method
          * for this region)

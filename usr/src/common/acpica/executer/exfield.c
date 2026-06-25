@@ -289,11 +289,13 @@ AcpiExReadDataFromField (
     else if ((ObjDesc->Common.Type == ACPI_TYPE_LOCAL_REGION_FIELD) &&
              (ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_SMBUS ||
               ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_GSBUS ||
-              ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_IPMI))
+              ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_IPMI ||
+              ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_FIXED_HARDWARE))
     {
         /*
-         * This is an SMBus, GSBus or IPMI read. We must create a buffer to
-         * hold the data and then directly access the region handler.
+         * This is an SMBus, GSBus, IPMI or FFH read. We must create a
+         * buffer to hold the data and then directly access the region
+         * handler.
          *
          * Note: SMBus and GSBus protocol value is passed in upper 16-bits
          * of Function
@@ -321,9 +323,15 @@ AcpiExReadDataFromField (
             Length += 2;
             Function = ACPI_READ | (AccessorType << 16);
         }
-        else /* IPMI */
+        else if (ObjDesc->Field.RegionObj->Region.SpaceId ==
+            ACPI_ADR_SPACE_IPMI)
         {
             Length = ACPI_IPMI_BUFFER_SIZE;
+            Function = ACPI_READ;
+        }
+        else /* ACPI_ADR_SPACE_FIXED_HARDWARE */
+        {
+            Length = ACPI_FFH_INPUT_BUFFER_SIZE;
             Function = ACPI_READ;
         }
 
@@ -507,13 +515,14 @@ AcpiExWriteDataToField (
     else if ((ObjDesc->Common.Type == ACPI_TYPE_LOCAL_REGION_FIELD) &&
              (ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_SMBUS ||
               ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_GSBUS ||
-              ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_IPMI))
+              ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_IPMI ||
+              ObjDesc->Field.RegionObj->Region.SpaceId == ACPI_ADR_SPACE_FIXED_HARDWARE))
     {
         /*
-         * This is an SMBus, GSBus or IPMI write. We will bypass the entire
-         * field mechanism and handoff the buffer directly to the handler.
-         * For these address spaces, the buffer is bi-directional; on a
-         * write, return data is returned in the same buffer.
+         * This is an SMBus, GSBus, IPMI or FFH write. We will bypass the
+         * entire field mechanism and handoff the buffer directly to the
+         * handler. For these address spaces, the buffer is bi-directional;
+         * on a write, return data is returned in the same buffer.
          *
          * Source must be a buffer of sufficient size:
          * ACPI_SMBUS_BUFFER_SIZE, ACPI_GSBUS_BUFFER_SIZE, or
@@ -525,7 +534,7 @@ AcpiExWriteDataToField (
         if (SourceDesc->Common.Type != ACPI_TYPE_BUFFER)
         {
             ACPI_ERROR ((AE_INFO,
-                "SMBus/IPMI/GenericSerialBus write requires "
+                "SMBus/IPMI/GenericSerialBus/FFH write requires "
                 "Buffer, found type %s",
                 AcpiUtGetObjectTypeName (SourceDesc)));
 
@@ -555,16 +564,22 @@ AcpiExWriteDataToField (
             Length += 2;
             Function = ACPI_WRITE | (AccessorType << 16);
         }
-        else /* IPMI */
+        else if (ObjDesc->Field.RegionObj->Region.SpaceId ==
+            ACPI_ADR_SPACE_IPMI)
         {
             Length = ACPI_IPMI_BUFFER_SIZE;
+            Function = ACPI_WRITE;
+        }
+        else /* ACPI_ADR_SPACE_FIXED_HARDWARE */
+        {
+            Length = ACPI_FFH_INPUT_BUFFER_SIZE;
             Function = ACPI_WRITE;
         }
 
         if (SourceDesc->Buffer.Length < Length)
         {
             ACPI_ERROR ((AE_INFO,
-                "SMBus/IPMI/GenericSerialBus write requires "
+                "SMBus/IPMI/GenericSerialBus/FFH write requires "
                 "Buffer of length %u, found length %u",
                 Length, SourceDesc->Buffer.Length));
 
