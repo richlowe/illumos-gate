@@ -324,6 +324,10 @@
 #define ACPI_GSBUS_BUFFER_SIZE          34
 #define ACPI_IPMI_BUFFER_SIZE           66
 
+/* FFH bidirectional buffer size (ACPI 6.5) */
+
+#define ACPI_FFH_INPUT_BUFFER_SIZE      256
+
 /* _SxD and _SxW control methods */
 
 #define ACPI_NUM_SxD_METHODS            4
