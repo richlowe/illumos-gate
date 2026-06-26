@@ -96,6 +96,13 @@ extern void kcpc_hw_fini(cpu_t *cp);
 extern void siron(void);
 
 /*
+ * Pluggable cpu_halt loop body (in mp_machdep.c).
+ *
+ * The default implementation just uses WFI.
+ */
+extern void (*cpu_halt_impl)(void);
+
+/*
  * UEFI Runtime Services (efirt_machdep.c/efirt_call.S)
  */
 extern void efirt_init(void);
