@@ -100,7 +100,24 @@ mach_cpu_pause(volatile char *safe)
 		SMT_PAUSE();
 }
 
-void
+/*
+ * Default cpu_halt loop body: execute WFI and return.
+ */
+static void
+cpu_halt_wfi(void)
+{
+	__asm__ __volatile__("wfi" ::: "memory");
+}
+
+/*
+ * Pluggable cpu_halt loop body.
+ *
+ * This implementation hook is called with interrupts disabled from
+ * the inner loop of cpu_halt.
+ */
+void (*cpu_halt_impl)(void) = cpu_halt_wfi;
+
+static void
 cpu_halt(void)
 {
 	cpu_t *cpup = CPU;
@@ -192,7 +209,7 @@ cpu_halt(void)
 	while (*p == 0 &&
 	    ((hset_update && bitset_in_set(&cp->cp_haltset, cpu_sid)) ||
 	    (!hset_update && (CPU->cpu_flags & CPU_OFFLINE)))) {
-		__asm__ volatile("wfi");
+		cpu_halt_impl();
 		restore_interrupts(s);
 		s = disable_interrupts();
 	}
