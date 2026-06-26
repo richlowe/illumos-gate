@@ -188,6 +188,8 @@ EFIFB_OBJS		+= efifb.o
 
 BOOTDEV_OBJS		+= bootdev.o
 
+CPUIDLE_OBJS +=	cpuidle.o
+
 ASSYM_DEPS +=			\
 	aarch64_subr.o		\
 	copy.o			\

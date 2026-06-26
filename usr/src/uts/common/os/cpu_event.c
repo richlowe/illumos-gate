@@ -61,7 +61,7 @@
 #include <sys/sunddi.h>
 #if defined(__sparc)
 #include <sys/machsystm.h>
-#elif defined(__x86)
+#elif defined(__x86) || defined(__aarch64__)
 #include <sys/archsystm.h>
 #endif
 #include <sys/cpu_event.h>
@@ -639,6 +639,8 @@ cpu_idle_enter(int state, int flag,
 	cpu_idle_callback_context_t ctx;
 #if defined(__x86)
 	ulong_t iflags;
+#elif defined(__aarch64__)
+	uint64_t daif;
 #endif
 
 	ctx = CPU_IDLE_GET_CTX(CPU);
@@ -662,20 +664,24 @@ cpu_idle_enter(int state, int flag,
 	}
 
 	/*
-	 * On x86, cpu_idle_enter can be called from idle thread with either
-	 * interrupts enabled or disabled, so we need to make sure interrupts
-	 * are disabled here.
+	 * On x86 and aarch64, cpu_idle_enter can be called from idle thread
+	 * with either interrupts enabled or disabled, so we need to make
+	 * sure interrupts are disabled here.
 	 * On SPARC, cpu_idle_enter will be called from idle thread with
 	 * interrupt disabled, so no special handling necessary.
 	 */
 #if defined(__x86)
 	iflags = intr_clear();
+#elif defined(__aarch64__)
+	daif = disable_interrupts();
 #endif
 
 	/* Skip calling callback if state is not ready for current CPU. */
 	if (cpu_idle_enter_state(sp, state) == 0) {
 #if defined(__x86)
 		intr_restore(iflags);
+#elif defined(__aarch64__)
+		restore_interrupts(daif);
 #endif
 		return (0);
 	}
@@ -721,6 +727,8 @@ cpu_idle_enter(int state, int flag,
 			if (sp->v.index != i + 1) {
 #if defined(__x86)
 				intr_restore(iflags);
+#elif defined(__aarch64__)
+				restore_interrupts(daif);
 #endif
 				return (EBUSY);
 			}
@@ -728,6 +736,8 @@ cpu_idle_enter(int state, int flag,
 	}
 #if defined(__x86)
 	intr_restore(iflags);
+#elif defined(__aarch64__)
+	restore_interrupts(daif);
 #endif
 
 	return (0);
@@ -736,13 +746,14 @@ cpu_idle_enter(int state, int flag,
 void
 cpu_idle_exit(int flag)
 {
-	/* XXXARM */
-	int i __unused;
-	cpu_idle_cb_item_t *cip __unused;
-	cpu_idle_cb_state_t *sp __unused;
-	cpu_idle_callback_context_t ctx __unused;
+	int i;
+	cpu_idle_cb_item_t *cip;
+	cpu_idle_cb_state_t *sp;
+	cpu_idle_callback_context_t ctx;
 #if defined(__x86)
 	ulong_t iflags;
+#elif defined(__aarch64__)
+	uint64_t daif;
 #endif
 
 	ASSERT(CPU->cpu_seqid < max_ncpus);
@@ -807,6 +818,49 @@ cpu_idle_exit(int flag)
 			sp->v.index = 0;
 		}
 		intr_restore(iflags);
+	}
+#elif defined(__aarch64__)
+	/*
+	 * On aarch64, cpu_idle_exit will be called from idle thread or
+	 * interrupt handler.  When called from interrupt handler, interrupts
+	 * will be disabled.  When called from idle thread, interrupts may be
+	 * disabled or enabled.
+	 */
+
+	/* Called from interrupt, interrupts are already disabled. */
+	if (flag & CPU_IDLE_CB_FLAG_INTR) {
+		/*
+		 * Return if cpu_idle_exit already called or
+		 * there is no registered callback.
+		 */
+		if (sp->v.index == 0) {
+			return;
+		}
+		ctx = CPU_IDLE_GET_CTX(CPU);
+		cpu_idle_exit_state(sp);
+		for (i = sp->v.index - 1; i >= 0; i--) {
+			cip = &cpu_idle_cb_array[i];
+			if (cip->exit != NULL) {
+				cip->exit(cip->arg, ctx, flag);
+			}
+		}
+		sp->v.index = 0;
+
+	/* Called from idle thread, need to disable interrupts. */
+	} else {
+		daif = disable_interrupts();
+		if (sp->v.index != 0) {
+			ctx = CPU_IDLE_GET_CTX(CPU);
+			cpu_idle_exit_state(sp);
+			for (i = sp->v.index - 1; i >= 0; i--) {
+				cip = &cpu_idle_cb_array[i];
+				if (cip->exit != NULL) {
+					cip->exit(cip->arg, ctx, flag);
+				}
+			}
+			sp->v.index = 0;
+		}
+		restore_interrupts(daif);
 	}
 #endif
 }
