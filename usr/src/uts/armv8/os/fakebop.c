@@ -1094,6 +1094,16 @@ process_boot_environment(struct boot_modules *benv, char *space)
 			continue;
 		}
 
+		if (strcmp(name, "smbios.system.product") == 0) {
+			bsetprops("smbios.system.product", value);
+			continue;
+		}
+
+		if (strcmp(name, "smbios.planar.maker") == 0) {
+			bsetprops("smbios.planar.maker", value);
+			continue;
+		}
+
 		/* Translate netboot variables */
 		if (strcmp(name, "boot.netif.gateway") == 0) {
 			bsetprops(BP_ROUTER_IP, value);
@@ -1380,24 +1390,59 @@ build_boot_properties(struct xboot_info *xbp)
 	build_firmware_properties(xbp);
 
 	/*
-	 * Unless provided by other means, set the default mfg-name,
-	 * preferring the SMBIOS system maker if present.
+	 * Unless provided by other means, set the default mfg-name from
+	 * SMBIOS.  Try the system manufacturer first, then the baseboard
+	 * (planar) manufacturer, then the system product name.  Skip any
+	 * value that is blank or contains only whitespace (some firmware
+	 * leaves these fields empty).  Fall back to "armv8" if nothing
+	 * usable is found (analogous to i86pc's hardcoded "i86pc").
 	 */
 	if (do_bsys_getproplen(NULL, "mfg-name") == -1) {
+		static const char *smbios_props[] = {
+			"smbios.system.maker",
+			"smbios.planar.maker",
+			"smbios.system.product",
+		};
+		static const size_t nsmbios_props = ARRAY_SIZE(smbios_props);
 		int plen;
+		size_t i;
+		boolean_t found = B_FALSE;
 
-		if ((plen = do_bsys_getproplen(NULL,
-		    "smbios.system.maker")) > 0 &&
-		    do_bsys_getprop(NULL, "smbios.system.maker",
-		    propbuf) == 0) {
+		for (i = 0; i < nsmbios_props; ++i) {
+			const char *p;
+
+			plen = do_bsys_getproplen(NULL, smbios_props[i]);
+			if (plen <= 0) {
+				continue;
+			}
+
+			if (do_bsys_getprop(NULL, smbios_props[i],
+			    propbuf) != 0) {
+				continue;
+			}
+
 			propbuf[plen] = '\0';
+
 			/*
-			 * This value is massaged prior to being used to name
-			 * the DDI root node, so no need to massage it here.
+			 * Reject strings that are blank or contain only
+			 * whitespace.
 			 */
+			for (p = propbuf; *p != '\0'; p++) {
+				if (!isspace(*p)) {
+					break;
+				}
+			}
+			if (*p == '\0') {
+				continue;
+			}
+
 			bsetprops("mfg-name", propbuf);
-		} else {
-			bsetprops("mfg-name", "Unknown");
+			found = B_TRUE;
+			break;
+		}
+
+		if (!found) {
+			bsetprops("mfg-name", "armv8");
 		}
 	}
 }
