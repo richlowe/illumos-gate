@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -67,7 +67,7 @@ plat_get_cpu_clock(int cpu_no)
 		}
 	}
 
-	return (1000 * 1000 * 1000);
+	return (0);
 }
 
 int

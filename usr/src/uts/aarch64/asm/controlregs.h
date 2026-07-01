@@ -979,6 +979,52 @@ write_icc_dir_el1(uint64_t reg)
 	__asm__ __volatile__("msr icc_dir_el1, %0"::"r"(reg):"memory");
 }
 
+/*
+ * AMU (Activity Monitors Unit) access
+ *
+ * These read the architectural group 0 event counters and the counter
+ * enable register.
+ */
+
+/*
+ * AMEVCNTR00_EL0 (S3_3_C15_C4_0) - CPU cycle counter
+ *
+ * Increments at the core's operating frequency.
+ */
+extern __GNU_INLINE uint64_t
+read_amevcntr00(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, S3_3_C15_C4_0" : "=r"(reg) :: "memory");
+	return (reg);
+}
+
+/*
+ * AMEVCNTR01_EL0 (S3_3_C15_C4_1) - constant frequency counter
+ *
+ * Increments at CNTFRQ_EL0.
+ */
+extern __GNU_INLINE uint64_t
+read_amevcntr01(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, S3_3_C15_C4_1" : "=r"(reg) :: "memory");
+	return (reg);
+}
+
+/*
+ * AMCNTENSET0_EL0 (S3_3_C15_C9_0) - counter enable set
+ *
+ * Bit 0 enables counter 0, bit 1 enables counter 1.
+ */
+extern __GNU_INLINE uint64_t
+read_amcntenset0(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, S3_3_C15_C9_0" : "=r"(reg) :: "memory");
+	return (reg);
+}
+
 #ifdef __cplusplus
 }
 #endif
