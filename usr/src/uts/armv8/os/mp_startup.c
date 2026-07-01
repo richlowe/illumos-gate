@@ -80,6 +80,7 @@
 #include <sys/sunddi.h>
 #include <sys/arm_features.h>
 #include <sys/cpuinfo.h>
+#include <sys/smbios.h>
 
 
 struct cpu	cpus[1];			/* CPU data */
@@ -127,6 +128,121 @@ mp_startup_signal(cpuset_t *sp, processorid_t cpuid)
 	}
 }
 
+/*
+ * Measure CPU clock frequency using the AMU.
+ *
+ * The ratio of the CPU cycle counter (AMEVCNTR00) delta to the constant
+ * frequency counter (AMEVCNTR01) delta, scaled by CNTFRQ_EL0, gives the
+ * CPU clock:
+ *
+ *   freq_hz = (delta_cpu / delta_ref) * CNTFRQ_EL0
+ *
+ * Counter reads are not atomic, so the two MRS instructions in each
+ * sample can be skewed by interrupts or microarchitectural effects,
+ * producing jitter in the computed frequency.  Nvidia Grace is a known
+ * example (see Jeremy Linton's cppc_cpufreq jitter reduction Linux patch).
+ *
+ * To get a stable result we sample repeatedly, using a 20 usec delay
+ * per sample for sufficient counter turnover, and require three
+ * consecutive readings to agree within 10 MHz before accepting.  If
+ * we never fully stabilize we return 0 to allow the caller to try
+ * other methods.
+ *
+ * Returns frequency in Hz, or 0 if AMU is unavailable, the counters
+ * are not enabled, or measurement fails.
+ */
+#define	AMU_SAMPLE_RETRIES	10
+#define	AMU_SAMPLE_DELAY_USEC	20
+#define	AMU_STABLE_HZ		(10ULL * 1000 * 1000)	/* 10 MHz */
+#define	AMU_CNTEN_MASK		0x3			/* counters 0 and 1 */
+
+static uint64_t
+cpu_freq_from_amu(void)
+{
+	uint64_t cntfrq;
+	uint64_t c0_s, c1_s, c0_e, c1_e;
+	uint64_t delta_cpu, delta_ref;
+	uint64_t freq, diff;
+	uint64_t last_freq;
+	int stable;
+	int i;
+
+	if (!has_arm_feature(arm_features, ARM_FEAT_AMUv1)) {
+		return (0);
+	}
+
+	cntfrq = read_cntfrq();
+	if (cntfrq == 0) {
+		return (0);
+	}
+
+	/*
+	 * Both the CPU cycle counter and the constant frequency
+	 * counter must be enabled.  If firmware did not enable them,
+	 * there is nothing to measure.
+	 */
+	if ((read_amcntenset0() & AMU_CNTEN_MASK) != AMU_CNTEN_MASK) {
+		return (0);
+	}
+
+	last_freq = 0;
+	stable = 0;
+
+	for (i = 0; i < AMU_SAMPLE_RETRIES; i++) {
+		c0_s = read_amevcntr00();
+		c1_s = read_amevcntr01();
+
+		drv_usecwait(AMU_SAMPLE_DELAY_USEC);
+
+		c0_e = read_amevcntr00();
+		c1_e = read_amevcntr01();
+
+		delta_cpu = c0_e - c0_s;
+		delta_ref = c1_e - c1_s;
+
+		if (delta_ref == 0 || delta_cpu == 0) {
+			continue;
+		}
+
+		/*
+		 * freq = (delta_cpu * cntfrq) / delta_ref
+		 *
+		 * At 2.6 GHz over 20 usec, delta_cpu ~ 52000.
+		 * With cntfrq at 1 GHz (SBSA), the product is
+		 * ~ 5.2e13, well within uint64_t range.
+		 */
+		freq = (delta_cpu * cntfrq) / delta_ref;
+		if (freq == 0) {
+			continue;
+		}
+
+		if (last_freq != 0) {
+			if (freq > last_freq) {
+				diff = freq - last_freq;
+			} else {
+				diff = last_freq - freq;
+			}
+
+			if (diff <= AMU_STABLE_HZ) {
+				stable++;
+				if (stable >= 2) {
+					return (freq);
+				}
+			} else {
+				stable = 0;
+			}
+		}
+
+		last_freq = freq;
+	}
+
+	/*
+	 * Never achieved three consecutive stable readings.
+	 * Let the caller fall through to the next method.
+	 */
+	return (0);
+}
+
 void
 init_cpu_info(struct cpu *cp)
 {
@@ -135,16 +251,82 @@ init_cpu_info(struct cpu *cp)
 	cp->cpu_m.mcpu_midr = read_midr();
 	cp->cpu_m.mcpu_revidr = read_revidr();
 
-	/* set maximum supported CPU clock frequency */
-	if (&plat_set_max_cpu_clock != NULL)
+	/*
+	 * Set maximum supported CPU clock frequency when supported by the
+	 * platform.
+	 */
+	if (&plat_set_max_cpu_clock != NULL) {
 		plat_set_max_cpu_clock(cp->cpu_id);
+	}
 
-	/* Get clock-frequency property and current frequency for the CPU. */
+	/*
+	 * Get the CPU clock frequency
+	 *
+	 * This is not particularly portable, so we try a few different ways,
+	 * from most platform specific to least platform specific.
+	 *
+	 * We first check the platmod: if it implements the CPU clock accessor
+	 * and that returns a non-zero value then this is what we use.
+	 *
+	 * Next up, on CPUs implementing AMUv1 with firmwares that make the
+	 * AMU counters available, we use the AMU to determine the CPU
+	 * frequency.  If that works well enough to give us a stable reading,
+	 * then that's what we use.
+	 *
+	 * If nothing worked and we have a reasonable looking SMBIOS type 4
+	 * record (this is the processor record), then we try to use that
+	 * value.
+	 *
+	 * If nothing else has worked, we use a dummy value of 1GHz.
+	 */
+
 	if (&plat_get_cpu_clock != NULL) {
 		uint64_t clk = plat_get_cpu_clock(cp->cpu_id);
-		pi->pi_clock = (clk + 500000) / 1000000;
-		cp->cpu_curr_clock = clk;
-	} else {
+		if (clk != 0) {
+			pi->pi_clock = (clk + 500000) / 1000000;
+			cp->cpu_curr_clock = clk;
+		}
+	}
+
+	if (pi->pi_clock == 0) {
+		/*
+		 * No platform module provided a clock frequency.
+		 *
+		 * Try AMU counter sampling if the hardware supports it.
+		 */
+		uint64_t clk;
+
+		clk = cpu_freq_from_amu();
+		if (clk != 0) {
+			pi->pi_clock = (clk + 500000) / 1000000;
+			cp->cpu_curr_clock = clk;
+		}
+	}
+
+	if (pi->pi_clock == 0) {
+		/*
+		 * AMU unavailable or failed.  Try SMBIOS Type 4
+		 * (Processor Information).
+		 */
+		smbios_struct_t s;
+		smbios_processor_t p;
+
+		if (ksmbios != NULL &&
+		    smbios_lookup_type(ksmbios, SMB_TYPE_PROCESSOR,
+		    &s) != SMB_ERR &&
+		    smbios_info_processor(ksmbios, s.smbstr_id,
+		    &p) != SMB_ERR &&
+		    p.smbp_curspeed != 0) {
+			pi->pi_clock = p.smbp_curspeed;
+			cp->cpu_curr_clock =
+			    (uint64_t)p.smbp_curspeed * 1000 * 1000;
+		}
+	}
+
+	/*
+	 * Fall all the way back to a 1GHz dummy value.
+	 */
+	if (pi->pi_clock == 0) {
 		pi->pi_clock = 1000;
 		cp->cpu_curr_clock = 1000 * 1000 * 1000;
 	}
