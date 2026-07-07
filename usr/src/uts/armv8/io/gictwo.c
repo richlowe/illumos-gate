@@ -88,6 +88,7 @@
 #include <sys/archsystm.h>
 #include <sys/list.h>
 #include <sys/mach_intr.h>
+#include <sys/gic_ops.h>
 
 /*
  * MSI SPI range - registered by child MSI controllers (v2m) so the
@@ -1012,6 +1013,63 @@ gicv2_init(gicv2_conf_t *sc)
 	return (DDI_SUCCESS);
 }
 
+/*
+ * Child ops wrappers for GICv2m parent operations.
+ *
+ * These thin wrappers adapt the existing gictwo functions (which take
+ * dev_info_t *) to the gicv2m_parent_ops_t interface (which takes an
+ * opaque void *ctx).
+ */
+static void
+gictwo_v2m_configure_irq(void *ctx, uint32_t intid, boolean_t is_edge)
+{
+	gicv2_configure_irq((dev_info_t *)ctx, intid, is_edge);
+}
+
+static boolean_t
+gictwo_v2m_irq_ispending(void *ctx, uint32_t intid)
+{
+	return (gicv2_irq_ispending((dev_info_t *)ctx, intid));
+}
+
+static processorid_t
+gictwo_v2m_get_target_spi(void *ctx, uint32_t intid)
+{
+	return (gicv2_get_target_spi((dev_info_t *)ctx, intid));
+}
+
+static void
+gictwo_v2m_set_target_spi(void *ctx, uint32_t intid, processorid_t cpu)
+{
+	gicv2_set_target_spi((dev_info_t *)ctx, intid, cpu);
+}
+
+static void
+gictwo_v2m_register_msi_range(void *ctx, uint32_t base, uint32_t count)
+{
+	gicv2_register_msi_range((dev_info_t *)ctx, base, count);
+}
+
+static void
+gictwo_v2m_unregister_msi_range(void *ctx, uint32_t base, uint32_t count)
+{
+	gicv2_unregister_msi_range((dev_info_t *)ctx, base, count);
+}
+
+static gicv2m_parent_ops_t gictwo_v2m_ops = {
+	.gpo_configure_irq = gictwo_v2m_configure_irq,
+	.gpo_irq_ispending = gictwo_v2m_irq_ispending,
+	.gpo_get_target_spi = gictwo_v2m_get_target_spi,
+	.gpo_set_target_spi = gictwo_v2m_set_target_spi,
+	.gpo_register_msi_range = gictwo_v2m_register_msi_range,
+	.gpo_unregister_msi_range = gictwo_v2m_unregister_msi_range,
+};
+
+static gic_child_ops_t gictwo_child_ops = {
+	.gco_v2m_ops = &gictwo_v2m_ops,
+	.gco_its_ops = NULL,
+};
+
 static int
 gicv2_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
@@ -1100,6 +1158,9 @@ gicv2_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		dev_err(dip, CE_PANIC, "Failed to register GIC as the "
 		    "system programmable interrupt controller.");
 	}
+
+	gictwo_child_ops.gco_ctx = (void *)dip;
+	syspic_register_child_ops(&gictwo_child_ops);
 
 	ddi_report_dev(dip);
 	return (DDI_SUCCESS);
