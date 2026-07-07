@@ -37,11 +37,6 @@ ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
 #
-# depends on drv/gictwo
-#
-LDFLAGS         += -Ndrv/gictwo
-
-#
 #	Default build targets.
 #
 .KEEP_STATE:

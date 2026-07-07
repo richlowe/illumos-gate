@@ -32,7 +32,7 @@
  *     Protects the per-device state list (v2m_devs).
  *
  *   v2m_dev_lock --> syspic_intrs_lock --> av_lock
- *   gc_lock is acquired independently via gicv2_configure_irq()
+ *   gc_lock is acquired independently via gpo_configure_irq()
  *   cross-driver call, and is held only for the duration of that
  *   call.  The base GICv2 driver does not call into the v2m driver.
  */
@@ -56,6 +56,7 @@
 #include <sys/mach_intr.h>
 #include <sys/gic_reg.h>
 #include <sys/ddi_intr_impl.h>
+#include <sys/gic_ops.h>
 
 /*
  * Device tree properties for SPI base/count override.
@@ -105,29 +106,9 @@ typedef struct gicv2m_state {
 	ddi_irm_pool_t		*v2m_irm_pool;		/* IRM pool for SPIs */
 	list_t			v2m_devs;		/* gicv2m_dev_state_t */
 	kmutex_t		v2m_dev_lock;		/* protects v2m_devs */
+	gicv2m_parent_ops_t	*v2m_ops;		/* parent GIC ops */
+	void			*v2m_ops_ctx;		/* parent GIC ctx */
 } gicv2m_state_t;
-
-/*
- * Configure an SPI as edge-triggered or level-sensitive on the GICv2
- * distributor.  Takes the distributor lock internally.
- *
- * gic_dip: dev_info_t of the parent GICv2 instance
- * irq:     SPI INTID (32-1019)
- * is_edge: B_TRUE for edge-triggered, B_FALSE for level-sensitive
- *
- * This is a private interface, implemented by the GICv2 driver.
- */
-extern void gicv2_configure_irq(dev_info_t *gic_dip, uint32_t irq,
-    boolean_t is_edge);
-extern boolean_t gicv2_irq_ispending(dev_info_t *gic_dip, uint32_t irq);
-extern processorid_t gicv2_get_target_spi(dev_info_t *gic_dip,
-    uint32_t intid);
-extern void gicv2_set_target_spi(dev_info_t *gic_dip, uint32_t intid,
-    processorid_t cpuid);
-extern void gicv2_register_msi_range(dev_info_t *gic_dip, uint32_t base,
-    uint32_t count);
-extern void gicv2_unregister_msi_range(dev_info_t *gic_dip, uint32_t base,
-    uint32_t count);
 
 static void *gicv2m_soft_state;
 
@@ -367,7 +348,7 @@ gicv2m_enable(gicv2m_state_t *sc, dev_info_t *rdip,
 	hdlp->ih_vector = spi;
 
 	/* Configure SPI as edge-triggered; MSI is always edge */
-	gicv2_configure_irq(sc->v2m_gic_dip, spi, B_TRUE);
+	sc->v2m_ops->gpo_configure_irq(sc->v2m_ops_ctx, spi, B_TRUE);
 
 	/*
 	 * syspic_get_state() acquires syspic_intrs_lock; we must release
@@ -470,7 +451,8 @@ gicv2m_getpending(gicv2m_state_t *sc, dev_info_t *rdip,
 	}
 	mutex_exit(&sc->v2m_dev_lock);
 
-	*(int *)result = gicv2_irq_ispending(sc->v2m_gic_dip, spi) ? 1 : 0;
+	*(int *)result = sc->v2m_ops->gpo_irq_ispending(sc->v2m_ops_ctx,
+	    spi) ? 1 : 0;
 	return (DDI_SUCCESS);
 }
 
@@ -509,7 +491,8 @@ gicv2m_gettarget(gicv2m_state_t *sc, dev_info_t *rdip,
 	}
 	mutex_exit(&sc->v2m_dev_lock);
 
-	*(processorid_t *)result = gicv2_get_target_spi(sc->v2m_gic_dip, spi);
+	*(processorid_t *)result = sc->v2m_ops->gpo_get_target_spi(
+	    sc->v2m_ops_ctx, spi);
 	return (DDI_SUCCESS);
 }
 
@@ -549,7 +532,7 @@ gicv2m_settarget(gicv2m_state_t *sc, dev_info_t *rdip,
 	}
 	mutex_exit(&sc->v2m_dev_lock);
 
-	gicv2_set_target_spi(sc->v2m_gic_dip, spi, new_cpu);
+	sc->v2m_ops->gpo_set_target_spi(sc->v2m_ops_ctx, spi, new_cpu);
 	return (DDI_SUCCESS);
 }
 
@@ -658,6 +641,7 @@ gicv2m_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	int instance;
 	int nregs;
 	gicv2m_state_t *sc;
+	gic_child_ops_t *gco;
 	ddi_device_acc_attr_t reg_acc_attr = {
 		.devacc_attr_version		= DDI_DEVICE_ATTR_V0,
 		.devacc_attr_endian_flags	= DDI_STRUCTURE_LE_ACC,
@@ -708,6 +692,12 @@ gicv2m_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	sc->v2m_gic_dip = ddi_get_parent(dip);
 	VERIFY3P(sc->v2m_gic_dip, !=, NULL);
 	VERIFY3P(sc->v2m_gic_dip, ==, syspic_get_dip());
+
+	gco = (gic_child_ops_t *)syspic_get_child_ops();
+	VERIFY3P(gco, !=, NULL);
+	VERIFY3P(gco->gco_v2m_ops, !=, NULL);
+	sc->v2m_ops = gco->gco_v2m_ops;
+	sc->v2m_ops_ctx = gco->gco_ctx;
 
 	/*
 	 * Initialise per-device state list.
@@ -831,8 +821,8 @@ gicv2m_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	 * direct GETTARGET/SETTARGET for our INTIDs -- only we can
 	 * issue targeting operations for our SPIs.
 	 */
-	gicv2_register_msi_range(sc->v2m_gic_dip, sc->v2m_spi_base,
-	    sc->v2m_spi_count);
+	sc->v2m_ops->gpo_register_msi_range(sc->v2m_ops_ctx,
+	    sc->v2m_spi_base, sc->v2m_spi_count);
 
 	ddi_report_dev(dip);
 	return (DDI_SUCCESS);
