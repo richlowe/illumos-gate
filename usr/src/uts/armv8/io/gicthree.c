@@ -97,6 +97,7 @@
 #include <sys/list.h>
 #include <sys/mach_intr.h>
 #include <sys/gic_v3.h>
+#include <sys/gic_ops.h>
 #include <sys/vmem.h>
 #include <vm/hat.h>
 #include <vm/hat_pte.h>
@@ -1528,6 +1529,171 @@ gicv3_init(dev_info_t *dip, gicv3_conf_t *gc)
 	return (DDI_SUCCESS);
 }
 
+/*
+ * Child ops wrappers - v2m parent operations.
+ *
+ * gicv3_config_irq_spi() and gicv3_irq_ispending() are file-local and
+ * take gicv3_conf_t; the wrappers do the soft-state lookup.  The
+ * remaining four functions already take dev_info_t and are called
+ * through.
+ */
+static void
+gicthree_v2m_configure_irq(void *ctx, uint32_t intid, boolean_t is_edge)
+{
+	dev_info_t *dip = (dev_info_t *)ctx;
+	gicv3_conf_t *gc = ddi_get_soft_state(gicv3_soft_state,
+	    ddi_get_instance(dip));
+
+	VERIFY3P(gc, !=, NULL);
+	ASSERT(GIC_INTID_IS_ANY_SPI(intid));
+	gicv3_config_irq_spi(gc, intid, is_edge ?
+	    GICD_ICFGR_INT_CONFIG_EDGE : GICD_ICFGR_INT_CONFIG_LEVEL);
+}
+
+/*
+ * Return the pending state of an SGI, PPI, or SPI from the GICv3 hardware.
+ *
+ * SGIs and PPIs (INTIDs 0-31) are per-CPU: their pending state lives in
+ * GICR_ISPENDR0 on the current CPU's redistributor.  SPIs (INTIDs 32-1019)
+ * are shared: their pending state lives in GICD_ISPENDRn on the distributor.
+ *
+ * This is inherently racy: the pending bit can change at any instant.
+ * The result is a best-effort snapshot for diagnostic use.
+ */
+static boolean_t
+gicv3_irq_ispending(gicv3_conf_t *gc, uint32_t irq)
+{
+	uint32_t val;
+
+	ASSERT(GIC_INTID_IS_SGI(irq) || GIC_INTID_IS_PPI(irq) ||
+	    GIC_INTID_IS_SPI(irq));
+
+	if (GIC_INTID_IS_PERCPU(irq)) {
+		gicv3_redistributor_t *r;
+
+		VERIFY3U(CPU->cpu_id, <, gc->gc_num_redist);
+		r = &gc->gc_redist[CPU->cpu_id];
+
+		val = gicr_sgi_read4(r, GICR_ISPENDR0);
+		return ((val & GICD_IPENDR_REGBIT(irq)) != 0);
+	}
+
+	val = gicd_read4(gc, GICD_ISPENDRn(GICD_IPENDR_REGNUM(irq)));
+	return ((val & GICD_IPENDR_REGBIT(irq)) != 0);
+}
+
+static boolean_t
+gicthree_v2m_irq_ispending(void *ctx, uint32_t intid)
+{
+	dev_info_t *dip = (dev_info_t *)ctx;
+	gicv3_conf_t *gc = ddi_get_soft_state(gicv3_soft_state,
+	    ddi_get_instance(dip));
+
+	VERIFY3P(gc, !=, NULL);
+	return (gicv3_irq_ispending(gc, intid));
+}
+
+static processorid_t
+gicthree_v2m_get_target_spi(void *ctx, uint32_t intid)
+{
+	return (gicv3_get_target_spi((dev_info_t *)ctx, intid));
+}
+
+static void
+gicthree_v2m_set_target_spi(void *ctx, uint32_t intid, processorid_t cpu)
+{
+	gicv3_set_target_spi((dev_info_t *)ctx, intid, cpu);
+}
+
+static void
+gicthree_v2m_register_msi_range(void *ctx, uint32_t base, uint32_t count)
+{
+	gicv3_register_msi_range((dev_info_t *)ctx, base, count);
+}
+
+static void
+gicthree_v2m_unregister_msi_range(void *ctx, uint32_t base, uint32_t count)
+{
+	gicv3_unregister_msi_range((dev_info_t *)ctx, base, count);
+}
+
+static gicv2m_parent_ops_t gicthree_v2m_ops = {
+	.gpo_configure_irq = gicthree_v2m_configure_irq,
+	.gpo_irq_ispending = gicthree_v2m_irq_ispending,
+	.gpo_get_target_spi = gicthree_v2m_get_target_spi,
+	.gpo_set_target_spi = gicthree_v2m_set_target_spi,
+	.gpo_register_msi_range = gicthree_v2m_register_msi_range,
+	.gpo_unregister_msi_range = gicthree_v2m_unregister_msi_range,
+};
+
+/*
+ * Child ops wrappers - ITS parent operations.
+ */
+static int
+gicthree_its_alloc_lpi(void *ctx, uint32_t *lpip)
+{
+	return (gicv3_alloc_lpi((dev_info_t *)ctx, lpip));
+}
+
+static void
+gicthree_its_free_lpi(void *ctx, uint32_t lpi)
+{
+	gicv3_free_lpi((dev_info_t *)ctx, lpi);
+}
+
+static void
+gicthree_its_lpi_set_config(void *ctx, uint32_t lpi, uint8_t prio,
+    boolean_t enable)
+{
+	gicv3_lpi_set_config((dev_info_t *)ctx, lpi, prio, enable);
+}
+
+static boolean_t
+gicthree_its_lpi_ispending(void *ctx, uint32_t lpi, processorid_t cpuid)
+{
+	return (gicv3_lpi_ispending((dev_info_t *)ctx, lpi, cpuid));
+}
+
+static size_t
+gicthree_its_lpi_navail(void *ctx)
+{
+	return (gicv3_lpi_navail((dev_info_t *)ctx));
+}
+
+static ddi_irm_pool_t *
+gicthree_its_get_lpi_irm_pool(void *ctx)
+{
+	return (gicv3_get_lpi_irm_pool((dev_info_t *)ctx));
+}
+
+static uint64_t
+gicthree_its_redist_pa(void *ctx, processorid_t cpuid)
+{
+	return (gicv3_redist_pa((dev_info_t *)ctx, cpuid));
+}
+
+static uint32_t
+gicthree_its_redist_procnum(void *ctx, processorid_t cpuid)
+{
+	return (gicv3_redist_procnum((dev_info_t *)ctx, cpuid));
+}
+
+static gicv3its_parent_ops_t gicthree_its_ops = {
+	.ipo_alloc_lpi = gicthree_its_alloc_lpi,
+	.ipo_free_lpi = gicthree_its_free_lpi,
+	.ipo_lpi_set_config = gicthree_its_lpi_set_config,
+	.ipo_lpi_ispending = gicthree_its_lpi_ispending,
+	.ipo_lpi_navail = gicthree_its_lpi_navail,
+	.ipo_get_lpi_irm_pool = gicthree_its_get_lpi_irm_pool,
+	.ipo_redist_pa = gicthree_its_redist_pa,
+	.ipo_redist_procnum = gicthree_its_redist_procnum,
+};
+
+static gic_child_ops_t gicthree_child_ops = {
+	.gco_v2m_ops = &gicthree_v2m_ops,
+	.gco_its_ops = &gicthree_its_ops,
+};
+
 static int
 gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
@@ -1652,6 +1818,9 @@ gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		    "system programmable interrupt controller.");
 	}
 
+	gicthree_child_ops.gco_ctx = (void *)dip;
+	syspic_register_child_ops(&gicthree_child_ops);
+
 	ddi_report_dev(dip);
 	return (DDI_SUCCESS);
 }
@@ -1695,39 +1864,6 @@ gicv3_bus_ctl(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 
 	return (ret);
 }
-
-/*
- * Return the pending state of an SGI, PPI, or SPI from the GICv3 hardware.
- *
- * SGIs and PPIs (INTIDs 0-31) are per-CPU: their pending state lives in
- * GICR_ISPENDR0 on the current CPU's redistributor.  SPIs (INTIDs 32-1019)
- * are shared: their pending state lives in GICD_ISPENDRn on the distributor.
- *
- * This is inherently racy: the pending bit can change at any instant.
- * The result is a best-effort snapshot for diagnostic use.
- */
-static boolean_t
-gicv3_irq_ispending(gicv3_conf_t *gc, uint32_t irq)
-{
-	uint32_t val;
-
-	ASSERT(GIC_INTID_IS_SGI(irq) || GIC_INTID_IS_PPI(irq) ||
-	    GIC_INTID_IS_SPI(irq));
-
-	if (GIC_INTID_IS_PERCPU(irq)) {
-		gicv3_redistributor_t *r;
-
-		VERIFY3U(CPU->cpu_id, <, gc->gc_num_redist);
-		r = &gc->gc_redist[CPU->cpu_id];
-
-		val = gicr_sgi_read4(r, GICR_ISPENDR0);
-		return ((val & GICD_IPENDR_REGBIT(irq)) != 0);
-	}
-
-	val = gicd_read4(gc, GICD_ISPENDRn(GICD_IPENDR_REGNUM(irq)));
-	return ((val & GICD_IPENDR_REGBIT(irq)) != 0);
-}
-
 
 /*
  * Check whether an INTID falls within a registered MSI SPI range.
