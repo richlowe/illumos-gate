@@ -54,6 +54,7 @@ static syspic_ops_t spo_default_ops = {
 static spo_ctx_t spo_ctx = &spo_default_ops;
 static syspic_ops_t *spo_ops = &spo_default_ops;
 static dev_info_t *syspic_dip;
+static void *syspic_child_ops;
 
 static void
 stub_not_config(void)
@@ -162,6 +163,19 @@ dev_info_t *
 syspic_get_dip(void)
 {
 	return (syspic_dip);
+}
+
+void
+syspic_register_child_ops(void *ops)
+{
+	VERIFY3P(syspic_child_ops, ==, NULL);
+	syspic_child_ops = ops;
+}
+
+void *
+syspic_get_child_ops(void)
+{
+	return (syspic_child_ops);
 }
 
 void
