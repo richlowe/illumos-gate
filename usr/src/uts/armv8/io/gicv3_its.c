@@ -82,7 +82,7 @@
  * It must not be held when calling ITS command functions.
  *
  * gc_lpi_prop_lock (in gicthree.c) is acquired independently via
- * gicv3_lpi_set_config() - it is not nested with any ITS lock.
+ * ipo_lpi_set_config() - it is not nested with any ITS lock.
  *
  * Stall recovery
  * ==============
@@ -113,6 +113,7 @@
 #include <sys/syspic.h>
 #include <sys/syspic_impl.h>
 #include <sys/gic_v3.h>
+#include <sys/gic_ops.h>
 #include <sys/gic_reg.h>
 #include <sys/byteorder.h>
 #include <sys/cpu.h>
@@ -249,6 +250,10 @@ typedef struct gicv3_its_state {
 
 	/* Global list linkage (in parent GICv3's its_list) */
 	list_node_t		its_node;
+
+	/* Parent GIC ops (from syspic child ops) */
+	gicv3its_parent_ops_t	*its_ops;
+	void			*its_ops_ctx;
 } gicv3_its_state_t;
 
 static void *gicv3_its_soft_state;
@@ -596,10 +601,11 @@ static uint64_t
 gicv3_its_sync_target(gicv3_its_state_t *sc, processorid_t cpuid)
 {
 	if (sc->its_pta)
-		return (gicv3_redist_pa(sc->its_gic_dip, cpuid) >> 16);
+		return (sc->its_ops->ipo_redist_pa(sc->its_ops_ctx,
+		    cpuid) >> 16);
 	else
-		return ((uint64_t)gicv3_redist_procnum(sc->its_gic_dip,
-		    cpuid));
+		return ((uint64_t)sc->its_ops->ipo_redist_procnum(
+		    sc->its_ops_ctx, cpuid));
 }
 
 static int
@@ -777,7 +783,7 @@ gicv3_its_alloc(gicv3_its_state_t *sc, dev_info_t *rdip,
 	for (actual = 0; actual < count; actual++) {
 		uint32_t lpi;
 
-		if (gicv3_alloc_lpi(sc->its_gic_dip, &lpi) != 0)
+		if (sc->its_ops->ipo_alloc_lpi(sc->its_ops_ctx, &lpi) != 0)
 			break;
 		ds->ds_vecs[actual].gv_lpi = lpi;
 		ds->ds_vecs[actual].gv_eventid = actual;
@@ -817,7 +823,7 @@ gicv3_its_alloc(gicv3_its_state_t *sc, dev_info_t *rdip,
 	    PAGESIZE, &ds->ds_itt, &ds->ds_itt_pa,
 	    &ds->ds_itt_dmah, &ds->ds_itt_acch) != DDI_SUCCESS) {
 		for (i = 0; i < actual; i++)
-			gicv3_free_lpi(sc->its_gic_dip,
+			sc->its_ops->ipo_free_lpi(sc->its_ops_ctx,
 			    ds->ds_vecs[i].gv_lpi);
 		kmem_free(ds->ds_vecs, ds->ds_vecs_sz);
 		kmem_free(ds, sizeof (*ds));
@@ -829,7 +835,7 @@ gicv3_its_alloc(gicv3_its_state_t *sc, dev_info_t *rdip,
 	    ds->ds_itt_pa, B_TRUE) != 0) {
 		gicv3_contig_free(&ds->ds_itt_dmah, &ds->ds_itt_acch);
 		for (i = 0; i < actual; i++)
-			gicv3_free_lpi(sc->its_gic_dip,
+			sc->its_ops->ipo_free_lpi(sc->its_ops_ctx,
 			    ds->ds_vecs[i].gv_lpi);
 		kmem_free(ds->ds_vecs, ds->ds_vecs_sz);
 		kmem_free(ds, sizeof (*ds));
@@ -884,9 +890,10 @@ gicv3_its_free(gicv3_its_state_t *sc, dev_info_t *rdip,
 	 */
 	for (i = 0; i < ds->ds_nalloc; i++) {
 		ASSERT3S(ds->ds_vecs[i].gv_enabled, ==, B_FALSE);
-		gicv3_lpi_set_config(sc->its_gic_dip,
+		sc->its_ops->ipo_lpi_set_config(sc->its_ops_ctx,
 		    ds->ds_vecs[i].gv_lpi, 0, B_FALSE);
-		gicv3_free_lpi(sc->its_gic_dip, ds->ds_vecs[i].gv_lpi);
+		sc->its_ops->ipo_free_lpi(sc->its_ops_ctx,
+		    ds->ds_vecs[i].gv_lpi);
 	}
 
 	kmem_free(ds->ds_vecs, ds->ds_vecs_sz);
@@ -977,13 +984,13 @@ gicv3_its_enable(gicv3_its_state_t *sc, dev_info_t *rdip,
 	mutex_exit(&syspic_intrs_lock);
 
 	/* Enable LPI in PROPBASER: set priority and enable */
-	gicv3_lpi_set_config(sc->its_gic_dip, lpi,
+	sc->its_ops->ipo_lpi_set_config(sc->its_ops_ctx, lpi,
 	    GIC_IPL_TO_PRIO(hdlp->ih_pri), B_TRUE);
 
 	/* Program ITS translation: EventID -> (LPI, Collection) */
 	if (gicv3_its_do_mapti(sc, devid, eventid, lpi,
 	    (uint16_t)target_cpu, target_cpu) != 0) {
-		gicv3_lpi_set_config(sc->its_gic_dip, lpi,
+		sc->its_ops->ipo_lpi_set_config(sc->its_ops_ctx, lpi,
 		    GIC_IPL_TO_PRIO(hdlp->ih_pri), B_FALSE);
 		rem_avintr((void *)hdlp, hdlp->ih_pri,
 		    hdlp->ih_cb_func, lpi);
@@ -1060,7 +1067,7 @@ gicv3_its_disable(gicv3_its_state_t *sc, dev_info_t *rdip,
 	rem_avintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func, lpi);
 
 	/* Disable LPI in PROPBASER */
-	gicv3_lpi_set_config(sc->its_gic_dip, lpi,
+	sc->its_ops->ipo_lpi_set_config(sc->its_ops_ctx, lpi,
 	    GIC_IPL_TO_PRIO(hdlp->ih_pri), B_FALSE);
 
 	/*
@@ -1155,7 +1162,7 @@ gicv3_its_gettarget(gicv3_its_state_t *sc, dev_info_t *rdip,
  *
  * The LPI INTID and target CPU are looked up from the per-device
  * vector state, then the pending bit is read from the target
- * redistributor's pending table via gicv3_lpi_ispending().
+ * redistributor's pending table via ipo_lpi_ispending().
  */
 static int
 gicv3_its_getpending(gicv3_its_state_t *sc, dev_info_t *rdip,
@@ -1179,7 +1186,7 @@ gicv3_its_getpending(gicv3_its_state_t *sc, dev_info_t *rdip,
 	target_cpu = ds->ds_vecs[idx].gv_target_cpu;
 	mutex_exit(&sc->its_dev_lock);
 
-	*(int *)result = gicv3_lpi_ispending(sc->its_gic_dip,
+	*(int *)result = sc->its_ops->ipo_lpi_ispending(sc->its_ops_ctx,
 	    lpi, target_cpu) ? 1 : 0;
 	return (DDI_SUCCESS);
 }
@@ -1256,7 +1263,7 @@ gicv3_its_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 		return (DDI_SUCCESS);
 	case DDI_INTROP_NAVAIL:
 		*(int *)result =
-		    (int)gicv3_lpi_navail(sc->its_gic_dip);
+		    (int)sc->its_ops->ipo_lpi_navail(sc->its_ops_ctx);
 		return (DDI_SUCCESS);
 	case DDI_INTROP_GETPENDING:
 		return (gicv3_its_getpending(sc, rdip, hdlp, result));
@@ -1269,7 +1276,7 @@ gicv3_its_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 	case DDI_INTROP_GETPOOL: {
 		ddi_irm_pool_t *pool;
 
-		pool = gicv3_get_lpi_irm_pool(sc->its_gic_dip);
+		pool = sc->its_ops->ipo_get_lpi_irm_pool(sc->its_ops_ctx);
 		if (pool == NULL) {
 			return (DDI_ENOTSUP);
 		}
@@ -1652,6 +1659,7 @@ gicv3_its_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	int instance;
 	int nregs;
 	gicv3_its_state_t *sc;
+	gic_child_ops_t *gco;
 	uint32_t ctlr;
 	int timeout_us;
 	cpu_t *cp;
@@ -1711,6 +1719,12 @@ gicv3_its_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	sc->its_dip = dip;
 	sc->its_gic_dip = ddi_get_parent(dip);
 	VERIFY3P(sc->its_gic_dip, !=, NULL);
+
+	gco = (gic_child_ops_t *)syspic_get_child_ops();
+	VERIFY3P(gco, !=, NULL);
+	VERIFY3P(gco->gco_its_ops, !=, NULL);
+	sc->its_ops = gco->gco_its_ops;
+	sc->its_ops_ctx = gco->gco_ctx;
 
 	/* Initialise locks */
 	mutex_init(&sc->its_cmd_lock, NULL, MUTEX_DRIVER, NULL);

@@ -37,7 +37,7 @@ ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
 #
-# depends on drv/gicthree
+# depends on drv/gicthree for gicv3_contig_alloc/free DMA utilities
 #
 LDFLAGS         += -Ndrv/gicthree
 
