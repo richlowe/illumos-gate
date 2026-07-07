@@ -162,6 +162,21 @@ extern int syspic_register_syspic(spo_ctx_t ctx, syspic_ops_t *ops,
  */
 extern dev_info_t *syspic_get_dip(void);
 
+/*
+ * Register and retrieve an opaque child-ops pointer.
+ *
+ * The system interrupt controller registers a pointer to a
+ * controller-specific child operations structure during attach.
+ * Subordinate interrupt controllers (such as MSI controllers)
+ * retrieve this pointer during their own attach to obtain indirect
+ * access to their parent's operations.
+ *
+ * The syspic facility stores this pointer opaquely and does not
+ * interpret its contents.
+ */
+extern void syspic_register_child_ops(void *ops);
+extern void *syspic_get_child_ops(void);
+
 #endif	/* _KERNEL */
 
 #ifdef __cplusplus
