@@ -53,10 +53,11 @@ set_platform_defaults(void)
 }
 
 uint64_t
-plat_get_cpu_clock(int cpu_no)
+plat_cpu_get_speed(cpu_t *cp)
 {
 	char name[80];
-	sprintf(name, "/cpus/cpu@%d", cpu_no);
+
+	(void) sprintf(name, "/cpus/cpu@%d", cp->cpu_id);
 	pnode_t node = prom_finddevice(name);
 	if (node > 0) {
 		uint_t clock;

@@ -48,9 +48,11 @@ extern "C" {
 struct gpio_ctrl;
 struct prom_hwclock;
 
-#pragma weak	plat_get_cpu_clock
+#pragma weak	plat_cpu_get_speed
+#pragma weak	plat_cpu_get_speeds
+#pragma weak	plat_cpu_free_speeds
+#pragma weak	plat_cpu_set_speed
 #pragma weak	plat_set_max_cpu_clock
-#pragma weak	plat_set_cpu_supp_freqs
 #pragma weak	plat_gpio_get
 #pragma weak	plat_gpio_set
 #pragma weak	plat_clk_get_rate
@@ -59,11 +61,23 @@ struct prom_hwclock;
 #pragma weak	plat_pcie_osc
 
 /*
- * Called in mp_startup.c from init_cpu_info (twice).
+ * CPU frequency interfaces.
+ *
+ * plat_cpu_get_speed: return current CPU frequency in Hz, 0 if unknown.
+ * plat_cpu_get_speeds: enumerate supported frequencies in MHz (highest
+ *     first).  Returns DDI_SUCCESS with *speeds and *nspeeds filled in,
+ *     or DDI_ENOTSUP if the platform has no DVFS.  Caller must pair
+ *     a successful call with plat_cpu_free_speeds.
+ * plat_cpu_set_speed: transition to the given frequency in MHz.
+ *     Returns DDI_SUCCESS or DDI_FAILURE.
+ * plat_set_max_cpu_clock: boot-time call to set CPU to maximum speed
+ *     before the first frequency reading.
  */
-extern uint64_t plat_get_cpu_clock(int cpu_no);
+extern uint64_t plat_cpu_get_speed(cpu_t *cp);
+extern int plat_cpu_get_speeds(cpu_t *cp, int **speeds, int *nspeeds);
+extern void plat_cpu_free_speeds(int *speeds, int nspeeds);
+extern int plat_cpu_set_speed(cpu_t *cp, int speed);
 extern void plat_set_max_cpu_clock(int cpu_no);
-extern void plat_set_cpu_supp_freqs(cpu_t *cp);
 
 /*
  * Called in bcm2711-emmc2.c to drive the GPIO regulator when switching to 1v8.
