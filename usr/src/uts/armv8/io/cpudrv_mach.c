@@ -16,16 +16,17 @@
 /*
  * CPU power management driver - aarch64 FDT machine-dependent support.
  *
- * Provides the cpudrv_mach interface for FDT (non-SBBR) platforms.
+ * Provides the cpudrv_mach interface for FDT platforms.
+ *
  * On attach, cpudrv_mach_init() parses the optional idle-states binding
  * (devicetree.org idle-states.yaml) and registers discovered states with
  * the cpuidle framework.
  *
- * Frequency scaling (DVFS) is not yet supported.  cpudrv_is_enabled()
- * returns B_FALSE for per-instance calls so the common cpudrv PM
- * governor is not started.  When platform DVFS is added (e.g. RPi4
- * via platmod hooks), cpudrv_is_enabled() and CPUDRV_GET_SPEEDS will
- * be updated to provide real speed levels.
+ * Frequency scaling (DVFS) is delegated to the platform module via
+ * weak symbols (plat_cpu_get_speeds, plat_cpu_set_speed, etc.).
+ * When the platmod provides these, the common cpudrv PM governor is
+ * enabled and manages speed transitions.  When absent, the driver
+ * attaches for idle state registration only.
  */
 
 #include <sys/types.h>
@@ -41,8 +42,95 @@
 #include <sys/cpuidle.h>
 #include <sys/cpupm.h>
 #include <sys/cpudrv_mach.h>
+#include <sys/platmod.h>
 #include <sys/obpdefs.h>
 #include <sys/machsystm.h>
+
+/*
+ * Platmod DVFS wrappers.
+ *
+ * Each wrapper checks whether the corresponding platmod weak symbol is
+ * resolved and delegates to it, returning a safe default when the symbol
+ * is absent.  All internal callsites go through these wrappers.
+ */
+
+/*
+ * Cached result of the DVFS availability probe.  Checked once and reused
+ * for the lifetime of the driver.
+ *
+ * 0 = not yet probed, 1 = available, -1 = not available.
+ */
+static volatile int cpudrv_mach_dvfs_state = 0;
+static kmutex_t cpudrv_mach_dvfs_lock;
+
+static boolean_t
+cpudrv_mach_dvfs_available(void)
+{
+	if (cpudrv_mach_dvfs_state != 0) {
+		return (cpudrv_mach_dvfs_state > 0);
+	}
+
+	mutex_enter(&cpudrv_mach_dvfs_lock);
+	if (cpudrv_mach_dvfs_state == 0) {
+		if (&plat_cpu_get_speeds != NULL) {
+			int *speeds;
+			int nspeeds;
+
+			if (plat_cpu_get_speeds(CPU, &speeds, &nspeeds) ==
+			    DDI_SUCCESS) {
+				plat_cpu_free_speeds(speeds, nspeeds);
+				cpudrv_mach_dvfs_state = 1;
+			} else {
+				cpudrv_mach_dvfs_state = -1;
+			}
+		} else {
+			cpudrv_mach_dvfs_state = -1;
+		}
+	}
+	mutex_exit(&cpudrv_mach_dvfs_lock);
+
+	return (cpudrv_mach_dvfs_state > 0);
+}
+
+int
+cpudrv_mach_get_speeds(cpu_t *cp, int **speeds, int *nspeeds)
+{
+	if (&plat_cpu_get_speeds == NULL) {
+		return (DDI_ENOTSUP);
+	}
+
+	return (plat_cpu_get_speeds(cp, speeds, nspeeds));
+}
+
+void
+cpudrv_mach_free_speeds(int *speeds, int nspeeds)
+{
+	if (&plat_cpu_free_speeds == NULL) {
+		return;
+	}
+
+	plat_cpu_free_speeds(speeds, nspeeds);
+}
+
+static int
+cpudrv_mach_set_speed(cpu_t *cp, int speed)
+{
+	if (&plat_cpu_set_speed == NULL) {
+		return (DDI_ENOTSUP);
+	}
+
+	return (plat_cpu_set_speed(cp, speed));
+}
+
+static uint64_t
+cpudrv_mach_get_speed(cpu_t *cp)
+{
+	if (&plat_cpu_get_speed == NULL) {
+		return (0);
+	}
+
+	return (plat_cpu_get_speed(cp));
+}
 
 /*
  * Check whether a dev_info node has "arm,idle-state" in its compatible
@@ -279,21 +367,44 @@ cpudrv_get_cpu_id(dev_info_t *dip, processorid_t *cpu_id)
 }
 
 /*
- * Change CPU speed.  No DVFS support yet.
+ * Change CPU speed via the platmod DVFS interface.
+ *
+ * The common cpudrv_power() calls this with the target speed level.
+ * On success, update cpu_curr_clock from the platmod.
  */
-/* ARGSUSED */
 int
 cpudrv_change_speed(cpudrv_devstate_t *cpudsp, cpudrv_pm_spd_t *new_spd)
 {
+	cpu_t *cp;
+	int ret;
+	uint64_t clk;
+
+	ASSERT3P(cpudsp, !=, NULL);
+	ASSERT3P(new_spd, !=, NULL);
+
+	cp = cpudsp->cp;
+	if (cp == NULL) {
+		return (DDI_FAILURE);
+	}
+
+	ret = cpudrv_mach_set_speed(cp, new_spd->speed);
+	if (ret != DDI_SUCCESS) {
+		return (ret);
+	}
+
+	clk = cpudrv_mach_get_speed(cp);
+	if (clk != 0) {
+		cp->cpu_curr_clock = clk;
+	}
+
 	return (DDI_SUCCESS);
 }
 
 /*
  * All CPUs are always ready for power transitions.
  */
-/* ARGSUSED */
 boolean_t
-cpudrv_power_ready(cpu_t *cp)
+cpudrv_power_ready(cpu_t *cp __unused)
 {
 	return (B_TRUE);
 }
@@ -301,9 +412,8 @@ cpudrv_power_ready(cpu_t *cp)
 /*
  * No governor thread on aarch64.
  */
-/* ARGSUSED */
 boolean_t
-cpudrv_is_governor_thread(cpudrv_pm_t *cpupm)
+cpudrv_is_governor_thread(cpudrv_pm_t *cpupm __unused)
 {
 	return (B_FALSE);
 }
@@ -336,9 +446,8 @@ cpudrv_mach_init(cpudrv_devstate_t *cpudsp)
 /*
  * Machine-dependent cleanup (detach).
  */
-/* ARGSUSED */
 boolean_t
-cpudrv_mach_fini(cpudrv_devstate_t *cpudsp)
+cpudrv_mach_fini(cpudrv_devstate_t *cpudsp __unused)
 {
 	return (B_TRUE);
 }
@@ -349,9 +458,9 @@ cpudrv_mach_fini(cpudrv_devstate_t *cpudsp)
  * When called with NULL (from the global attach gate), returns B_TRUE
  * so the driver attaches and cpudrv_mach_init() can register idle
  * states.  When called with a per-instance cpudsp (from the PM setup
- * block), returns B_FALSE to skip the speed governor (no DVFS yet).
+ * block), returns B_TRUE only if the platmod provides DVFS speeds,
+ * enabling the governor for that instance.
  */
-/* ARGSUSED */
 boolean_t
 cpudrv_is_enabled(cpudrv_devstate_t *cpudsp)
 {
@@ -359,15 +468,25 @@ cpudrv_is_enabled(cpudrv_devstate_t *cpudsp)
 		return (B_TRUE);
 	}
 
-	return (B_FALSE);
+	return (cpudrv_mach_dvfs_available());
 }
 
 /*
- * Set supported frequencies.  No DVFS yet.
+ * Set supported frequencies from the platmod DVFS interface.
  */
-/* ARGSUSED */
 void
 cpudrv_set_supp_freqs(cpudrv_devstate_t *cpudsp)
 {
+	int *speeds;
+	int nspeeds;
 
+	ASSERT3P(cpudsp, !=, NULL);
+
+	if (cpudrv_mach_get_speeds(cpudsp->cp, &speeds, &nspeeds) !=
+	    DDI_SUCCESS) {
+		return;
+	}
+
+	cpupm_set_supp_freqs(cpudsp->cp, speeds, (uint_t)nspeeds);
+	cpudrv_mach_free_speeds(speeds, nspeeds);
 }
