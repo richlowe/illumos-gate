@@ -43,7 +43,7 @@
 #include <sys/ddi_implfuncs.h>
 #include <sys/ddi_subrdefs.h>
 #include <sys/param.h>
-#include <sys/cpupm.h>
+#include <sys/kmem.h>
 #include <vm/hat.h>
 #include <sys/bcm2835_mbox.h>
 #include <sys/bcm2835_vcprop.h>
@@ -156,7 +156,7 @@ plat_vc_hwclock_rate(struct prom_hwclock *clk, clockid_type_t clkidtype,
 }
 
 uint64_t
-plat_get_cpu_clock(int cpu_no)
+plat_cpu_get_speed(cpu_t *cp __unused)
 {
 	pnode_t node = 0;
 	int clkhz;
@@ -330,16 +330,17 @@ plat_gpio_set(struct gpio_ctrl *gpio, int value)
 	return (0);
 }
 
-void
-plat_set_cpu_supp_freqs(cpu_t *cp)
+int
+plat_cpu_get_speeds(cpu_t *cp __unused, int **speedsp, int *nspeedsp)
 {
-	int supp_freqs[] = {
+	static int supp_speeds[] = {
 		1500,
 		1000,
 		750,
 		600,
 	};
-
+	int *speeds;
+	int nspeeds = sizeof (supp_speeds) / sizeof (supp_speeds[0]);
 	pnode_t node = 0;
 
 	prom_fdt_walk(find_cprman, &node);
@@ -349,13 +350,24 @@ plat_set_cpu_supp_freqs(cpu_t *cp)
 	struct prom_hwclock clk = { node, VCPROP_CLK_ARM };
 	int clkhz = plat_vc_hwclock_rate(&clk, VCCLOCKID,
 	    VCPROPTAG_GET_MAX_CLOCKRATE, 0);
+
+	speeds = kmem_alloc(nspeeds * sizeof (int), KM_SLEEP);
+	memcpy(speeds, supp_speeds, nspeeds * sizeof (int));
+
 	if (clkhz == -1) {
 		cmn_err(CE_WARN, "unable to read maximum CPU clock rate; "
-		    "assuming %d MHz", supp_freqs[0]);
+		    "assuming %d MHz", speeds[0]);
 	} else {
-		supp_freqs[0] = (clkhz + 500000) / 1000000;
+		speeds[0] = (clkhz + 500000) / 1000000;
 	}
 
-	cpupm_set_supp_freqs(cp, supp_freqs,
-	    sizeof (supp_freqs) / sizeof (supp_freqs[0]));
+	*speedsp = speeds;
+	*nspeedsp = nspeeds;
+	return (DDI_SUCCESS);
+}
+
+void
+plat_cpu_free_speeds(int *speeds, int nspeeds)
+{
+	kmem_free(speeds, nspeeds * sizeof (int));
 }
