@@ -62,6 +62,17 @@
  * Taking this approach alleviates the strict ordering requirement imposed
  * by the running priority drop, enabling full support for threaded IRQs.
  *
+ * Message Based Interrupts (MBI) is an intrinsic distributor capability.
+ * Devices write an SPI INTID to the GICD_SETSPI_NSR register and the
+ * distributor simply asserts that SPI.   MBI can be used to implement
+ * MSI/MSI-X interrupts, and requires that GICD_TYPER.MBIS is set (i.e. the
+ * hardware has MBI support), the device tree node has the "msi-controller"
+ * property and one or more "mbi-ranges" base-and-bounds entries.  The optional
+ * "mbi-alias" provides an alternate base address for the doorbell register,
+ * containing only the GICD_SETSPI_NSR/GICD_CLRSPI_NSR registers (when absent
+ * the GICD base PA is used).  MBI is not supported on ACPI systems due to
+ * the lack of firmare configuration support.
+ *
  * Lock ordering
  * =============
  *   gc_dist_lock (GICD_LOCK, spinlock + interrupts-disabled)
@@ -157,6 +168,21 @@ typedef struct gicv3_msi_range {
 	uint32_t	mr_count;	/* number of SPIs */
 } gicv3_msi_range_t;
 
+/*
+ * Per-device MBI state, tracking the SPI allocation for a PCI device
+ * that has been assigned MSI/MSI-X vectors through the MBI path.
+ */
+typedef struct gicv3_mbi_dev_state {
+	dev_info_t	*mds_rdip;		/* owning PCI device */
+	int		mds_type;		/* DDI_INTR_TYPE_MSI[X] */
+	uint32_t	mds_inum_base;		/* starting inum */
+	uint32_t	mds_count;		/* number allocated */
+	uint32_t	mds_base_spi;		/* MSI: contiguous base */
+	uint32_t	*mds_spi_array;		/* MSI-X: per-inum SPIs */
+	uint32_t	mds_spi_array_sz;	/* MSI-X: kmem_alloc size */
+	list_node_t	mds_node;
+} gicv3_mbi_dev_state_t;
+
 typedef struct gicv3_conf {
 	/* Base address of, and handle to, the distributor */
 	caddr_t			gc_gicd;
@@ -224,6 +250,22 @@ typedef struct gicv3_conf {
 	 */
 	kmutex_t		gc_msi_lock;
 	list_t			gc_msi_ranges;
+
+	/*
+	 * Message Based Interrupts (MBI).
+	 *
+	 * gc_mbi_dev_lock protects the per-device state list (gc_mbi_devs).
+	 * It is blockable and independent of gc_dist_lock (never nested).
+	 *
+	 * Lock ordering: gc_mbi_dev_lock -> syspic_intrs_lock -> av_lock
+	 */
+	boolean_t		gc_mbi_enabled;
+	uint64_t		gc_mbi_doorbell_pa;
+	vmem_t			*gc_mbi_spi_arena;
+	uint32_t		gc_mbi_total_spis;
+	ddi_irm_pool_t		*gc_mbi_irm_pool;
+	kmutex_t		gc_mbi_dev_lock;
+	list_t			gc_mbi_devs;
 } gicv3_conf_t;
 
 #define	TO_CONF(__c)		((gicv3_conf_t *)(__c))
@@ -242,6 +284,10 @@ static void			*gicv3_soft_state;
 					lock_set(&(__sc)->gc_dist_lock)
 #define	GICD_UNLOCK(__sc)		lock_clear(&(__sc)->gc_dist_lock); \
 					restore_interrupts(__s)
+
+/* Forward declarations for file-local functions used by MBI */
+static void gicv3_config_irq_spi(gicv3_conf_t *, uint32_t, uint32_t);
+static boolean_t gicv3_irq_ispending(gicv3_conf_t *, uint32_t);
 
 static inline uint32_t
 reg_rmw4(ddi_acc_handle_t hdl, caddr_t base,
@@ -291,6 +337,647 @@ gicd_rmw4(gicv3_conf_t *gic, uint32_t reg, uint32_t clrbits, uint32_t setbits)
 {
 	return (reg_rmw4(gic->gc_gicd_regh, gic->gc_gicd,
 	    reg, clrbits, setbits));
+}
+
+/*
+ * Message Based Interrupts (MBI)
+ */
+
+/*
+ * Find the per-device MBI state for a given MSI/MSI-X consumer.
+ *
+ * Caller must hold gc->gc_mbi_dev_lock.
+ */
+static gicv3_mbi_dev_state_t *
+gicv3_mbi_find_dev(gicv3_conf_t *gc, dev_info_t *rdip)
+{
+	gicv3_mbi_dev_state_t *ds;
+
+	ASSERT(MUTEX_HELD(&gc->gc_mbi_dev_lock));
+
+	for (ds = list_head(&gc->gc_mbi_devs); ds != NULL;
+	    ds = list_next(&gc->gc_mbi_devs, ds)) {
+		if (ds->mds_rdip == rdip) {
+			return (ds);
+		}
+	}
+
+	return (NULL);
+}
+
+/*
+ * Look up the SPI for a given (rdip, inum) from per-device MBI state.
+ * Caller must hold gc->gc_mbi_dev_lock.  Returns DDI_SUCCESS with *spip
+ * and optionally *msi_basep populated, or DDI_FAILURE if not found.
+ */
+static int
+gicv3_mbi_lookup_spi(gicv3_conf_t *gc, dev_info_t *rdip,
+    ddi_intr_handle_impl_t *hdlp, uint32_t *spip, uint32_t *msi_basep)
+{
+	gicv3_mbi_dev_state_t *ds;
+	uint32_t idx;
+
+	ASSERT(MUTEX_HELD(&gc->gc_mbi_dev_lock));
+
+	ds = gicv3_mbi_find_dev(gc, rdip);
+	if (ds == NULL) {
+		return (DDI_FAILURE);
+	}
+
+	idx = hdlp->ih_inum - ds->mds_inum_base;
+	if (idx >= ds->mds_count) {
+		return (DDI_FAILURE);
+	}
+
+	if (ds->mds_type == DDI_INTR_TYPE_MSI) {
+		*spip = ds->mds_base_spi + idx;
+
+		if (msi_basep != NULL) {
+			*msi_basep = ds->mds_base_spi;
+		}
+	} else {
+		*spip = ds->mds_spi_array[idx];
+
+		if (msi_basep != NULL) {
+			*msi_basep = 0;
+		}
+	}
+
+	return (DDI_SUCCESS);
+}
+
+/*
+ * Allocate MSI/MSI-X vectors from the MBI SPI arena.
+ *
+ * For MSI, SPIs must be contiguous and naturally aligned (PCI spec requires
+ * power-of-2 count).  For MSI-X, each vector is independently addressable, so
+ * SPIs need not be contiguous.
+ */
+static int
+gicv3_mbi_alloc(gicv3_conf_t *gc, dev_info_t *rdip,
+    ddi_intr_handle_impl_t *hdlp, void *result)
+{
+	int count = hdlp->ih_scratch1;
+	int actual = 0;
+	gicv3_mbi_dev_state_t *ds;
+
+	ds = kmem_zalloc(sizeof (*ds), KM_SLEEP);
+	ds->mds_rdip = rdip;
+	ds->mds_type = hdlp->ih_type;
+	ds->mds_inum_base = hdlp->ih_inum;
+
+	if (hdlp->ih_type == DDI_INTR_TYPE_MSI) {
+		void *base = NULL;
+		int try = count;
+
+		while (try > 0) {
+			base = vmem_xalloc(gc->gc_mbi_spi_arena, try, try,
+			    0, 0, NULL, NULL, VM_NOSLEEP);
+			if (base != NULL) {
+				break;
+			}
+
+			try >>= 1;
+		}
+
+		if (base == NULL) {
+			kmem_free(ds, sizeof (*ds));
+			return (DDI_INTR_NOTFOUND);
+		}
+
+		ds->mds_base_spi = (uint32_t)(uintptr_t)base;
+		ds->mds_count = try;
+		actual = try;
+	} else {
+		ds->mds_spi_array = kmem_zalloc(
+		    count * sizeof (uint32_t), KM_SLEEP);
+		ds->mds_spi_array_sz = count * sizeof (uint32_t);
+
+		for (actual = 0; actual < count; actual++) {
+			void *id = vmem_alloc(gc->gc_mbi_spi_arena, 1,
+			    VM_NOSLEEP);
+			if (id == NULL) {
+				break;
+			}
+
+			ds->mds_spi_array[actual] =
+			    (uint32_t)(uintptr_t)id;
+		}
+
+		if (actual == 0) {
+			kmem_free(ds->mds_spi_array, ds->mds_spi_array_sz);
+			kmem_free(ds, sizeof (*ds));
+			return (DDI_INTR_NOTFOUND);
+		}
+
+		ds->mds_count = actual;
+	}
+
+	mutex_enter(&gc->gc_mbi_dev_lock);
+	list_insert_tail(&gc->gc_mbi_devs, ds);
+	mutex_exit(&gc->gc_mbi_dev_lock);
+
+	*(int *)result = actual;
+	return (DDI_SUCCESS);
+}
+
+/*
+ * Free MSI/MSI-X vectors back to the MBI SPI arena.
+ *
+ * The first FREE for a device releases the entire allocation.  Subsequent
+ * FREEs for the same device are no-ops.
+ */
+static int
+gicv3_mbi_free(gicv3_conf_t *gc, dev_info_t *rdip,
+    ddi_intr_handle_impl_t *hdlp)
+{
+	gicv3_mbi_dev_state_t *ds;
+
+	mutex_enter(&gc->gc_mbi_dev_lock);
+	ds = gicv3_mbi_find_dev(gc, rdip);
+	if (ds == NULL) {
+		mutex_exit(&gc->gc_mbi_dev_lock);
+		return (DDI_SUCCESS);
+	}
+	list_remove(&gc->gc_mbi_devs, ds);
+	mutex_exit(&gc->gc_mbi_dev_lock);
+
+	if (ds->mds_type == DDI_INTR_TYPE_MSI) {
+		vmem_xfree(gc->gc_mbi_spi_arena,
+		    (void *)(uintptr_t)ds->mds_base_spi, ds->mds_count);
+	} else {
+		for (uint32_t i = 0; i < ds->mds_count; i++) {
+			vmem_free(gc->gc_mbi_spi_arena,
+			    (void *)(uintptr_t)ds->mds_spi_array[i], 1);
+		}
+
+		kmem_free(ds->mds_spi_array, ds->mds_spi_array_sz);
+	}
+
+	kmem_free(ds, sizeof (*ds));
+	return (DDI_SUCCESS);
+}
+
+/*
+ * Enable a single MSI/MSI-X vector via MBI.
+ *
+ * 1. Look up the SPI for this handle's inum from per-device state.
+ * 2. Configure the SPI as edge-triggered on the distributor.
+ * 3. Register the handler via add_avintr.
+ * 4. Set ip_msi_addr (doorbell PA) and ip_msi_data (SPI INTID) on the handle
+ *    for the DDI MSI framework to program PCI caps.
+ */
+static int
+gicv3_mbi_enable(gicv3_conf_t *gc, dev_info_t *rdip,
+    ddi_intr_handle_impl_t *hdlp)
+{
+	uint32_t spi;
+	uint32_t msi_base_spi = 0;
+	syspic_intr_state_t *state;
+	ihdl_plat_t *priv = hdlp->ih_private;
+
+	mutex_enter(&gc->gc_mbi_dev_lock);
+	if (gicv3_mbi_lookup_spi(gc, rdip, hdlp, &spi,
+	    &msi_base_spi) != DDI_SUCCESS) {
+		mutex_exit(&gc->gc_mbi_dev_lock);
+		dev_err(gc->gc_dip, CE_WARN,
+		    "MBI: no MSI state for %s%d",
+		    ddi_driver_name(rdip), ddi_get_instance(rdip));
+		return (DDI_FAILURE);
+	}
+	mutex_exit(&gc->gc_mbi_dev_lock);
+
+	hdlp->ih_vector = spi;
+
+	/* Configure SPI as edge-triggered.  PCI MSI is always edge */
+	gicv3_config_irq_spi(gc, spi, GICD_ICFGR_INT_CONFIG_EDGE);
+
+	state = syspic_get_state(spi);	/* takes syspic_intrs_lock */
+	VERIFY3P(state, !=, NULL);
+	state->si_edge_triggered = B_TRUE;
+	state->si_prio = hdlp->ih_pri;
+
+	if (!add_avintr((void *)hdlp, hdlp->ih_pri,
+	    hdlp->ih_cb_func, DEVI(rdip)->devi_name, spi,
+	    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2,
+	    &priv->ip_ticks, rdip)) {
+		syspic_remove_state(spi);
+		mutex_exit(&syspic_intrs_lock);
+		return (DDI_FAILURE);
+	}
+	mutex_exit(&syspic_intrs_lock);
+
+	if (hdlp->ih_type == DDI_INTR_TYPE_MSI) {
+		priv->ip_msi_addr = gc->gc_mbi_doorbell_pa;
+		priv->ip_msi_data = msi_base_spi;
+	} else {
+		ASSERT3U(hdlp->ih_type, ==, DDI_INTR_TYPE_MSIX);
+		priv->ip_msi_addr = gc->gc_mbi_doorbell_pa;
+		priv->ip_msi_data = spi;
+	}
+
+	return (DDI_SUCCESS);
+}
+
+/*
+ * Disable a single MSI/MSI-X vector.
+ */
+static int
+gicv3_mbi_disable(gicv3_conf_t *gc, dev_info_t *rdip,
+    ddi_intr_handle_impl_t *hdlp)
+{
+	uint32_t spi = hdlp->ih_vector;
+
+	rem_avintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func, spi);
+	return (DDI_SUCCESS);
+}
+
+/*
+ * MBI bus_intr_op dispatch - handles all MSI/MSI-X verbs when MBI is enabled
+ * and ih_type is MSI or MSI-X.
+ */
+static int
+gicv3_mbi_intr_op(gicv3_conf_t *gc, dev_info_t *dip, dev_info_t *rdip,
+    ddi_intr_op_t intr_op, ddi_intr_handle_impl_t *hdlp, void *result)
+{
+	switch (intr_op) {
+	case DDI_INTROP_ALLOC:
+		return (gicv3_mbi_alloc(gc, rdip, hdlp, result));
+
+	case DDI_INTROP_FREE:
+		return (gicv3_mbi_free(gc, rdip, hdlp));
+
+	case DDI_INTROP_ENABLE:
+		return (gicv3_mbi_enable(gc, rdip, hdlp));
+
+	case DDI_INTROP_DISABLE:
+		return (gicv3_mbi_disable(gc, rdip, hdlp));
+
+	case DDI_INTROP_BLOCKENABLE:	/* fallthrough */
+	case DDI_INTROP_BLOCKDISABLE:
+		return (DDI_ENOTSUP);
+
+	case DDI_INTROP_ADDISR:		/* fallthrough */
+	case DDI_INTROP_REMISR:
+		return (DDI_SUCCESS);
+
+	case DDI_INTROP_SUPPORTED_TYPES:
+		*(int *)result = DDI_INTR_TYPE_MSI | DDI_INTR_TYPE_MSIX;
+		return (DDI_SUCCESS);
+
+	case DDI_INTROP_NAVAIL:
+		*(int *)result =
+		    (int)vmem_size(gc->gc_mbi_spi_arena, VMEM_FREE);
+		return (DDI_SUCCESS);
+
+	case DDI_INTROP_GETPENDING: {
+		uint32_t spi;
+
+		mutex_enter(&gc->gc_mbi_dev_lock);
+		if (gicv3_mbi_lookup_spi(gc, rdip, hdlp, &spi,
+		    NULL) != DDI_SUCCESS) {
+			mutex_exit(&gc->gc_mbi_dev_lock);
+			return (DDI_FAILURE);
+		}
+		mutex_exit(&gc->gc_mbi_dev_lock);
+
+		*(int *)result = gicv3_irq_ispending(gc, spi) ? 1 : 0;
+		return (DDI_SUCCESS);
+	}
+
+	case DDI_INTROP_GETCAP:
+		*(int *)result &= ~DDI_INTR_FLAG_BLOCK;
+		*(int *)result |= DDI_INTR_FLAG_PENDING;
+		*(int *)result |= DDI_INTR_FLAG_EDGE;
+		*(int *)result &= ~DDI_INTR_FLAG_LEVEL;
+		return (DDI_SUCCESS);
+
+	case DDI_INTROP_GETTARGET: {
+		uint32_t spi;
+
+		mutex_enter(&gc->gc_mbi_dev_lock);
+		if (gicv3_mbi_lookup_spi(gc, rdip, hdlp, &spi,
+		    NULL) != DDI_SUCCESS) {
+			mutex_exit(&gc->gc_mbi_dev_lock);
+			return (DDI_FAILURE);
+		}
+		mutex_exit(&gc->gc_mbi_dev_lock);
+
+		*(processorid_t *)result =
+		    gicv3_get_target_spi(dip, spi);
+		return (DDI_SUCCESS);
+	}
+
+	case DDI_INTROP_SETTARGET: {
+		uint32_t spi;
+		processorid_t new_cpu = *(processorid_t *)result;
+
+		if (new_cpu < 0 ||
+		    new_cpu >= (processorid_t)gc->gc_num_redist) {
+			return (DDI_EINVAL);
+		}
+
+		mutex_enter(&gc->gc_mbi_dev_lock);
+		if (gicv3_mbi_lookup_spi(gc, rdip, hdlp, &spi,
+		    NULL) != DDI_SUCCESS) {
+			mutex_exit(&gc->gc_mbi_dev_lock);
+			return (DDI_FAILURE);
+		}
+		mutex_exit(&gc->gc_mbi_dev_lock);
+
+		gicv3_set_target_spi(dip, spi, new_cpu);
+		return (DDI_SUCCESS);
+	}
+
+	case DDI_INTROP_SETPRI: {
+		int shared;
+		uint_t curpri;
+		uint_t newpri;
+		uint32_t spi = hdlp->ih_vector;
+
+		if (*(int *)result > LOCK_LEVEL) {
+			return (DDI_FAILURE);
+		}
+
+		shared = av_get_shared(spi, &curpri);
+		newpri = (uint_t)(*(int *)result);
+		if (shared > 0 && newpri != curpri) {
+			dev_err(dip, CE_NOTE,
+			    "!%s%d: refusing to set pri 0x%x on "
+			    "shared SPI %u with pri 0x%x",
+			    ddi_node_name(rdip), ddi_get_instance(rdip),
+			    newpri, spi, curpri);
+			return (DDI_FAILURE);
+		}
+
+		ASSERT3U(*(int *)result, !=, 0);
+		hdlp->ih_pri = *(int *)result;
+		return (DDI_SUCCESS);
+	}
+
+	case DDI_INTROP_GETPOOL:
+		if (gc->gc_mbi_irm_pool == NULL) {
+			return (DDI_ENOTSUP);
+		}
+
+		*(ddi_irm_pool_t **)result = gc->gc_mbi_irm_pool;
+		return (DDI_SUCCESS);
+
+	default:
+		return (DDI_ENOTSUP);
+	}
+}
+
+/*
+ * Initialize MBI support during GICv3 attach.
+ *
+ * Parse the "mbi-ranges" FDT property, validate all ranges, create the vmem
+ * arena and IRM pool, and register each range with the gc_msi_ranges list so
+ * the FIXED path rejects those INTIDs.
+ *
+ * Returns B_TRUE if MBI was enabled, B_FALSE otherwise - MBI is optional, so
+ * the caller is not expected to take action.
+ */
+static boolean_t
+gicv3_mbi_init(dev_info_t *dip, gicv3_conf_t *gc)
+{
+	int *mbi_ranges = NULL;
+	uint_t nranges = 0;
+	uint_t npairs;
+	uint32_t max_spi;
+	uint32_t base0;
+	uint32_t count0;
+	int *alias = NULL;
+	uint_t alias_cells = 0;
+	uint32_t total_spis = 0;
+	ddi_irm_params_t params = {
+		.iparams_types = DDI_INTR_TYPE_MSI | DDI_INTR_TYPE_MSIX,
+	};
+
+	gc->gc_mbi_enabled = B_FALSE;
+
+	/* Gate 1: hardware must advertise MBI */
+	if ((gc->gc_gicd_typer & GICD_TYPER_MBIS) == 0) {
+		return (B_FALSE);
+	}
+
+	/* Gate 2: node must be an MSI controller */
+	if (!ddi_prop_exists(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, OBP_MSI_CONTROLLER)) {
+		return (B_FALSE);
+	}
+
+	/* Gate 3: mbi-ranges must be present and well-formed */
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "mbi-ranges", &mbi_ranges,
+	    &nranges) != DDI_SUCCESS) {
+		return (B_FALSE);
+	}
+
+	if (nranges == 0 || (nranges & 1) != 0) {
+		dev_err(dip, CE_WARN,
+		    "MBI: mbi-ranges has %u cells (expected even, non-zero)",
+		    nranges);
+		ddi_prop_free(mbi_ranges);
+		return (B_FALSE);
+	}
+
+	npairs = nranges / 2;
+	max_spi = gc->gc_maxsources;
+
+	/*
+	 * Validate each (base, count) pair:
+	 * - Values are absolute INTIDs, not SPI-relative
+	 * - base must be >= GIC_INTID_SPI_MIN (32)
+	 * - count must be > 0
+	 * - base + count - 1 must be <= max_spi
+	 * - No integer overflow
+	 */
+	for (uint_t i = 0; i < npairs; i++) {
+		uint32_t base = (uint32_t)mbi_ranges[i * 2];
+		uint32_t count = (uint32_t)mbi_ranges[i * 2 + 1];
+
+		if (count == 0) {
+			dev_err(dip, CE_WARN,
+			    "MBI: mbi-ranges pair %u has zero count", i);
+			ddi_prop_free(mbi_ranges);
+			return (B_FALSE);
+		}
+
+		if (base < GIC_INTID_SPI_MIN) {
+			dev_err(dip, CE_WARN,
+			    "MBI: mbi-ranges pair %u base %u below SPI "
+			    "minimum %u", i, base, GIC_INTID_SPI_MIN);
+			ddi_prop_free(mbi_ranges);
+			return (B_FALSE);
+		}
+
+		if (base + count - 1 > max_spi) {
+			dev_err(dip, CE_WARN,
+			    "MBI: mbi-ranges pair %u [%u-%u] exceeds "
+			    "max SPI %u", i, base, base + count - 1,
+			    max_spi);
+			ddi_prop_free(mbi_ranges);
+			return (B_FALSE);
+		}
+
+		/* Check overflow */
+		if (base + count < base) {
+			dev_err(dip, CE_WARN,
+			    "MBI: mbi-ranges pair %u overflows", i);
+			ddi_prop_free(mbi_ranges);
+			return (B_FALSE);
+		}
+
+		total_spis += count;
+	}
+
+	/*
+	 * Check for overlapping ranges.  Sort would be cleaner for large N,
+	 * but mbi-ranges is typically 1-2 pairs, so O(n^2) is fine.
+	 */
+	for (uint_t i = 0; i < npairs; i++) {
+		uint32_t a_base = (uint32_t)mbi_ranges[i * 2];
+		uint32_t a_end = a_base + (uint32_t)mbi_ranges[i * 2 + 1] - 1;
+
+		for (uint_t j = i + 1; j < npairs; j++) {
+			uint32_t b_base = (uint32_t)mbi_ranges[j * 2];
+			uint32_t b_end = b_base +
+			    (uint32_t)mbi_ranges[j * 2 + 1] - 1;
+
+			if (a_base <= b_end && b_base <= a_end) {
+				dev_err(dip, CE_WARN,
+				    "MBI: mbi-ranges pairs %u [%u-%u] "
+				    "and %u [%u-%u] overlap",
+				    i, a_base, a_end, j, b_base, b_end);
+				ddi_prop_free(mbi_ranges);
+				return (B_FALSE);
+			}
+		}
+	}
+
+	/*
+	 * Determine the doorbell physical address.
+	 *
+	 * If "mbi-alias" is present, it provides an alternate base
+	 * address for the GICD_SETSPI_NSR register.  Otherwise, use
+	 * the GICD base address from reg 0.
+	 *
+	 * mbi-alias is an address in the GIC's parent bus address
+	 * space (like reg), encoded per the parent's #address-cells.
+	 * Unlike reg, it is not translated by impl_xlate_regs during
+	 * initchild, so we must translate it to a CPU physical
+	 * address by walking the parent's ranges chain.
+	 *
+	 * The regspec fallback path uses i_ddi_pd_getreg() which
+	 * returns already-translated addresses.
+	 */
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "mbi-alias", &alias,
+	    &alias_cells) == DDI_SUCCESS) {
+		uint64_t bus_addr;
+
+		if (alias_cells == 2) {
+			bus_addr =
+			    ((uint64_t)(uint32_t)alias[0] << 32) |
+			    (uint64_t)(uint32_t)alias[1];
+		} else if (alias_cells == 1) {
+			bus_addr = (uint64_t)(uint32_t)alias[0];
+		} else {
+			dev_err(dip, CE_WARN,
+			    "MBI: mbi-alias has unexpected "
+			    "cell count %u", alias_cells);
+			ddi_prop_free(alias);
+			ddi_prop_free(mbi_ranges);
+			return (B_FALSE);
+		}
+
+		ddi_prop_free(alias);
+
+		if (i_ddi_bus_to_cpu(ddi_get_parent(dip),
+		    bus_addr, sizeof (uint32_t),
+		    &gc->gc_mbi_doorbell_pa) != DDI_SUCCESS) {
+			dev_err(dip, CE_WARN,
+			    "MBI: failed to translate mbi-alias "
+			    "address 0x%" PRIx64, bus_addr);
+			ddi_prop_free(mbi_ranges);
+			return (B_FALSE);
+		}
+
+		gc->gc_mbi_doorbell_pa += GICD_SETSPI_NSR;
+	} else {
+		struct regspec *rp;
+
+		rp = i_ddi_pd_getreg(dip, 0);
+		if (rp == NULL) {
+			dev_err(dip, CE_WARN,
+			    "MBI: no reg property for GICD");
+			ddi_prop_free(mbi_ranges);
+			return (B_FALSE);
+		}
+
+		gc->gc_mbi_doorbell_pa =
+		    rp->regspec_addr + GICD_SETSPI_NSR;
+	}
+
+	/*
+	 * Initialize per-device state tracking.
+	 */
+	mutex_init(&gc->gc_mbi_dev_lock, NULL, MUTEX_DRIVER, NULL);
+	list_create(&gc->gc_mbi_devs, sizeof (gicv3_mbi_dev_state_t),
+	    offsetof(gicv3_mbi_dev_state_t, mds_node));
+
+	/*
+	 * Create the vmem arena.  First range uses vmem_create,
+	 * subsequent ranges use vmem_add.
+	 */
+	base0 = (uint32_t)mbi_ranges[0];
+	count0 = (uint32_t)mbi_ranges[1];
+
+	gc->gc_mbi_spi_arena = vmem_create("gicv3_mbi_spi",
+	    (void *)(uintptr_t)base0, count0, 1,
+	    NULL, NULL, NULL, 0, VM_SLEEP);
+
+	for (uint_t i = 1; i < npairs; i++) {
+		uint32_t base = (uint32_t)mbi_ranges[i * 2];
+		uint32_t count = (uint32_t)mbi_ranges[i * 2 + 1];
+
+		(void) vmem_add(gc->gc_mbi_spi_arena,
+		    (void *)(uintptr_t)base, count, VM_SLEEP);
+	}
+
+	gc->gc_mbi_total_spis = total_spis;
+
+	/*
+	 * Create the IRM pool.
+	 */
+	params.iparams_total = total_spis;
+	if (ndi_irm_create(dip, &params, &gc->gc_mbi_irm_pool) != NDI_SUCCESS) {
+		dev_err(dip, CE_WARN, "MBI: failed to create IRM pool");
+		gc->gc_mbi_irm_pool = NULL;
+	}
+
+	/*
+	 * Register each range with gc_msi_ranges so the FIXED path's
+	 * GETTARGET/SETTARGET correctly rejects MBI-owned SPIs.
+	 */
+	for (uint_t i = 0; i < npairs; i++) {
+		uint32_t base = (uint32_t)mbi_ranges[i * 2];
+		uint32_t count = (uint32_t)mbi_ranges[i * 2 + 1];
+
+		gicv3_register_msi_range(dip, base, count);
+	}
+
+	gc->gc_mbi_enabled = B_TRUE;
+
+	dev_err(dip, CE_CONT,
+	    "!GICv3 MBI: %u MSI SPIs across %u range%s, "
+	    "doorbell PA 0x%" PRIx64 "\n",
+	    total_spis, npairs, npairs > 1 ? "s" : "",
+	    gc->gc_mbi_doorbell_pa);
+
+	ddi_prop_free(mbi_ranges);
+	return (B_TRUE);
 }
 
 /*
@@ -1801,6 +2488,14 @@ gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		return (ret);
 	}
 
+	/*
+	 * Initialise MBI support.  This is optional and non-fatal - if the
+	 * hardware does not support MBI or the firmware does not contain
+	 * relevant configuration, gicv3_mbi_init returns B_FALSE and we
+	 * continue without it.
+	 */
+	(void) gicv3_mbi_init(dip, gc);
+
 	gc->gc_syspic.spo_cpu_init = gicv3_cpu_init;
 	gc->gc_syspic.spo_intr_enter = gicv3_intr_enter;
 	gc->gc_syspic.spo_intr_exit = gicv3_intr_exit;
@@ -2063,6 +2758,7 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 	uint32_t vector;
 	uint32_t sense;
 	uint32_t intid;
+	gicv3_conf_t *mbi_gc;
 
 	ASSERT(RW_WRITE_HELD(&hdlp->ih_rwlock));
 
@@ -2070,6 +2766,38 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 	    "dip 0x%p, hdlp 0x%p, type 0x%x, inum 0x%x, op 0x%x\n",
 	    rdip, hdlp, hdlp->ih_type, hdlp->ih_inum, intr_op));
 
+	/*
+	 * MBI dispatch: when MBI is enabled and the handle type is
+	 * MSI or MSI-X, route all verbs to the MBI handler.
+	 * SUPPORTED_TYPES also routes here when reached via map_msi.
+	 */
+	mbi_gc = ddi_get_soft_state(gicv3_soft_state,
+	    ddi_get_instance(dip));
+
+	if (mbi_gc != NULL && mbi_gc->gc_mbi_enabled) {
+		if (DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)) {
+			return (gicv3_mbi_intr_op(mbi_gc, dip, rdip,
+			    intr_op, hdlp, result));
+		}
+
+		if (intr_op == DDI_INTROP_SUPPORTED_TYPES) {
+			*(int *)result =
+			    DDI_INTR_TYPE_MSI | DDI_INTR_TYPE_MSIX;
+			return (DDI_SUCCESS);
+		}
+	}
+
+	/*
+	 * If it were possible for us to deal with MSI/MSI-X we would have
+	 * done so by now.
+	 */
+	if (DDI_INTR_IS_MSI_OR_MSIX(hdlp->ih_type)) {
+		return (DDI_ENOTSUP);
+	}
+
+	/*
+	 * FIXED interrupt dispatch.
+	 */
 	switch (intr_op) {
 	case DDI_INTROP_NINTRS:		/* fallthrough */
 	case DDI_INTROP_NAVAIL:
@@ -2380,6 +3108,13 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 		    intid, (int)new_cpu));
 		return (DDI_SUCCESS);
 	}
+
+	case DDI_INTROP_GETPOOL:
+		if (mbi_gc != NULL && mbi_gc->gc_mbi_enabled) {
+			return (DDI_ENOTSUP);
+		}
+
+		/* fallthrough */
 
 	/* Operations which should never have reached us */
 	default:
