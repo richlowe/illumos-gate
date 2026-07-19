@@ -2894,7 +2894,7 @@ impl_setup_ddi(void)
 	(void) BOP_GETPROP(bootops, "ramdisk_end", (void *)&ramdisk_end);
 
 	rd_mem_prop.phys = ramdisk_start;
-	rd_mem_prop.size = ramdisk_end - ramdisk_start + 1;
+	rd_mem_prop.size = ramdisk_end - ramdisk_start;
 
 	ndi_prop_update_byte_array(DDI_DEV_T_NONE, xdip, RD_EXISTING_PROP_NAME,
 	    (uchar_t *)&rd_mem_prop, sizeof (rd_mem_prop));
