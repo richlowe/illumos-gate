@@ -25,10 +25,6 @@
 # Copyright 2025 Michael van der Westhuizen
 #
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/ns16550a/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
 $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

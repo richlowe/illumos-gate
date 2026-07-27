@@ -44,6 +44,9 @@ extern "C" {
  */
 #define	ASY_BUS_PCI	(0)
 #define	ASY_BUS_ISA	(1)
+#if defined(__aarch64__)
+#define	ASY_BUS_PLATFORM (2)
+#endif
 #define	ASY_BUS_UNKNOWN	(-1)
 
 #define	ASY_MINOR_LEN	(40)
@@ -52,6 +55,9 @@ extern "C" {
 #define	COM2_IOADDR	0x2f8
 #define	COM3_IOADDR	0x3e8
 #define	COM4_IOADDR	0x2e8
+
+#define	BAUDINDEX(cflg)	(((cflg) & CBAUDEXT) ? \
+	    (((cflg) & CBAUD) + CBAUD + 1) : ((cflg) & CBAUD))
 
 /*
  * asy_hwtype definitions
@@ -66,6 +72,9 @@ extern "C" {
 #define	ASY_16650	0x40016650	/* 32 byte FIFO, auto flow control */
 #define	ASY_16950	0x50016950	/* 128 byte FIFO, auto flow control */
 #define	ASY_MAXCHIP	ASY_16950
+#if defined(__aarch64__)
+#define	ASY_PL011	0x60010011	/* ARM PL011 UART */
+#endif
 
 /*
  * Definitions for INS8250 / 16550  chips
@@ -355,8 +364,114 @@ typedef enum {
 
 /* definitions for asy_flags2 field */
 typedef enum {
-	ASY2_NO_LOOPBACK = 1 << 0	/* Device doesn't support loopback */
+	ASY2_NO_LOOPBACK = 1 << 0,	/* Device doesn't support loopback */
+#if defined(__aarch64__)
+	ASY2_SBSA	= 1 << 1,	/* SBSA subset UART (no baud/lcr) */
+	ASY2_NOCLK	= 1 << 2,	/* No clock freq; no baud changes */
+#endif
 } asy_flags2_t;
+
+/*
+ * Hardware operations vector.
+ *
+ * Each UART variant (16550, PL011, SBSA, ...) provides an instance of this
+ * structure.  The shared asy.c driver calls through these function pointers
+ * instead of touching hardware registers directly.
+ *
+ * Register-value arguments and return values for MCR, MSR, LSR, LCR, and
+ * IER use the ASY_MCR_*, ASY_MSR_*, ASY_LSR_*, ASY_LCR_*, and ASY_IER_*
+ * bit definitions above as a common vocabulary.  Variant implementations
+ * translate to/from their own register layouts.
+ *
+ * FIFO flush flags use ASY_FCR_RHR_FL and ASY_FCR_THR_FL as semantic
+ * tokens meaning "flush RX" and "flush TX" respectively.
+ */
+struct asycom;		/* forward */
+
+typedef struct asy_hw_ops {
+	/* Interrupt service routine */
+	uint_t	(*aho_intr)(caddr_t, caddr_t);
+
+	/* Chip identification and naming */
+	int	(*aho_identify)(dev_info_t *, struct asycom *);
+	char *(*aho_hw_name)(struct asycom *);
+
+	/* Baud rate */
+	void	(*aho_set_baud)(struct asycom *, int);
+	boolean_t (*aho_baudok)(struct asycom *);
+	void	(*aho_wait_baud)(struct asycom *);
+
+	/* Line control: word length, stop bits, parity (ASY_LCR_* bits) */
+	void	(*aho_set_lcr)(struct asycom *, uint8_t);
+
+	/* Break control */
+	void	(*aho_set_break)(struct asycom *, boolean_t);
+
+	/* Modem control (ASY_MCR_* bits) */
+	uint8_t	(*aho_get_mcr)(struct asycom *);
+	void	(*aho_set_mcr)(struct asycom *, uint8_t);
+	void	(*aho_mcr_set)(struct asycom *, uint8_t);	/* set bits */
+	void	(*aho_mcr_clr)(struct asycom *, uint8_t);	/* clear bits */
+
+	/* Modem status (ASY_MSR_* bits) */
+	uint8_t	(*aho_get_msr)(struct asycom *);
+
+	/* Line status (ASY_LSR_* bits) */
+	uint8_t	(*aho_get_lsr)(struct asycom *);
+
+	/* Interrupt enable/disable (ASY_IER_* bits) */
+	void	(*aho_enable_intr)(struct asycom *, uint8_t);
+	void	(*aho_disable_intr)(struct asycom *, uint8_t);
+
+	/* FIFO setup/flush (ASY_FCR_RHR_FL, ASY_FCR_THR_FL as flush flags) */
+	void	(*aho_fifo_setup)(struct asycom *, uint8_t);
+
+	/* Receive/transmit data */
+	uint8_t	(*aho_get_rx)(struct asycom *);
+	void	(*aho_put_tx)(struct asycom *, uint8_t);
+
+	/*
+	 * Fill the TX FIFO from buf with at most ocnt pending bytes.
+	 * reserve is 1 when a FIFO slot must be held back for a
+	 * software-flow (XON/XOFF) character, else 0.  Returns the
+	 * number of bytes actually written.  Sets *space_left to
+	 * indicate whether FIFO capacity remained after the fill;
+	 * the caller uses this to gate the asysetsoft() call.
+	 */
+	uint_t	(*aho_tx_fill)(struct asycom *, uchar_t *, uint_t, uint_t,
+	    boolean_t *);
+
+	/*
+	 * Initial TX fill for async_start: push the first bytes of a
+	 * new message into the hardware.  On the 16550 this is a
+	 * THRE-gated prime pump (typically 1 byte); on the PL011 it
+	 * fills until TXFF.  reserve is 1 when a FIFO slot must be
+	 * held back for a software-flow (XON/XOFF) character, else 0.
+	 * Returns the number of bytes actually written.
+	 */
+	uint_t	(*aho_tx_start)(struct asycom *, uchar_t *, uint_t, uint_t);
+
+	/*
+	 * Drain the RX FIFO (or holding register) by reading and
+	 * discarding all pending data.  Used during init to clear stale
+	 * bytes before enabling receive.  The backend knows its own
+	 * hardware depth and drain strategy.
+	 */
+	void	(*aho_rx_drain)(struct asycom *);
+
+	/* Clear pending interrupt/error state */
+	void	(*aho_flush_status)(struct asycom *);
+
+	/* Polled console I/O */
+	void	(*aho_polledio_putchar)(struct asycom *, uchar_t);
+	int	(*aho_polledio_getchar)(struct asycom *);
+	boolean_t (*aho_polledio_ischar)(struct asycom *);
+} asy_hw_ops_t;
+
+extern const asy_hw_ops_t asy_16550_ops;
+#if defined(__aarch64__)
+extern const asy_hw_ops_t asy_pl011_ops;
+#endif
 
 /*
  * Hardware channel common data. One structure per port.
@@ -372,12 +487,14 @@ struct asycom {
 #ifdef DEBUG
 	int		asy_debug;	/* per-instance debug flags */
 #endif
+	const asy_hw_ops_t *asy_hw;	/* HW variant operations */
 	asy_progress_t	asy_progress;	/* attach progress */
 	asy_flags_t	asy_flags;	/* random flags  */
 					/* protected by asy_excl_hi lock */
 	uint_t		asy_hwtype;	/* HW type: ASY16550A, etc. */
 	uint_t		asy_use_fifo;	/* HW FIFO use it or not ?? */
 	uint_t		asy_fifo_buf;	/* With FIFO = 16, otherwise = 1 */
+	uint_t		asy_rx_drain_limit; /* async_rxint runaway guard */
 	asy_flags2_t	asy_flags2;	/* flags which don't change, no lock */
 	uint8_t		*asy_ioaddr;	/* i/o address of ASY port */
 	struct asyncline *asy_priv;	/* protocol private data -- asyncline */
@@ -418,6 +535,10 @@ struct asycom {
 	uchar_t		asy_com_port;	/* COM port number, or zero */
 	uchar_t		asy_fifor;	/* FIFOR register setting */
 	uint8_t		asy_acr;	/* 16950 additional control register */
+#if defined(__aarch64__)
+	uint32_t	asy_clk_freq;	/* UART input clock frequency (Hz) */
+	uint32_t	asy_fw_baud;	/* firmware-configured baud rate */
+#endif
 #ifdef DEBUG
 	int		asy_msint_cnt;	/* number of times in async_msint */
 #endif
@@ -556,6 +677,59 @@ struct asyncline {
 
 /* This corresponds to DDI_SOFTINT_MED used by the old softint routines. */
 #define	ASY_SOFT_INT_PRI	6
+
+/*
+ * Debug infrastructure shared between asy.c and variant drivers.
+ */
+#ifdef DEBUG
+typedef enum {
+	ASY_DEBUG_INIT	= 1 << 0,	/* driver initialization */
+	ASY_DEBUG_INPUT	= 1 << 1,	/* characters received during int */
+	ASY_DEBUG_EOT	= 1 << 2,	/* wait for xmit to finish */
+	ASY_DEBUG_CLOSE	= 1 << 3,	/* driver open/close */
+	ASY_DEBUG_HFLOW	= 1 << 4,	/* H/W flow control active */
+	ASY_DEBUG_PROCS	= 1 << 5,	/* proc name on entry */
+	ASY_DEBUG_STATE	= 1 << 6,	/* ISR value output */
+	ASY_DEBUG_INTR	= 1 << 7,	/* ISR value output */
+	ASY_DEBUG_OUT	= 1 << 8,	/* output events */
+	ASY_DEBUG_BUSY	= 1 << 9,	/* xmit enabled/disabled */
+	ASY_DEBUG_MODEM	= 1 << 10,	/* modem status & control */
+	ASY_DEBUG_MODM2	= 1 << 11,	/* modem status & control */
+	ASY_DEBUG_IOCTL	= 1 << 12,	/* ioctl messages */
+	ASY_DEBUG_CHIP	= 1 << 13,	/* chip identification */
+	ASY_DEBUG_SFLOW	= 1 << 14,	/* S/W flow control active */
+} asy_debug_t;
+#endif
+
+/*
+ * Functions shared between asy.c and variant drivers (e.g. asy_16550.c).
+ */
+extern void		asysetsoft(struct asycom *);
+extern void		async_rxint(struct asycom *, uchar_t);
+extern void		async_txint(struct asycom *);
+extern void		async_msint(struct asycom *);
+extern void		asyerror(const struct asycom *, int, const char *, ...)
+    __KPRINTFLIKE(3);
+extern int		asy_get_bus_type(dev_info_t *);
+
+/*
+ * Tunables shared between asy.c and variant drivers.
+ */
+extern int		asymaxchip;
+extern int		asy_scr_test;
+extern int		asy_fifo_test;
+extern int		asy_trig_level;
+extern int		asy_max_tx_fifo;
+
+#ifdef DEBUG
+#define	ASY_DEBUG(asy, x) ((asy)->asy_debug & (x))
+#define	ASY_DPRINTF(asy, fac, format, ...) \
+	if ((asy)->asy_debug & (fac)) \
+		asyerror(asy, CE_CONT, "!%s: " format, __func__, ##__VA_ARGS__)
+#else
+#define	ASY_DEBUG(asy, x) B_FALSE
+#define	ASY_DPRINTF(asy, fac, format, ...)
+#endif
 
 #ifdef __cplusplus
 }

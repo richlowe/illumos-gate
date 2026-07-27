@@ -1162,6 +1162,57 @@ process_boot_environment(struct boot_modules *benv, char *space)
 			bsetprops(name, propval);
 			continue;
 		}
+
+		/*
+		 * Loader property `motherboard-serial-ports-pa' is a
+		 * comma-separated list of CPU physical addresses (in
+		 * hex, e.g. "0x9000000,0x9040000") identifying MMIO
+		 * UARTs positionally by tty letter: first entry is
+		 * ttya, second is ttyb, and so on.  Interior gaps
+		 * use 0x0 as an unmatchable sentinel.
+		 *
+		 * Convert to an int64 array boot property so that
+		 * asy(4D) can look it up via
+		 * ddi_prop_lookup_int64_array on the root node.
+		 *
+		 * If the loader string is malformed the parseable
+		 * entries are what gets propagated to boot props.
+		 */
+		if (strcmp(name, "motherboard-serial-ports-pa") == 0) {
+			uint64_t addrs[26];
+			uint_t naddrs = 0;
+			char *p = value;
+
+			while (*p != '\0' && naddrs < 26) {
+				uint64_t v;
+				char *ep;
+
+				while (*p == ',' || *p == ' ') {
+					p++;
+				}
+
+				if (*p == '\0') {
+					break;
+				}
+
+				if (ddi_strtoul(p, &ep, 0, &v) != 0) {
+					break;
+				}
+
+				addrs[naddrs++] = v;
+				p = ep;
+			}
+
+			if (naddrs > 0) {
+				bsetprop(DDI_PROP_TYPE_INT64,
+				    "motherboard-serial-ports-pa",
+				    strlen("motherboard-serial-ports-pa"),
+				    addrs, naddrs * sizeof (uint64_t));
+			}
+
+			continue;
+		}
+
 		if (name_is_blocklisted(name) == B_TRUE)
 			continue;
 

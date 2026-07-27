@@ -259,30 +259,36 @@ plat_ttypath(int inum)
 	major_t major;
 	dev_info_t *dip;
 
-	if (inum < 0 || inum > 25)
+	if (inum < 0 || inum > 25) {
 		return (NULL);
-
-	/* XXXARM: we really need to work on asy */
-	if ((major = ddi_name_to_major("ns16550a")) == (major_t)-1)
-		return (NULL);
-
-	if ((dip = devnamesp[major].dn_head) == NULL)
-		return (NULL);
-
-	for (; dip != NULL; dip = ddi_get_next(dip)) {
-		if (i_ddi_attach_node_hierarchy(dip) != DDI_SUCCESS)
-			continue;
-
-		if (DEVI(dip)->devi_minor->ddm_name[0] == ('a' + (char)inum))
-			break;
 	}
 
-	if (dip == NULL)
+	if ((major = ddi_name_to_major("asy")) == (major_t)-1) {
 		return (NULL);
+	}
+
+	if ((dip = devnamesp[major].dn_head) == NULL) {
+		return (NULL);
+	}
+
+	for (; dip != NULL; dip = ddi_get_next(dip)) {
+		if (i_ddi_attach_node_hierarchy(dip) != DDI_SUCCESS) {
+			continue;
+		}
+
+		if (DEVI(dip)->devi_minor->ddm_name[0] == ('a' + (char)inum)) {
+			break;
+		}
+	}
+
+	if (dip == NULL) {
+		return (NULL);
+	}
 
 	(void) ddi_pathname(dip, path);
-	if (path[0] == '\0')
+	if (path[0] == '\0') {
 		return (NULL);
+	}
 
 	bp = path + strlen(path);
 	(void) snprintf(bp, 3, ":%s", DEVI(dip)->devi_minor->ddm_name);

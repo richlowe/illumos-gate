@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2025 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #ifndef _SYS_PLATMOD_H
@@ -53,7 +53,8 @@ struct prom_hwclock;
 #pragma weak	plat_set_cpu_supp_freqs
 #pragma weak	plat_gpio_get
 #pragma weak	plat_gpio_set
-#pragma weak	plat_hwclock_get_rate
+#pragma weak	plat_clk_get_rate
+#pragma weak	plat_clk_get_rate_by_name
 
 /*
  * Called in mp_startup.c from init_cpu_info (twice).
@@ -69,10 +70,8 @@ struct gpio_ctrl;
 extern int plat_gpio_get(struct gpio_ctrl *);
 extern int plat_gpio_set(struct gpio_ctrl *, int);
 
-/*
- * Called in ns16550a.c to get the clock frequency driving the UART.
- */
-extern int plat_hwclock_get_rate(struct prom_hwclock *);
+extern int plat_clk_get_rate(dev_info_t *, uint_t);
+extern int plat_clk_get_rate_by_name(dev_info_t *, const char *);
 
 #endif	/* _KERNEL */
 

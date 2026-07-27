@@ -31,6 +31,8 @@
 #include <sys/cmn_err.h>
 #include <sys/platmod.h>
 #include <sys/promif.h>
+#include <sys/prom_plat.h>
+#include <sys/sunddi.h>
 
 /*
  * Platform power management drivers list - empty by default
@@ -66,4 +68,50 @@ plat_get_cpu_clock(int cpu_no)
 	}
 
 	return (1000 * 1000 * 1000);
+}
+
+int
+plat_clk_get_rate(dev_info_t *dip, uint_t clkno)
+{
+	struct prom_hwclock hwclk;
+
+	if (prom_fdt_get_clock_by_index((pnode_t)ddi_get_nodeid(dip),
+	    clkno, &hwclk) != 0) {
+		return (-1);
+	}
+
+	if (prom_fdt_is_compatible(hwclk.node, "fixed-clock")) {
+		uint_t clock;
+		if (prom_getproplen(hwclk.node, "clock-frequency") ==
+		    sizeof (uint_t)) {
+			prom_getprop(hwclk.node, "clock-frequency",
+			    (caddr_t)&clock);
+			return (ntohl(clock));
+		}
+	}
+
+	return (-1);
+}
+
+int
+plat_clk_get_rate_by_name(dev_info_t *dip, const char *clkname)
+{
+	struct prom_hwclock hwclk;
+
+	if (prom_fdt_get_clock_by_name((pnode_t)ddi_get_nodeid(dip),
+	    clkname, &hwclk) != 0) {
+		return (-1);
+	}
+
+	if (prom_fdt_is_compatible(hwclk.node, "fixed-clock")) {
+		uint_t clock;
+		if (prom_getproplen(hwclk.node, "clock-frequency") ==
+		    sizeof (uint_t)) {
+			prom_getprop(hwclk.node, "clock-frequency",
+			    (caddr_t)&clock);
+			return (ntohl(clock));
+		}
+	}
+
+	return (-1);
 }

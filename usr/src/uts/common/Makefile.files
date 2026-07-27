@@ -970,7 +970,7 @@ KB8042_OBJS +=	\
 
 MOUSE8042_OBJS += mouse8042.o
 
-ASY_OBJS +=	asy.o
+ASY_OBJS +=	asy.o asy_16550.o asy_pl011.o
 
 ECPP_OBJS +=	ecpp.o
 

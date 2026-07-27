@@ -88,7 +88,6 @@ case "$MACH" in
 
 	wc	-1	0	ldterm ttcompat
 	asy	-1	0	ldterm ttcompat
-	ns16550a	-1	0	ldterm ttcompat
 	ptsl	0	47	ldterm ttcompat
 	usbsacm -1	0	ldterm ttcompat
 	usbser_edge	-1	0	ldterm ttcompat

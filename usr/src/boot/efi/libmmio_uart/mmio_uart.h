@@ -22,6 +22,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
+
+#define	MMIO_UART_MAX_UARTS	26
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,6 +154,8 @@ extern void mmio_uart_free_low_page(void *addr);
 
 extern void mmio_uart_puts(const char *s);
 extern void mmio_uart_putn(unsigned long n, int b);
+
+extern void mmio_uart_set_serial_ports_pa(mmio_uart_t *, size_t);
 
 #ifdef __cplusplus
 }
