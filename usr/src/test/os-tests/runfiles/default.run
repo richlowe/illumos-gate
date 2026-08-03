@@ -70,6 +70,8 @@ tests = ['secflags_aslr',
          'secflags_truss',
          'secflags_zonecfg']
 
+[/opt/os-tests/tests/poll_close_test]
+
 [/opt/os-tests/tests/signalfd]
 tests = ['basic_args', 'basic_read', 'multipoll']
 

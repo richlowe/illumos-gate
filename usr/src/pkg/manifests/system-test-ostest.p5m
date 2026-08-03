@@ -264,6 +264,7 @@ file path=opt/os-tests/tests/pf_key/acquire-spray mode=0555
 file path=opt/os-tests/tests/pf_key/eacq-enabler mode=0555
 file path=opt/os-tests/tests/pf_key/kmc-update mode=0555
 file path=opt/os-tests/tests/pf_key/kmc-updater mode=0555
+file path=opt/os-tests/tests/poll_close_test mode=0555
 file path=opt/os-tests/tests/poll_test mode=0555
 dir  path=opt/os-tests/tests/portfs
 $(MULTILIB_ONLY)dir path=opt/os-tests/tests/portfs/32
