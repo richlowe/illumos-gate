@@ -1115,38 +1115,55 @@ i_ddi_remove_softint(ddi_softint_hdl_impl_t *hdlp)
  * tree.  Returns NULL only if no node with #interrupt-cells is found.
  */
 static dev_info_t *
-i_ddi_interrupt_domain(dev_info_t *pdip)
+i_ddi_interrupt_domain(dev_info_t *dip)
 {
-	dev_info_t *p = pdip;
+	dev_info_t *p;
+	phandle_t phandle;
 
-	ndi_hold_devi(pdip);
+	/*
+	 * Per dtspec, check the device's own interrupt-parent first.
+	 *
+	 * We skip #interrupt-cells on dip itself, as that describes
+	 * its children's interrupt specifier format, not its own.
+	 */
+	phandle = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, OBP_INTERRUPT_PARENT, -1);
+	if (phandle != (phandle_t)-1) {
+		p = e_ddi_nodeid_to_dip(phandle);
+		VERIFY3P(p, !=, NULL);
+	} else {
+		p = ddi_get_parent(dip);
+		if (p != NULL) {
+			ndi_hold_devi(p);
+		}
+	}
 
 	while (p != NULL) {
-		phandle_t phandle;
-
-		/* If we have "#interrupt-cells", we're what we want */
+		/* if #interrupt-cells exists this parent is our domain... */
 		if (ddi_prop_exists(DDI_DEV_T_ANY, p, DDI_PROP_DONTPASS,
 		    OBP_INTERRUPT_CELLS) != 0) {
 			return (p);
 		}
 
+		/*
+		 * ... otherwise, walk to interrupt-parent when that exists,
+		 * device tree parent otherwise.
+		 */
+		phandle = ddi_prop_get_int(DDI_DEV_T_ANY, p,
+		    DDI_PROP_DONTPASS, OBP_INTERRUPT_PARENT, -1);
 		ndi_rele_devi(p);
 
-		/* If not, if there's an interrupt-parent follow it */
-		if ((phandle = ddi_prop_get_int(DDI_DEV_T_ANY, p,
-		    DDI_PROP_DONTPASS, OBP_INTERRUPT_PARENT, -1)) != -1) {
-			p = e_ddi_nodeid_to_dip(phandle); /* Holds p */
+		if (phandle != (phandle_t)-1) {
+			p = e_ddi_nodeid_to_dip(phandle);
 			VERIFY3P(p, !=, NULL);
-			continue;
 		} else {
-			/* If that didn't work, follow the tree itself */
 			p = ddi_get_parent(p);
-			if (p != NULL)
+			if (p != NULL) {
 				ndi_hold_devi(p);
+			}
 		}
 	}
 
-	/* Unreachable */
 	return (NULL);
 }
 
@@ -1448,22 +1465,7 @@ i_ddi_get_interrupt(dev_info_t *dip, uint_t inumber, int **ret)
 
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    OBP_INTERRUPTS, &ip, &ip_sz) == DDI_SUCCESS) {
-		/*
-		 * A device's interrupts property is encoded per the parent's
-		 * interrupt domain's #interrupt-cells, not the device's own.
-		 * The device's own #interrupt-cells (if any) describes its
-		 * children's interrupt specifier format.
-		 */
-		dev_info_t *pdip = ddi_get_parent(dip);
-		dev_info_t *id;
-
-		if (pdip == NULL) {
-			ddi_prop_free(ip);
-			return (0);
-		}
-
-		id = i_ddi_interrupt_domain(pdip);
-
+		dev_info_t *id = i_ddi_interrupt_domain(dip);
 		VERIFY3P(id, !=, NULL);
 
 		int intr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, id,
@@ -1684,8 +1686,7 @@ i_ddi_update_unitintr_unit(unit_intr_t *ui, dev_info_t *dip)
 		return (NULL);	/* Unreachable */
 	}
 
-	idom = i_ddi_interrupt_domain(pdip);
-
+	idom = i_ddi_interrupt_domain(dip);
 	VERIFY3P(idom, !=, NULL);
 
 	int new_intr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, idom,
@@ -2188,20 +2189,7 @@ i_ddi_get_intx_nintrs(dev_info_t *dip)
 
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    OBP_INTERRUPTS, &ip, &intrlen) == DDI_SUCCESS) {
-		/*
-		 * The interrupts property is encoded per the parent's
-		 * interrupt domain's #interrupt-cells.
-		 */
-		dev_info_t *pdip = ddi_get_parent(dip);
-		dev_info_t *intrd;
-
-		if (pdip == NULL) {
-			ddi_prop_free(ip);
-			return (0);
-		}
-
-		intrd = i_ddi_interrupt_domain(pdip);
-
+		dev_info_t *intrd = i_ddi_interrupt_domain(dip);
 		VERIFY3P(intrd, !=, NULL);
 
 		intr_sz = ddi_prop_get_int(DDI_DEV_T_ANY, intrd,
