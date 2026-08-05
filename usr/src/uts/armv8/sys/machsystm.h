@@ -100,6 +100,11 @@ extern boolean_t efirt_is_active(void);
 extern uint64_t efirt_call_rt(uint64_t, uint64_t, uint64_t, uint64_t,
     uint64_t, uint64_t);
 
+/*
+ * CPU Dynamic Reconfiguration.
+ */
+extern boolean_t plat_dr_support_cpu(void);
+
 #endif /* _KERNEL */
 
 #ifdef __cplusplus

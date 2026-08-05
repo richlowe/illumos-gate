@@ -136,7 +136,7 @@ dtrace_xcall(processorid_t cpu, dtrace_xcall_t func, void *arg)
 	}
 
 	kpreempt_disable();
-	xc_sync((xc_arg_t)func, (xc_arg_t)arg, 0, (set),
+	xc_sync((xc_arg_t)func, (xc_arg_t)arg, 0, CPUSET2BV(set),
 	    (xc_func_t)(uintptr_t)dtrace_xcall_func); /* XXXARM */
 	kpreempt_enable();
 }

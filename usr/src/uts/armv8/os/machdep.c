@@ -452,17 +452,6 @@ panic_idle(void)
 
 	(void) setjmp(&curthread->t_pcb);
 
-	/*
-	 * XXXARM: This is a hack because our xcalls are not great right now.
-	 * If we kick a cpu into a function which spins (like this), we never
-	 * get chance to ack the xcall, and the caller waits for us forever.
-	 *
-	 * To break free of this, for right now, we ack the xcall ourselves as
-	 * we know this will always happen to us.
-	 */
-	CPU->cpu_m.xc_ack = 1;
-	dsb(ish);
-
 	dumpsys_helper();
 
 	/*
@@ -487,7 +476,7 @@ panic_stopcpus(cpu_t *cp, kthread_t *t, int spl)
 	(void) splzs();
 
 	CPUSET_ALL_BUT(xcset, cp->cpu_id);
-	xc_call(0, 0, 0, CPUSET2BV(xcset), (xc_func_t)panic_idle);
+	xc_priority(0, 0, 0, CPUSET2BV(xcset), (xc_func_t)panic_idle);
 
 	for (i = 0; i < NCPU; i++) {
 		if (i != cp->cpu_id && cpu[i] != NULL &&
@@ -549,19 +538,9 @@ static int
 mach_cpu_halt(xc_arg_t arg1 __unused, xc_arg_t arg2 __unused,
     xc_arg_t arg3 __unused)
 {
-	/*
-	 * XXXARM: As in panic_idle is a hack because our xcalls are not great
-	 * right now.  If we kick a cpu into a function which spins (like
-	 * this), we never get chance to ack the xcall, and the caller waits
-	 * for us forever.
-	 *
-	 * To break free of this, for right now, we ack the xcall ourselves as
-	 * we know this will always happen to us.
-	 */
-	CPU->cpu_m.xc_ack = 1;
-
-	for (;;)
+	for (;;) {
 		__asm__ volatile("wfe":::"memory");
+	}
 
 	return (0);
 }
@@ -572,7 +551,7 @@ stop_other_cpus(void)
 	cpuset_t xcset;
 
 	CPUSET_ALL_BUT(xcset, CPU->cpu_id);
-	xc_call_nowait(0, 0, 0, xcset, mach_cpu_halt);
+	xc_priority(0, 0, 0, CPUSET2BV(xcset), mach_cpu_halt);
 }
 
 /*
@@ -845,4 +824,13 @@ impl_obmem_pfnum(pfn_t pf)
 void
 do_hotinlines(struct module *mp)
 {
+}
+
+/*
+ * CPU Dynamic Reconfiguration is not currently supported on aarch64.
+ */
+boolean_t
+plat_dr_support_cpu(void)
+{
+	return (B_FALSE);
 }
