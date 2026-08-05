@@ -621,6 +621,7 @@ mp_start_cpu_common(cpu_t *cp)
 
 	mp_startup_wait(&procset_slave, cpuid);
 
+	xc_init_cpu(cp);
 	(void) pg_cpu_init(cp, B_FALSE);
 	cpu_set_state(cp);
 	mp_startup_signal(&procset_master, cpuid);
@@ -679,7 +680,7 @@ start_other_cpus(int flag __unused)
 
 	cpu_pause_init();
 
-	xc_init();
+	xc_init_cpu(CPU);
 
 	if (mach_cpucontext_init() != 0)
 		prom_panic("mach_cpucontext_init fail");

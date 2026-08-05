@@ -22,12 +22,12 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #ifndef _SYS_X_CALL_H
 #define	_SYS_X_CALL_H
-
-#include <sys/cpuvar.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -35,23 +35,54 @@ extern "C" {
 
 #ifndef _ASM
 
+#define	XC_MSG_FREE	(0)	/* msg in xc_free queue */
+#define	XC_MSG_ASYNC	(1)	/* msg in slave xc_msgbox */
+#define	XC_MSG_CALL	(2)	/* msg in slave xc_msgbox */
+#define	XC_MSG_SYNC	(3)	/* msg in slave xc_msgbox */
+#define	XC_MSG_WAITING	(4)	/* msg in master xc_msgbox or xc_waiters */
+#define	XC_MSG_RELEASED	(5)	/* msg in slave xc_msgbox */
+#define	XC_MSG_DONE	(6)	/* msg in master xc_msgbox */
+
 typedef uintptr_t xc_arg_t;
 typedef int (*xc_func_t)(xc_arg_t, xc_arg_t, xc_arg_t);
+
+/*
+ * One of these is stored in each CPU's machcpu data, plus one extra for
+ * priority (ie panic) messages.
+ */
+typedef struct xc_data {
+	xc_func_t	xc_func;
+	xc_arg_t	xc_a1;
+	xc_arg_t	xc_a2;
+	xc_arg_t	xc_a3;
+} xc_data_t;
+
+/*
+ * This is kept as small as possible, since for N CPUs we need N * N of them.
+ */
+typedef struct xc_msg {
+	uint8_t		xc_command;
+	uint16_t	xc_master;
+	uint16_t	xc_slave;
+	struct xc_msg	*xc_next;
+} xc_msg_t;
 
 /*
  * Cross-call routines.
  */
 #if defined(_KERNEL)
 
-#if defined(_MACHDEP)
-/* XXXARM: this whole file needs to be closer to Intel */
-#define	CPUSET2BV(set)	(set)
-extern void	xc_init(void);
-extern void	xc_call(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t);
-extern void	xc_sync(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t);
-extern void	xc_call_nowait(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set,
+extern void	xc_init_cpu(struct cpu *);
+extern void	xc_fini_cpu(struct cpu *);
+extern int	xc_flush_cpu(struct cpu *);
+
+#define	CPUSET2BV(set)	((ulong_t *)(void *)&(set))
+extern void	xc_call(xc_arg_t, xc_arg_t, xc_arg_t, ulong_t *, xc_func_t);
+extern void	xc_call_nowait(xc_arg_t, xc_arg_t, xc_arg_t, ulong_t *,
     xc_func_t);
-#endif
+extern void	xc_sync(xc_arg_t, xc_arg_t, xc_arg_t, ulong_t *, xc_func_t);
+extern void	xc_priority(xc_arg_t, xc_arg_t, xc_arg_t, ulong_t *,
+    xc_func_t);
 
 #endif	/* _KERNEL */
 

@@ -105,7 +105,7 @@ extern void null_xcall(void);
 #define	MUTEX_SYNC()	{	\
 			cpuset_t set;   \
 			CPUSET_ALL(set);        \
-			xc_call(0, 0, 0, (set),	\
+			xc_call(0, 0, 0, CPUSET2BV(set),	\
 			    (xc_func_t)null_xcall); \
 		}
 

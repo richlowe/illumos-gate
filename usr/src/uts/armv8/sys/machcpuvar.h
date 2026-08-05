@@ -35,6 +35,7 @@
 
 #include <sys/types.h>
 #include <sys/avintr.h>
+#include <sys/x_call.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -44,11 +45,12 @@ struct	machcpu {
 	struct hat	*mcpu_current_hat;
 	int		mcpu_pri;
 
-	volatile int	xc_pend;
-	volatile int	xc_wait;
-	volatile int	xc_ack;
-	volatile int	xc_state;
-	volatile int	xc_retval;
+	struct xc_msg	*xc_msgbox;
+	struct xc_msg	*xc_curmsg;
+	struct xc_msg	*xc_free;
+	xc_data_t	xc_data;
+	uint32_t	xc_wait_cnt;
+	volatile uint32_t xc_work_cnt;
 
 	struct softint	mcpu_softinfo;
 	uint64_t	pil_high_start[HIGH_LEVELS];
