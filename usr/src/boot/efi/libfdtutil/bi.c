@@ -42,6 +42,12 @@ static const board_info_t board_info[] = {
 		.bi_hw_provider = "QEMU"
 	},
 	{
+		.bi_compat = "freebsd,bhyve",
+		.bi_impl_name = "FreeBSD,Bhyve",
+		.bi_mfg_name = "FreeBSD,Bhyve",
+		.bi_hw_provider = "The FreeBSD Project"
+	},
+	{
 		.bi_compat = NULL
 	}
 };
