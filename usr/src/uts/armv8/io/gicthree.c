@@ -1433,10 +1433,28 @@ gicv3_send_ipi(spo_ctx_t ctx, cpuset_t cpuset, intr_intid_t intid)
 	dsb(ish);
 
 	/*
-	 * There is almost definitely a better way to do this, populating
-	 * targetlist/RS and issuing SGI with CPUs clustered by AFF3-1+RS.
+	 * There is an obvious optimisation here that we're not doing, and this
+	 * begs some explanation.
 	 *
-	 * However, this is obviously correct, which will do for now.
+	 * It is possible to batch ICC_SGI1R_EL1 writes by using the route
+	 * key from the SGIR, then packing the CPU selection bit from all
+	 * matching entries with the same route key into the batched value,
+	 * resulting in up to a 16x ICC_SGI1R_EL1 write reduction.  Since
+	 * writing ICC_SGI1R_EL1 is relatively expensive this appears to
+	 * be a very attractive optimisation, even though the pathological
+	 * complexity (each CPU having its own routing key) would be a very
+	 * expensive O(N**2).
+	 *
+	 * Real world machines with large CPU counts would see the most
+	 * benefit, but looking at ACPI tables for Altra Max, Nvidia Grace
+	 * and the Arm AGI CPU, all three differentiate by Aff2/Aff1, with
+	 * Aff0 as zero (72 CPU Grace is even worse, with only Aff2
+	 * differentiating).  So, in all observed cases the real world _is_ the
+	 * pathological case.
+	 *
+	 * This is not to say we might not see some benefit on future
+	 * platforms, but for now this simple and obviously correct approach
+	 * will do and will not add overhead.
 	 */
 	CPUSET_AND(cpuset, gc->gc_cpuset);
 	CPUSET_DEL(cpuset, CPU->cpu_id);
