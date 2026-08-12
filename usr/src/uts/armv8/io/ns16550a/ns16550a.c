@@ -33,6 +33,7 @@
 
 #include <sys/param.h>
 #include <sys/types.h>
+#include <sys/machsystm.h>
 #include <sys/signal.h>
 #include <sys/stream.h>
 #include <sys/termio.h>
@@ -354,6 +355,9 @@ static void	nsasync_flowcontrol_hw_output(struct ns16550com *ns16550,
 
 static kmutex_t ns16550_glob_lock; /* lock protecting global data manipulation */
 static void *ns16550_soft_state;
+
+static uint64_t *com_ports_pa;
+static uint_t num_com_ports_pa;
 
 #ifdef	DEBUG
 /*
@@ -829,6 +833,11 @@ _fini(void)
 		    modldrv.drv_linkinfo);
 		ASSERT(max_ns16550_instance == -1);
 		mutex_destroy(&ns16550_glob_lock);
+		if (com_ports_pa != NULL) {
+			ddi_prop_free(com_ports_pa);
+			com_ports_pa = NULL;
+		}
+		num_com_ports_pa = 0;
 		ddi_soft_state_fini(&ns16550_soft_state);
 	}
 	return (i);
@@ -973,6 +982,21 @@ ns16550attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		DDI_STRICTORDER_ACC,
 	};
 
+	mutex_enter(&ns16550_glob_lock);
+	if (com_ports_pa == NULL) {
+		if (ddi_prop_lookup_int64_array(DDI_DEV_T_ANY,
+		    ddi_root_node(), 0, "motherboard-serial-ports-pa",
+		    (int64_t **)&com_ports_pa,
+		    &num_com_ports_pa) != DDI_PROP_SUCCESS) {
+			com_ports_pa = NULL;
+			num_com_ports_pa = 0;
+		}
+		if (num_com_ports_pa > MMIO_UART_MAX_UARTS) {
+			num_com_ports_pa = MMIO_UART_MAX_UARTS;
+		}
+	}
+	mutex_exit(&ns16550_glob_lock);
+
 	instance = ddi_get_instance(devi);	/* find out which unit */
 
 	switch (cmd) {
@@ -1032,7 +1056,22 @@ ns16550attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	DEBUGCONT2(NS16550_DEBUG_INIT, "ns16550%dattach: UART @ %p\n",
 	    instance, (void *)ns16550->ns16550_ioaddr);
 
-	ns16550->ns16550_com_port = instance + 1;
+	if (num_com_ports_pa > 0) {
+		struct regspec *rp;
+		uint64_t cpu_pa;
+
+		rp = i_ddi_rnumber_to_regspec(devi, 0);
+		if (rp != NULL && i_ddi_bus_to_cpu(devi, rp->regspec_addr,
+		    rp->regspec_size, &cpu_pa) == DDI_SUCCESS) {
+			for (i = 0; i < num_com_ports_pa; i++) {
+				if (com_ports_pa[i] != 0 &&
+				    com_ports_pa[i] == cpu_pa) {
+					ns16550->ns16550_com_port = i + 1;
+					break;
+				}
+			}
+		}
+	}
 
 	/*
 	 * It appears that there was async hardware that on reset
@@ -1052,50 +1091,59 @@ ns16550attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 #endif
 	mcr = 0;				/* don't enable until open */
 
-	/*
-	 * For motherboard ports, emulate tty eeprom properties.
-	 * Actually, we can't tell if a port is motherboard or not,
-	 * so for "motherboard ports", read standard DOS COM ports.
-	 */
-	switch (ns16550_getproperty(devi, ns16550, "ignore-cd")) {
-	case 0:				/* *-ignore-cd=False */
-		DEBUGCONT1(NS16550_DEBUG_MODEM,
-		    "ns16550%dattach: clear NS16550_IGNORE_CD\n", instance);
-		ns16550->ns16550_flags &= ~NS16550_IGNORE_CD; /* wait for cd */
-		break;
-	case 1:				/* *-ignore-cd=True */
-		/*FALLTHRU*/
-	default:			/* *-ignore-cd not defined */
+	if (ns16550->ns16550_com_port != 0) {
 		/*
-		 * We set rather silly defaults of soft carrier on
-		 * and DTR/RTS raised here because it might be that
-		 * one of the motherboard ports is the system console.
+		 * For motherboard ports, emulate tty eeprom properties.
+		 * Actually, we can't tell if a port is motherboard or not,
+		 * so for "motherboard ports", read ports recognised by loader.
 		 */
-		DEBUGCONT1(NS16550_DEBUG_MODEM,
-		    "ns16550%dattach: set NS16550_IGNORE_CD, set RTS & DTR\n",
-		    instance);
-		mcr = ns16550->ns16550_mcr;		/* rts/dtr on */
-		ns16550->ns16550_flags |= NS16550_IGNORE_CD;	/* ignore cd */
-		break;
-	}
+		switch (ns16550_getproperty(devi, ns16550, "ignore-cd")) {
+		case 0:				/* *-ignore-cd=False */
+			DEBUGCONT1(NS16550_DEBUG_MODEM, "ns16550%dattach: "
+			    "clear NS16550_IGNORE_CD\n", instance);
+			/* wait for cd */
+			ns16550->ns16550_flags &= ~NS16550_IGNORE_CD;
+			break;
+		case 1:				/* *-ignore-cd=True */
+			/*FALLTHRU*/
+		default:			/* *-ignore-cd not defined */
+			/*
+			 * We set rather silly defaults of soft carrier on
+			 * and DTR/RTS raised here because it might be that
+			 * one of the motherboard ports is the system console.
+			 */
+			DEBUGCONT1(NS16550_DEBUG_MODEM, "ns16550%dattach: "
+			    "set NS16550_IGNORE_CD, set RTS & DTR\n", instance);
+			mcr = ns16550->ns16550_mcr;		/* rts/dtr on */
+			/* ignore cd */
+			ns16550->ns16550_flags |= NS16550_IGNORE_CD;
+			break;
+		}
 
-	/* Property for not raising DTR/RTS */
-	switch (ns16550_getproperty(devi, ns16550, "rts-dtr-off")) {
-	case 0:				/* *-rts-dtr-off=False */
-		ns16550->ns16550_flags |= NS16550_RTS_DTR_OFF;	/* OFF */
-		mcr = ns16550->ns16550_mcr;		/* rts/dtr on */
+		/* Property for not raising DTR/RTS */
+		switch (ns16550_getproperty(devi, ns16550, "rts-dtr-off")) {
+		case 0:				/* *-rts-dtr-off=False */
+			/* OFF */
+			ns16550->ns16550_flags |= NS16550_RTS_DTR_OFF;
+			mcr = ns16550->ns16550_mcr;	/* rts/dtr on */
+			DEBUGCONT1(NS16550_DEBUG_MODEM, "ns16550%dattach: "
+			    "NS16550_RTS_DTR_OFF set and DTR & RTS set\n",
+			    instance);
+			break;
+		case 1:				/* *-rts-dtr-off=True */
+			/*FALLTHRU*/
+		default:			/* *-rts-dtr-off undefined */
+			break;
+		}
+
+		/* Parse property for tty modes */
+		ns16550_parse_mode(devi, ns16550);
+	} else {
 		DEBUGCONT1(NS16550_DEBUG_MODEM, "ns16550%dattach: "
-		    "NS16550_RTS_DTR_OFF set and DTR & RTS set\n",
-		    instance);
-		break;
-	case 1:				/* *-rts-dtr-off=True */
-		/*FALLTHRU*/
-	default:			/* *-rts-dtr-off undefined */
-		break;
+		    "clear NS16550_IGNORE_CD, clear RTS & DTR\n", instance);
+		/* wait for cd */
+		ns16550->ns16550_flags &= ~NS16550_IGNORE_CD;
 	}
-
-	/* Parse property for tty modes */
-	ns16550_parse_mode(devi, ns16550);
 
 	/*
 	 * Get icookie for mutexes initialization
@@ -1187,14 +1235,23 @@ ns16550attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	ns16550init(ns16550);	/* initialize the nsasyncline structure */
 
 	/* create minor device nodes for this device */
-	/*
-	 * For DOS COM ports, add letter suffix so
-	 * devfsadm can create correct link names.
-	 */
-	name[0] = ns16550->ns16550_com_port + 'a' - 1;
-	name[1] = '\0';
+	if (ns16550->ns16550_com_port != 0) {
+		/*
+		 * for COM ports identified by loader, add letter suffix so
+		 * devfsadm can create correct link names.
+		 */
+		name[0] = ns16550->ns16550_com_port + 'a' - 1;
+		name[1] = '\0';
+	} else {
+		/*
+		 * ports not identified by loader get a numeric name based
+		 * on instance.
+		 */
+		(void) snprintf(name, NS16550_MINOR_LEN, "%d", instance);
+	}
 	status = ddi_create_minor_node(devi, name, S_IFCHR, instance,
-	    ns16550->ns16550_com_port != 0 ? DDI_NT_SERIAL_MB : DDI_NT_SERIAL, 0);
+	    ns16550->ns16550_com_port != 0 ?
+	    DDI_NT_SERIAL_MB : DDI_NT_SERIAL, 0);
 	if (status == DDI_SUCCESS) {
 		(void) strcat(name, ",cu");
 		status = ddi_create_minor_node(devi, name, S_IFCHR,
