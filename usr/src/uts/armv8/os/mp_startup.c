@@ -606,6 +606,8 @@ mp_startup_boot(void)
 	/* Enable interrupts */
 	(void) spl0();
 
+	(void) mach_cpu_create_device_node(cp, NULL);
+
 	/*
 	 * Setting the bit in cpu_ready_set must be the last operation in
 	 * processor initialization; the boot CPU will continue to boot once
