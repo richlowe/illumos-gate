@@ -231,6 +231,7 @@ DRV_KMODS += pl03one
 DRV_KMODS += efitod
 DRV_KMODS += efifb
 DRV_KMODS += pcieb
+DRV_KMODS += cpunex
 
 #
 #	'Dacf' Modules (/kernel/dacf):
