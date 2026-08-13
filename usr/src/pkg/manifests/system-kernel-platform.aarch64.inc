@@ -63,6 +63,7 @@ file path=platform/armv8/kernel/drv/cpudrv.conf
 file path=platform/armv8/kernel/drv/ns16550a.conf
 dir  path=platform/armv8/kernel/misc
 dir  path=platform/armv8/kernel/misc/$(ARCH)
+file path=platform/armv8/kernel/misc/$(ARCH)/acpicppc group=sys mode=0755
 file path=platform/armv8/kernel/misc/$(ARCH)/acpidev group=sys mode=0755
 file path=platform/armv8/kernel/misc/$(ARCH)/acpipcc group=sys mode=0755
 file path=platform/armv8/kernel/misc/$(ARCH)/cpuidle group=sys mode=0755
