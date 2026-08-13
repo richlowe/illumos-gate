@@ -64,6 +64,7 @@ file path=platform/armv8/kernel/drv/ns16550a.conf
 dir  path=platform/armv8/kernel/misc
 dir  path=platform/armv8/kernel/misc/$(ARCH)
 file path=platform/armv8/kernel/misc/$(ARCH)/acpidev group=sys mode=0755
+file path=platform/armv8/kernel/misc/$(ARCH)/acpipcc group=sys mode=0755
 file path=platform/armv8/kernel/misc/$(ARCH)/cpuidle group=sys mode=0755
 file path=platform/armv8/kernel/misc/$(ARCH)/ffa group=sys mode=0755
 file path=platform/armv8/kernel/misc/$(ARCH)/gfx_private group=sys mode=0755
@@ -75,6 +76,7 @@ dir  path=platform/armv8/kernel/tod/$(ARCH)
 file path=platform/armv8/kernel/tod/$(ARCH)/efitod mode=0755
 file path=platform/armv8/kernel/tod/$(ARCH)/pl03one mode=0755
 file path=usr/lib/devfsadm/linkmod/SUNW_misc_link_aarch64.so
+file path=usr/share/man/man4d/acpipcc.4d
 file path=usr/share/man/man4d/devfdt.4d
 file path=usr/share/man/man4d/ecam.4d
 file path=usr/share/man/man4d/simple-bus.4d

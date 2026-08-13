@@ -242,7 +242,8 @@ $(HAVE_CLOSED_BINS)i386_MANFILES +=	\
 	bcm_sata.4d			\
 	sdp.4d
 
-aarch64_MANFILES=	ahci.4d			\
+aarch64_MANFILES=	acpipcc.4d		\
+			ahci.4d			\
 			arn.4d			\
 			asy.4d			\
 			atge.4d			\
