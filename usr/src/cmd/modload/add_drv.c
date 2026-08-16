@@ -1007,8 +1007,10 @@ remove_slashes(char *path)
 		remain_str = ++slash;
 		while (*remain_str == '/')
 			++remain_str;
-		if (slash != remain_str)
-			(void) strcpy(slash, remain_str);
+		if (slash != remain_str) {
+			(void) memmove(slash, remain_str,
+			    strlen(remain_str) + 1);
+		}
 	}
 
 	pathlen = strlen(path);
