@@ -2144,7 +2144,7 @@ VIOMMIONEX_OBJS = viommionex.o
 VIOBLK_OBJS = vioblk.o
 
 # Virtio network driver
-VIOIF_OBJS = vioif.o
+VIOIF_OBJS = vioif.o vioif_rx.o vioif_tx.o
 
 # Virtio SCSI driver
 VIOSCSI_OBJS = vioscsi.o

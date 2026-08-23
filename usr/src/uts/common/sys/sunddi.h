@@ -28,6 +28,7 @@
  * Copyright 2019 Joyent, Inc.
  * Copyright 2022 Tintri by DDN, Inc. All rights reserved.
  * Copyright 2022 Michael van der Westhuizen
+ * Copyright 2026 Oxide Computer Company
  */
 
 #ifndef	_SYS_SUNDDI_H
@@ -1602,6 +1603,9 @@ ddi_get_pid(void);
 
 kt_did_t
 ddi_get_kt_did(void);
+
+uint_t
+ddi_ncpus_expected(void);
 
 boolean_t
 ddi_can_receive_sig(void);
