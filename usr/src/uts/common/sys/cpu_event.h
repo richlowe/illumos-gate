@@ -82,7 +82,7 @@ extern "C" {
 #define	CPU_IDLE_PROP_LAST_BUSY_TIME	"last-busy-time"
 #define	CPU_IDLE_PROP_TOTAL_IDLE_TIME	"total-idle-time"
 #define	CPU_IDLE_PROP_TOTAL_BUSY_TIME	"total-busy-time"
-#define	CPU_IDLE_PROP_INTERRUPT_COUNT	"interupt-count"
+#define	CPU_IDLE_PROP_INTERRUPT_COUNT	"interrupt-count"
 
 /*
  * sizeof(cpu_idle_prop_value_t) should be power of 2 to align on cache line.
