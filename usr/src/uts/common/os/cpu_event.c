@@ -325,7 +325,7 @@ cpu_event_init(void)
 		___INIT_P(last_busy, CPU_IDLE_PROP_IDX_LAST_BUSY);
 		___INIT_P(total_idle, CPU_IDLE_PROP_IDX_TOTAL_IDLE);
 		___INIT_P(total_busy, CPU_IDLE_PROP_IDX_TOTAL_BUSY);
-		___INIT_P(last_idle, CPU_IDLE_PROP_IDX_INTR_CNT);
+		___INIT_P(intr_cnt, CPU_IDLE_PROP_IDX_INTR_CNT);
 #undef	___INIT_P
 	}
 
