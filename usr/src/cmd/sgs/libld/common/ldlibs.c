@@ -185,6 +185,10 @@ build_library_path(char *out, size_t len,
 {
 	boolean_t with_sysroot = B_FALSE;
 
+	/* If there's no sysroot, it's / */
+	if (sysroot == NULL)
+		sysroot = "/";
+
 	if (strncmp(dir, MSG_ORIG(MSG_STR_SYSROOTPATH),
 	    MSG_STR_SYSROOTPATH_SIZE) == 0) {
 		dir += MSG_STR_SYSROOTPATH_SIZE;

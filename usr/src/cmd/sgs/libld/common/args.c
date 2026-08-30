@@ -1585,7 +1585,7 @@ parseopt_pass1(Ofl_desc *ofl, int argc, char **argv, int *usage)
 			    MSG_ARG_SYSROOT_SIZE) == 0) {
 				struct stat buf;
 				/*
-				 * NB: We don't check this exists, or is a
+				 * NB: We don't insist this exists, or is a
 				 * directory, for the strictest (if weirdest)
 				 * compatibility with GNU
 				 */

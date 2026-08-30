@@ -478,8 +478,6 @@ fcnname##_info:								\
 	NO_UNLOAD_STUB(procfs, prgetlwpstatus,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prgetpsinfo,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prgetlwpsinfo,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, oprgetstatus,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, oprgetpsinfo,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prnotify,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prexecstart,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prexecend,	nomod_zero);
