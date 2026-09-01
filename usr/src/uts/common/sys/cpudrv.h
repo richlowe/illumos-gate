@@ -97,7 +97,7 @@ typedef struct cpudrv_pm {
 /*
  * Idle & user threads water marks in percentage
  */
-#if defined(__x86)
+#if defined(__x86) || defined(__aarch64__)
 #define	CPUDRV_IDLE_HWM		85	/* idle high water mark */
 #define	CPUDRV_IDLE_LWM		70	/* idle low water mark */
 #define	CPUDRV_IDLE_BLWM_CNT_MAX	1    /* # of iters idle can be < lwm */

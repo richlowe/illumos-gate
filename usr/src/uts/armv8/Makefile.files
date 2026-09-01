@@ -190,6 +190,12 @@ BOOTDEV_OBJS		+= bootdev.o
 
 CPUIDLE_OBJS +=	cpuidle.o
 
+CPUDRV_OBJS += \
+	cpudrv.o \
+	cpudrv_mach.o
+
+CPUNEX_OBJS +=	cpunex.o
+
 ASSYM_DEPS +=			\
 	aarch64_subr.o		\
 	copy.o			\
