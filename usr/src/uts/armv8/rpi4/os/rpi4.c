@@ -21,8 +21,8 @@
 
 /*
  * Copyright 2021 Hayashi Naoyuki
- * Copyright 2025 Michael van der Westhuizen
  * Copyright 2025 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -43,7 +43,7 @@
 #include <sys/ddi_implfuncs.h>
 #include <sys/ddi_subrdefs.h>
 #include <sys/param.h>
-#include <sys/cpupm.h>
+#include <sys/kmem.h>
 #include <vm/hat.h>
 #include <sys/bcm2835_mbox.h>
 #include <sys/bcm2835_vcprop.h>
@@ -87,6 +87,25 @@ find_cprman(pnode_t node, void *arg)
 	if (!prom_fdt_is_compatible(node, "brcm,bcm2711-cprman"))
 		return;
 	*(pnode_t *)arg = node;
+}
+
+static pnode_t
+get_cprman_node(void)
+{
+	static kmutex_t cprman_node_lock;
+	static volatile pnode_t cached_node = 0;
+
+	if (cached_node == 0) {
+		mutex_enter(&cprman_node_lock);
+		if (cached_node == 0) {
+			pnode_t node = 0;
+			prom_fdt_walk(find_cprman, &node);
+			cached_node = node;
+		}
+		mutex_exit(&cprman_node_lock);
+	}
+
+	return (cached_node);
 }
 
 static inline int
@@ -156,14 +175,14 @@ plat_vc_hwclock_rate(struct prom_hwclock *clk, clockid_type_t clkidtype,
 }
 
 uint64_t
-plat_get_cpu_clock(int cpu_no)
+plat_cpu_get_speed(cpu_t *cp __unused)
 {
-	pnode_t node = 0;
+	pnode_t node;
 	int clkhz;
 
-	prom_fdt_walk(find_cprman, &node);
-	if (node == 0)
-		cmn_err(CE_PANIC, "cprman register is not found");
+	if ((node = get_cprman_node()) == 0) {
+		cmn_err(CE_PANIC, "cprman is not found");
+	}
 
 	struct prom_hwclock clk = { node, VCPROP_CLK_ARM };
 	clkhz = plat_vc_hwclock_rate(&clk, VCCLOCKID,
@@ -177,12 +196,12 @@ plat_get_cpu_clock(int cpu_no)
 void
 plat_set_max_cpu_clock(int cpu_no)
 {
-	pnode_t node = 0;
+	pnode_t node;
 	int clkhz;
 
-	prom_fdt_walk(find_cprman, &node);
-	if (node == 0)
-		cmn_err(CE_PANIC, "cprman register is not found");
+	if ((node = get_cprman_node()) == 0) {
+		cmn_err(CE_PANIC, "cprman is not found");
+	}
 
 	struct prom_hwclock clk = { node, VCPROP_CLK_ARM };
 	clkhz = plat_vc_hwclock_rate(&clk, VCCLOCKID,
@@ -330,32 +349,113 @@ plat_gpio_set(struct gpio_ctrl *gpio, int value)
 	return (0);
 }
 
-void
-plat_set_cpu_supp_freqs(cpu_t *cp)
+int
+plat_cpu_get_speeds(cpu_t *cp __unused, int **speedsp, int *nspeedsp)
 {
-	int supp_freqs[] = {
+	static int supp_speeds[] = {
 		1500,
 		1000,
 		750,
 		600,
 	};
+	int *speeds;
+	int nspeeds = ARRAY_SIZE(supp_speeds);
+	pnode_t node;
 
-	pnode_t node = 0;
-
-	prom_fdt_walk(find_cprman, &node);
-	if (node == 0)
+	if ((node = get_cprman_node()) == 0) {
 		cmn_err(CE_PANIC, "cprman register is not found");
+	}
 
 	struct prom_hwclock clk = { node, VCPROP_CLK_ARM };
 	int clkhz = plat_vc_hwclock_rate(&clk, VCCLOCKID,
 	    VCPROPTAG_GET_MAX_CLOCKRATE, 0);
+
+	speeds = kmem_alloc(nspeeds * sizeof (int), KM_SLEEP);
+	memcpy(speeds, supp_speeds, nspeeds * sizeof (int));
+
 	if (clkhz == -1) {
 		cmn_err(CE_WARN, "unable to read maximum CPU clock rate; "
-		    "assuming %d MHz", supp_freqs[0]);
+		    "assuming %d MHz", speeds[0]);
 	} else {
-		supp_freqs[0] = (clkhz + 500000) / 1000000;
+		speeds[0] = (clkhz + 500000) / 1000000;
 	}
 
-	cpupm_set_supp_freqs(cp, supp_freqs,
-	    sizeof (supp_freqs) / sizeof (supp_freqs[0]));
+	*speedsp = speeds;
+	*nspeedsp = nspeeds;
+	return (DDI_SUCCESS);
+}
+
+void
+plat_cpu_free_speeds(int *speeds, int nspeeds)
+{
+	kmem_free(speeds, nspeeds * sizeof (int));
+}
+
+/*
+ * Per-CPU requested speed tracking for DVFS.
+ *
+ * The RPi4 has a single clock domain for all CPUs, so we cannot set
+ * per-CPU frequencies independently.  Instead, each CPU's governor
+ * records its requested speed here, and the actual system-wide
+ * frequency is set to the maximum across all CPUs so no busy CPU is
+ * penalised by another's idle request.
+ */
+static int plat_cpu_req_speed[NCPU];
+static kmutex_t plat_cpu_speed_lock;
+
+int
+plat_cpu_set_speed(cpu_t *cp, int speed)
+{
+	pnode_t node;
+	int max_speed;
+	int clkhz;
+	int i;
+	cpu_t *c;
+
+	ASSERT3P(cp, !=, NULL);
+
+	if ((node = get_cprman_node()) == 0) {
+		return (DDI_FAILURE);
+	}
+
+	mutex_enter(&plat_cpu_speed_lock);
+
+	plat_cpu_req_speed[cp->cpu_id] = speed;
+
+	/* Find the maximum requested speed across all CPUs */
+	max_speed = 0;
+	for (i = 0; i < boot_max_ncpus; i++) {
+		if (plat_cpu_req_speed[i] > max_speed) {
+			max_speed = plat_cpu_req_speed[i];
+		}
+	}
+
+	mutex_exit(&plat_cpu_speed_lock);
+
+	if (max_speed <= 0) {
+		return (DDI_FAILURE);
+	}
+
+	struct prom_hwclock clk = { node, VCPROP_CLK_ARM };
+	clkhz = plat_vc_hwclock_rate(&clk, VCCLOCKID,
+	    VCPROPTAG_SET_CLOCKRATE, max_speed * 1000000);
+	if (clkhz == -1) {
+		return (DDI_FAILURE);
+	}
+
+	/*
+	 * The RPi4 has a single clock domain shared by all CPUs, so the
+	 * actual hardware frequency is always the same for every core.
+	 *
+	 * Update cpu_curr_clock on all CPUs so kstat reflects the real
+	 * hardware state rather than each governor's stale last readback.
+	 */
+	mutex_enter(&cpu_lock);
+	c = cpu_list;
+	do {
+		c->cpu_curr_clock = (uint64_t)clkhz;
+	} while ((c = c->cpu_next) != cpu_list);
+	mutex_exit(&cpu_lock);
+
+	return (DDI_SUCCESS);
 }

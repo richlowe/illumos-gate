@@ -277,7 +277,27 @@ cpudrv_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 			return (DDI_FAILURE);
 		}
 
+#if defined(__aarch64__)
+		if (cpudrv_get_cpu(cpudsp) != DDI_SUCCESS) {
+			cmn_err(CE_WARN, "cpudrv_attach: instance %d: "
+			    "can't convert cpu_id to cpu", instance);
+			ddi_soft_state_free(cpudrv_state, instance);
+			cpudrv_enabled = B_FALSE;
+			return (DDI_FAILURE);
+		}
+
 		mutex_init(&cpudsp->lock, NULL, MUTEX_DRIVER, NULL);
+		if (!cpudrv_mach_init(cpudsp)) {
+			cmn_err(CE_WARN, "cpudrv_attach: instance %d: "
+			    "cpudrv_mach_init failed", instance);
+			cpudrv_enabled = B_FALSE;
+			cpudrv_free(cpudsp);
+			ddi_soft_state_free(cpudrv_state, instance);
+			return (DDI_FAILURE);
+		}
+#else
+		mutex_init(&cpudsp->lock, NULL, MUTEX_DRIVER, NULL);
+#endif
 		if (cpudrv_is_enabled(cpudsp)) {
 			if (cpudrv_init(cpudsp) != DDI_SUCCESS) {
 				cpudrv_enabled = B_FALSE;
@@ -338,6 +358,7 @@ cpudrv_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 		}
 
+#if !defined(__aarch64__)
 		if (!cpudrv_mach_init(cpudsp)) {
 			cmn_err(CE_WARN, "cpudrv_attach: instance %d: "
 			    "cpudrv_mach_init failed", instance);
@@ -346,6 +367,7 @@ cpudrv_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 			ddi_soft_state_free(cpudrv_state, instance);
 			return (DDI_FAILURE);
 		}
+#endif
 
 		CPUDRV_INSTALL_MAX_CHANGE_HANDLER(cpudsp);
 

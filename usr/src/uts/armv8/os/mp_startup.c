@@ -280,8 +280,8 @@ init_cpu_info(struct cpu *cp)
 	 * If nothing else has worked, we use a dummy value of 1GHz.
 	 */
 
-	if (&plat_get_cpu_clock != NULL) {
-		uint64_t clk = plat_get_cpu_clock(cp->cpu_id);
+	if (&plat_cpu_get_speed != NULL) {
+		uint64_t clk = plat_cpu_get_speed(cp);
 		if (clk != 0) {
 			pi->pi_clock = (clk + 500000) / 1000000;
 			cp->cpu_curr_clock = clk;
@@ -331,6 +331,15 @@ init_cpu_info(struct cpu *cp)
 		cp->cpu_curr_clock = 1000 * 1000 * 1000;
 	}
 
+	/*
+	 * Supported frequencies.
+	 *
+	 * This is a fallback and only used until cpudrv takes over.
+	 */
+	if (cp->cpu_supp_freqs == NULL) {
+		cpu_set_supp_freqs(cp, NULL);
+	}
+
 	strlcpy(pi->pi_processor_type, "AArch64", PI_TYPELEN);
 
 	if (has_arm_feature(arm_features, ARM_FEAT_SME2))
@@ -365,12 +374,6 @@ init_cpu_info(struct cpu *cp)
 
 	cp->cpu_revision = kmem_zalloc(16, KM_SLEEP);
 	sprintf(cp->cpu_revision, "%ld", MIDR_REVISION(cp->cpu_m.mcpu_midr));
-
-	/* Supported frequencies */
-	if (&plat_set_cpu_supp_freqs != NULL)
-		plat_set_cpu_supp_freqs(cp);
-	if (cp->cpu_supp_freqs == NULL)
-		cpu_set_supp_freqs(cp, NULL);
 }
 
 /*
@@ -605,6 +608,8 @@ mp_startup_boot(void)
 
 	/* Enable interrupts */
 	(void) spl0();
+
+	(void) mach_cpu_create_device_node(cp, NULL);
 
 	/*
 	 * Setting the bit in cpu_ready_set must be the last operation in
