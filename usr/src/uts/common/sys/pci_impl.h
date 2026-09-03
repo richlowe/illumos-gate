@@ -24,7 +24,7 @@
  * Copyright 2017 Hayashi Naoyuki
  * Copyright 2018 Joyent, Inc.
  * Copyright 2022 Michael van der Westhuizen
- * Copyright 2024 Oxide Computer Company
+ * Copyright 2026 Oxide Computer Company
  */
 
 #ifndef _SYS_PCI_IMPL_H
