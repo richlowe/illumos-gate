@@ -294,6 +294,11 @@ arch = i86pc
 
 [/opt/os-tests/tests/ilstr/64/ilstr_basic.64]
 
+[/opt/os-tests/tests/memlist/32/memlist_test.32]
+arch = i86pc
+
+[/opt/os-tests/tests/memlist/64/memlist_test.64]
+
 [/opt/os-tests/tests/execvpe/32/execvpe-test.32]
 arch = i86pc
 
@@ -302,6 +307,9 @@ arch = i86pc
 [/opt/os-tests/tests/minttl]
 user = root
 tests = ['minttl', 'minttl_err']
+
+[/opt/os-tests/tests/sockopt]
+tests = ['v4mapped']
 
 [/opt/os-tests/tests/tcpsig]
 pre_user = root

@@ -23,7 +23,7 @@
  * Copyright 2019 Joyent, Inc.
  * Copyright 2019 Western Digital Corporation
  * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
- * Copyright 2024 Oxide Computer Company
+ * Copyright 2026 Oxide Computer Company
  */
 
 /*
@@ -126,6 +126,7 @@
 
 #include <sys/ddi.h>
 #include <sys/memlist.h>
+#include <sys/memlist_impl.h>
 #include <sys/obpdefs.h>
 #include <sys/sunddi.h>
 #include <sys/sunndi.h>
@@ -134,7 +135,6 @@
 #include <sys/pci.h>
 #include <sys/pci_cfgacc.h>
 #include <sys/pci_impl.h>
-#include <sys/pci_memlist.h>
 #include <sys/pci_props.h>
 #include <sys/pcie_impl.h>
 #include <sys/plat/pci_prd.h>
@@ -236,11 +236,19 @@ static void add_bus_range_prop(struct pci_bus_resource *, int);
 static void add_ranges_prop(struct pci_bus_resource *, int, boolean_t);
 static void add_bus_available_prop(struct pci_bus_resource *, int);
 static void alloc_res_array(struct pci_bus_resource **, size_t);
-static void pci_memlist_remove_list(struct memlist **, struct memlist *);
 static void populate_bus_res(dev_info_t *, struct pci_bus_resource *,
     uchar_t);
 static void pci_reprogram(dev_info_t *, struct pci_bus_resource *);
 static void dip_bus_range(dev_info_t *, int *);
+
+static void
+print_memlist(const struct memlist *list)
+{
+	printf("0x%p content: ", (const void *)list);
+	for (; list != NULL; list = list->ml_next)
+		printf("(0x%lx, 0x%lx) ", list->ml_address, list->ml_size);
+	printf("\n");
+}
 
 static void
 dump_memlists_impl(struct pci_bus_resource *pci_bus_res, const char *tag,
@@ -249,27 +257,27 @@ dump_memlists_impl(struct pci_bus_resource *pci_bus_res, const char *tag,
 	printf("Memlist dump at %s - bus %x\n", tag, bus);
 	if (pci_bus_res[bus].io_used != NULL) {
 		printf("    io_used ");
-		pci_memlist_dump(pci_bus_res[bus].io_used);
+		print_memlist(pci_bus_res[bus].io_used);
 	}
 	if (pci_bus_res[bus].io_avail != NULL) {
 		printf("    io_avail ");
-		pci_memlist_dump(pci_bus_res[bus].io_avail);
+		print_memlist(pci_bus_res[bus].io_avail);
 	}
 	if (pci_bus_res[bus].mem_used != NULL) {
 		printf("    mem_used ");
-		pci_memlist_dump(pci_bus_res[bus].mem_used);
+		print_memlist(pci_bus_res[bus].mem_used);
 	}
 	if (pci_bus_res[bus].mem_avail != NULL) {
 		printf("    mem_avail ");
-		pci_memlist_dump(pci_bus_res[bus].mem_avail);
+		print_memlist(pci_bus_res[bus].mem_avail);
 	}
 	if (pci_bus_res[bus].pmem_used != NULL) {
 		printf("    pmem_used ");
-		pci_memlist_dump(pci_bus_res[bus].pmem_used);
+		print_memlist(pci_bus_res[bus].pmem_used);
 	}
 	if (pci_bus_res[bus].pmem_avail != NULL) {
 		printf("    pmem_avail ");
-		pci_memlist_dump(pci_bus_res[bus].pmem_avail);
+		print_memlist(pci_bus_res[bus].pmem_avail);
 	}
 }
 
@@ -356,7 +364,7 @@ remove_subtractive_res(struct pci_bus_resource *pci_bus_res)
 			list = pci_bus_res[i].io_used;
 			while (list) {
 				for (j = 0; j <= pci_boot_maxbus; j++)
-					(void) pci_memlist_remove(
+					memlist_rsrc_delete(
 					    &pci_bus_res[j].io_avail,
 					    list->ml_address, list->ml_size);
 				list = list->ml_next;
@@ -365,10 +373,10 @@ remove_subtractive_res(struct pci_bus_resource *pci_bus_res)
 			list = pci_bus_res[i].mem_used;
 			while (list) {
 				for (j = 0; j <= pci_boot_maxbus; j++) {
-					(void) pci_memlist_remove(
+					memlist_rsrc_delete(
 					    &pci_bus_res[j].mem_avail,
 					    list->ml_address, list->ml_size);
-					(void) pci_memlist_remove(
+					memlist_rsrc_delete(
 					    &pci_bus_res[j].pmem_avail,
 					    list->ml_address, list->ml_size);
 				}
@@ -378,10 +386,10 @@ remove_subtractive_res(struct pci_bus_resource *pci_bus_res)
 			list = pci_bus_res[i].pmem_used;
 			while (list) {
 				for (j = 0; j <= pci_boot_maxbus; j++) {
-					(void) pci_memlist_remove(
+					memlist_rsrc_delete(
 					    &pci_bus_res[j].pmem_avail,
 					    list->ml_address, list->ml_size);
-					(void) pci_memlist_remove(
+					memlist_rsrc_delete(
 					    &pci_bus_res[j].mem_avail,
 					    list->ml_address, list->ml_size);
 				}
@@ -407,7 +415,7 @@ setup_bus_res(struct pci_bus_resource *pci_bus_res, int bus)
 	 */
 	if (pci_bus_res[bus].bus_avail == NULL) {
 		ASSERT(pci_bus_res[bus].sub_bus >= bus);
-		pci_memlist_insert(&pci_bus_res[bus].bus_avail, bus,
+		memlist_rsrc_add(&pci_bus_res[bus].bus_avail, bus,
 		    pci_bus_res[bus].sub_bus - bus + 1);
 	}
 
@@ -420,12 +428,12 @@ setup_bus_res(struct pci_bus_resource *pci_bus_res, int bus)
 	par_bus = pci_bus_res[bus].par_bus;
 	if (par_bus != NO_PAR_BUS) {
 		ASSERT(pci_bus_res[par_bus].bus_avail != NULL);
-		pci_memlist_remove_list(&pci_bus_res[par_bus].bus_avail,
+		memlist_rsrc_delete_list(&pci_bus_res[par_bus].bus_avail,
 		    pci_bus_res[bus].bus_avail);
 	}
 
 	/* remove self from bus_avail */;
-	(void) pci_memlist_remove(&pci_bus_res[bus].bus_avail, bus, 1);
+	memlist_rsrc_delete(&pci_bus_res[bus].bus_avail, bus, 1);
 }
 
 /*
@@ -481,12 +489,15 @@ get_per_bridge_avail(struct pci_bus_resource *pci_bus_res, uchar_t bus)
 	return (pci_bus_res[bus].mem_buffer / pci_bus_res[bus].num_bridge);
 }
 
-static uint64_t
-lookup_parbus_res(struct pci_bus_resource *pci_bus_res, uchar_t parbus,
-    uint64_t size, uint64_t align, mem_res_t type)
+/*
+ * Return the list of resources of the given type still available on the given
+ * bus, or NULL if we may not allocate from it at all.
+ */
+static struct memlist **
+parbus_res_avail(struct pci_bus_resource *pci_bus_res, uchar_t parbus,
+    mem_res_t type)
 {
 	struct memlist **list;
-	uint64_t addr;
 
 	parbus = resolve_alloc_bus(pci_bus_res, parbus, type);
 
@@ -504,20 +515,34 @@ lookup_parbus_res(struct pci_bus_resource *pci_bus_res, uchar_t parbus,
 		panic("Invalid resource type %d", type);
 	}
 
-	if (*list == NULL)
-		return (0);
+	return (list);
+}
 
-	addr = pci_memlist_find(list, size, align);
+/*
+ * Claim a span from the parent bus, which is removed from its available list on
+ * success.  Returns whether one was found and leaves *addrp alone if not.
+ */
+static boolean_t
+lookup_parbus_res(struct pci_bus_resource *pci_bus_res, uchar_t parbus,
+    uint64_t size, uint64_t align, mem_res_t type, uint64_t *addrp)
+{
+	struct memlist **list;
 
-	return (addr);
+	list = parbus_res_avail(pci_bus_res, parbus, type);
+
+	if (list == NULL)
+		return (B_FALSE);
+
+	return (memlist_rsrc_claim(list, size, align, addrp) ==
+	    MEML_SPANOP_OK);
 }
 
 /*
  * Allocate a resource from the parent bus
  */
-static uint64_t
+static boolean_t
 get_parbus_res(struct pci_bus_resource *pci_bus_res, uchar_t parbus,
-    uchar_t bus, uint64_t size, uint64_t align, mem_res_t type)
+    uchar_t bus, uint64_t size, uint64_t align, mem_res_t type, uint64_t *addrp)
 {
 	struct memlist **par_avail, **par_used, **avail, **used;
 	uint64_t addr;
@@ -548,14 +573,15 @@ get_parbus_res(struct pci_bus_resource *pci_bus_res, uchar_t parbus,
 	}
 
 	/* Return any existing resources to the parent bus */
-	pci_memlist_subsume(used, avail);
+	memlist_rsrc_subsume(used, avail);
 	for (struct memlist *m = *avail; m != NULL; m = m->ml_next) {
-		(void) pci_memlist_remove(par_used, m->ml_address, m->ml_size);
-		pci_memlist_insert(par_avail, m->ml_address, m->ml_size);
+		memlist_rsrc_delete(par_used, m->ml_address, m->ml_size);
+		memlist_rsrc_add(par_avail, m->ml_address, m->ml_size);
 	}
-	pci_memlist_free_all(avail);
+	memlist_rsrc_free(avail);
 
-	addr = lookup_parbus_res(pci_bus_res, parbus, size, align, type);
+	if (!lookup_parbus_res(pci_bus_res, parbus, size, align, type, &addr))
+		return (B_FALSE);
 
 	/*
 	 * The system may have provided a 64-bit non-PF memory region to the
@@ -566,16 +592,19 @@ get_parbus_res(struct pci_bus_resource *pci_bus_res, uchar_t parbus,
 	 */
 	if (type == RES_MEM &&
 	    (addr >= UINT32_MAX || addr >= UINT32_MAX - size)) {
-		return (0);
+		/*
+		 * Return the span to the parent bus' available list.
+		 */
+		memlist_rsrc_add(par_avail, addr, size);
+		return (B_FALSE);
 	}
 
-	if (addr != 0) {
-		pci_memlist_insert(par_used, addr, size);
-		(void) pci_memlist_remove(par_avail, addr, size);
-		pci_memlist_insert(avail, addr, size);
-	}
+	memlist_rsrc_add(par_used, addr, size);
+	memlist_rsrc_add(avail, addr, size);
 
-	return (addr);
+	*addrp = addr;
+
+	return (B_TRUE);
 }
 
 /*
@@ -791,6 +820,7 @@ fix_ppb_res(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	int rv, cap_ptr, physhi;
 	dev_info_t *dip;
 	uint16_t cmd_reg;
+	struct memlist **parbus_pmem;
 
 	/* skip root (peer) PCI busses */
 	if (pci_bus_res[secbus].par_bus == NO_PAR_BUS)
@@ -898,12 +928,15 @@ fix_ppb_res(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	pmem.size = MAX(pci_bus_res[secbus].pmem_size,
 	    buscount * PPB_MEM_ALIGNMENT * 32);
 
+
 	/*
 	 * Check if the parent bus could allocate a 64-bit sized PF
 	 * range and bump the minimum pmem.size to 512MB if so.
 	 */
-	if (lookup_parbus_res(pci_bus_res, parbus, 1ULL << 32,
-	    PPB_MEM_ALIGNMENT, RES_PMEM) > 0) {
+	parbus_pmem = parbus_res_avail(pci_bus_res, parbus, RES_PMEM);
+	if (parbus_pmem != NULL &&
+	    memlist_find_span(*parbus_pmem, 1ULL << 32, PPB_MEM_ALIGNMENT,
+	    NULL) == MEML_SPANOP_OK) {
 		pmem.size = MAX(pci_bus_res[secbus].pmem_size,
 		    buscount * PPB_MEM_ALIGNMENT * 512);
 	}
@@ -951,9 +984,8 @@ fix_ppb_res(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 		 * Add an arbitrary I/O resource to the subtractive PPB
 		 */
 		if (pci_bus_res[secbus].io_avail == NULL) {
-			addr = get_parbus_res(pci_bus_res, parbus, secbus,
-			    io.size, io.align, RES_IO);
-			if (addr != 0) {
+			if (get_parbus_res(pci_bus_res, parbus, secbus, io.size,
+			    io.align, RES_IO, &addr)) {
 				add_ranges_prop(pci_bus_res, secbus, B_TRUE);
 
 				dcmn_err(CE_NOTE,
@@ -967,9 +999,8 @@ fix_ppb_res(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 		 * Add an arbitrary memory resource to the subtractive PPB
 		 */
 		if (pci_bus_res[secbus].mem_avail == NULL) {
-			addr = get_parbus_res(pci_bus_res, parbus, secbus,
-			    mem.size, mem.align, RES_MEM);
-			if (addr != 0) {
+			if (get_parbus_res(pci_bus_res, parbus, secbus, mem.size,
+			    mem.align, RES_MEM, &addr)) {
 				add_ranges_prop(pci_bus_res, secbus, B_TRUE);
 
 				dcmn_err(CE_NOTE,
@@ -995,14 +1026,13 @@ fix_ppb_res(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	 * Reprogram IO:
 	 */
 	if (pci_bus_res[secbus].io_used != NULL) {
-		pci_memlist_subsume(&pci_bus_res[secbus].io_used,
+		memlist_rsrc_subsume(&pci_bus_res[secbus].io_used,
 		    &pci_bus_res[secbus].io_avail);
 	}
 
 	/* get new io ports from parent bus */
-	addr = get_parbus_res(pci_bus_res, parbus, secbus,
-	    io.size, io.align, RES_IO);
-	if (addr != 0) {
+	if (get_parbus_res(pci_bus_res, parbus, secbus,
+	    io.size, io.align, RES_IO, &addr)) {
 		io.base = addr;
 		io.limit = addr + io.size - 1;
 	}
@@ -1017,28 +1047,26 @@ fix_ppb_res(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 	 */
 	/* Mem range */
 	if (pci_bus_res[secbus].mem_used != NULL) {
-		pci_memlist_subsume(&pci_bus_res[secbus].mem_used,
+		memlist_rsrc_subsume(&pci_bus_res[secbus].mem_used,
 		    &pci_bus_res[secbus].mem_avail);
 	}
 
 	/* get new mem resource from parent bus */
-	addr = get_parbus_res(pci_bus_res, parbus, secbus,
-	    mem.size, mem.align, RES_MEM);
-	if (addr != 0) {
+	if (get_parbus_res(pci_bus_res, parbus, secbus,
+	    mem.size, mem.align, RES_MEM, &addr)) {
 		mem.base = addr;
 		mem.limit = addr + mem.size - 1;
 	}
 
 	/* Prefetch mem */
 	if (pci_bus_res[secbus].pmem_used != NULL) {
-		pci_memlist_subsume(&pci_bus_res[secbus].pmem_used,
+		memlist_rsrc_subsume(&pci_bus_res[secbus].pmem_used,
 		    &pci_bus_res[secbus].pmem_avail);
 	}
 
 	/* get new mem resource from parent bus */
-	addr = get_parbus_res(pci_bus_res, parbus, secbus,
-	    pmem.size, pmem.align, RES_PMEM);
-	if (addr != 0) {
+	if (get_parbus_res(pci_bus_res, parbus, secbus,
+	    pmem.size, pmem.align, RES_PMEM, &addr)) {
 		pmem.base = addr;
 		pmem.limit = addr + pmem.size - 1;
 	}
@@ -1099,11 +1127,11 @@ pci_reprogram(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res)
 		 * least, is invalid.  This is as good a place as any to make
 		 * it true.  We also remove I/O 0x0 for the same reason
 		 */
-		(void) pci_memlist_remove(&pci_bus_res[bus].mem_avail,
+		memlist_rsrc_delete(&pci_bus_res[bus].mem_avail,
 		    0x0, 0x100000);
-		(void) pci_memlist_remove(&pci_bus_res[bus].pmem_avail,
+		memlist_rsrc_delete(&pci_bus_res[bus].pmem_avail,
 		    0x0, 0x100000);
-		(void) pci_memlist_remove(&pci_bus_res[bus].io_avail,
+		memlist_rsrc_delete(&pci_bus_res[bus].io_avail,
 		    0x0, 0x1);
 
 		/*
@@ -1151,15 +1179,15 @@ pci_reprogram(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res)
 		 * 4. Remove used PCI and ISA resources from bus resource map
 		 */
 
-		pci_memlist_remove_list(&pci_bus_res[bus].io_avail,
+		memlist_rsrc_delete_list(&pci_bus_res[bus].io_avail,
 		    pci_bus_res[bus].io_used);
-		pci_memlist_remove_list(&pci_bus_res[bus].mem_avail,
+		memlist_rsrc_delete_list(&pci_bus_res[bus].mem_avail,
 		    pci_bus_res[bus].mem_used);
-		pci_memlist_remove_list(&pci_bus_res[bus].pmem_avail,
+		memlist_rsrc_delete_list(&pci_bus_res[bus].pmem_avail,
 		    pci_bus_res[bus].pmem_used);
-		pci_memlist_remove_list(&pci_bus_res[bus].mem_avail,
+		memlist_rsrc_delete_list(&pci_bus_res[bus].mem_avail,
 		    pci_bus_res[bus].pmem_used);
-		pci_memlist_remove_list(&pci_bus_res[bus].pmem_avail,
+		memlist_rsrc_delete_list(&pci_bus_res[bus].pmem_avail,
 		    pci_bus_res[bus].mem_used);
 	}
 
@@ -1210,7 +1238,7 @@ find_resource(dev_info_t *rcdip, pci_prd_rsrc_t rsrc)
 		int busrng[2];
 
 		dip_bus_range(rcdip, busrng);
-		pci_memlist_insert(&mlp, busrng[0],
+		memlist_rsrc_add(&mlp, busrng[0],
 		    (busrng[1] - busrng[0] + 1));
 		return (mlp);
 	}
@@ -1250,7 +1278,7 @@ find_resource(dev_info_t *rcdip, pci_prd_rsrc_t rsrc)
 	if (i == rnglen)
 		return (NULL);
 
-	pci_memlist_insert(&mlp,
+	memlist_rsrc_add(&mlp,
 	    ((uint64_t)rngs[i].child_mid << 32) | rngs[i].child_low,
 	    ((uint64_t)rngs[i].size_high << 32) | rngs[i].size_low);
 
@@ -1317,7 +1345,7 @@ enumerate_bus_devs(dev_info_t *rcdip, uchar_t bus,
 			entry = devlist;
 			devlist = entry->next;
 			/* reprogram device(s) */
-			add_reg_props(rcdip, entry->dip,
+			(void) add_reg_props(rcdip, entry->dip,
 			    pci_bus_res, bus, entry->dev, entry->func,
 			    CONFIG_NEW);
 			kmem_free(entry, sizeof (*entry));
@@ -1386,20 +1414,12 @@ enumerate_bus_devs(dev_info_t *rcdip, uchar_t bus,
 			pci_bus_res[par_bus].pmem_size +=
 			    pci_bus_res[bus].pmem_size;
 
-			if (pci_bus_res[bus].io_used != NULL) {
-				pci_memlist_merge(&pci_bus_res[bus].io_used,
-				    &pci_bus_res[par_bus].io_used);
-			}
-
-			if (pci_bus_res[bus].mem_used != NULL) {
-				pci_memlist_merge(&pci_bus_res[bus].mem_used,
-				    &pci_bus_res[par_bus].mem_used);
-			}
-
-			if (pci_bus_res[bus].pmem_used != NULL) {
-				pci_memlist_merge(&pci_bus_res[bus].pmem_used,
-				    &pci_bus_res[par_bus].pmem_used);
-			}
+			memlist_rsrc_merge(pci_bus_res[bus].io_used,
+			    &pci_bus_res[par_bus].io_used);
+			memlist_rsrc_merge(pci_bus_res[bus].mem_used,
+			    &pci_bus_res[par_bus].mem_used);
+			memlist_rsrc_merge(pci_bus_res[bus].pmem_used,
+			    &pci_bus_res[par_bus].pmem_used);
 
 			pci_bus_res[par_bus].num_bridge +=
 			    pci_bus_res[bus].num_bridge;
@@ -1700,14 +1720,18 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 			    bus, dev, func, bar, base, len);
 			pci_bus_res[bus].io_size += len;
 		} else {
-			base = pci_memlist_find(io_avail, len, len);
-			if (base == 0) {
+			uint64_t found;
+
+			if (memlist_rsrc_claim(io_avail, len, len, &found) != MEML_SPANOP_OK) {
+				base = 0;
 				cmn_err(CE_WARN, MSGHDR "BAR%u I/O "
 				    "failed to find length 0x%x",
 				    ddi_node_name(rcdip), bus, dev, func, bar,
 				    len);
 			} else {
 				uint32_t nbase;
+
+				base = (uint32_t)found;
 
 				dcmn_err(CE_NOTE, MSGHDR "BAR%u  "
 				    "I/O REPROG 0x%x ~ 0x%x",
@@ -1740,10 +1764,10 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 						    PCI_GETBDF(bus, dev, func),
 						    PCI_CONF_COMM, command);
 					}
-					pci_memlist_insert(io_avail, base, len);
+					memlist_rsrc_add(io_avail, base, len);
 					base = 0;
 				} else {
-					pci_memlist_insert(io_used, base, len);
+					memlist_rsrc_add(io_used, base, len);
 				}
 			}
 		}
@@ -1788,7 +1812,6 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 		if (base & PCI_BASE_PREF_M)
 			phys_hi |= PCI_PREFETCH_B;
 
-
 		/*
 		 * A device under a subtractive PPB can allocate resources from
 		 * its parent bus if there is no resource available on its own
@@ -1822,6 +1845,7 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 		base &= PCI_BASE_M_ADDR_M;
 
 		fbase = (((uint64_t)base_hi) << 32) | base;
+
 		if (op == CONFIG_INFO) {
 			dcmn_err(CE_NOTE,
 			    MSGHDR "BAR%u %sMEM FWINIT 0x%lx ~ 0x%lx%s "
@@ -1847,29 +1871,30 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 			else
 				pci_bus_res[bus].mem_size += len;
 		} else {
-			boolean_t pf = B_FALSE;
+			boolean_t pf = B_FALSE, got = B_FALSE;
 			fbase = 0;
 
 			/*
 			 * When desired, attempt a prefetchable allocation first
 			 */
-			if ((phys_hi & PCI_PREFETCH_B) != 0 &&
-			    *pmem_avail != NULL) {
-				fbase = pci_memlist_find(pmem_avail, len, len);
-				if (fbase != 0)
-					pf = B_TRUE;
+			if ((phys_hi & PCI_PREFETCH_B) != 0) {
+				got = memlist_rsrc_claim(pmem_avail, len, len,
+				    &fbase) == MEML_SPANOP_OK;
+				pf = got;
 			}
 			/*
 			 * If prefetchable allocation was not desired, or
 			 * failed, attempt ordinary memory allocation.
 			 */
-			if (fbase == 0 && *mem_avail != NULL)
-				fbase = pci_memlist_find(mem_avail, len, len);
+			if (!got) {
+				got = memlist_rsrc_claim(mem_avail, len, len,
+				    &fbase) == MEML_SPANOP_OK;
+			}
 
 			base_hi = fbase >> 32;
 			base = fbase & 0xffffffff;
 
-			if (fbase == 0) {
+			if (!got) {
 				cmn_err(CE_WARN, MSGHDR "BAR%u MEM "
 				    "failed to find length 0x%lx",
 				    ddi_node_name(rcdip), bus, dev, func,
@@ -1932,20 +1957,20 @@ add_bar_reg_props(dev_info_t *rcdip, struct pci_bus_resource *pci_bus_res,
 						    PCI_CONF_COMM, command);
 					}
 
-					pci_memlist_insert(
+					memlist_rsrc_add(
 					    pf ? pmem_avail : mem_avail,
 					    base, len);
 					base = base_hi = 0;
 				} else {
 					if (pf) {
-						pci_memlist_insert(pmem_used,
+						memlist_rsrc_add(pmem_used,
 						    fbase, len);
-						(void) pci_memlist_remove(
+						memlist_rsrc_delete(
 						    pmem_avail, fbase, len);
 					} else {
-						pci_memlist_insert(mem_used,
+						memlist_rsrc_add(mem_used,
 						    fbase, len);
-						(void) pci_memlist_remove(
+						memlist_rsrc_delete(
 						    mem_avail, fbase, len);
 					}
 				}
@@ -2074,8 +2099,8 @@ add_reg_props(dev_info_t *rcdip, dev_info_t *dip,
 		nreg++, nasgn++;
 		/* take it out of the memory resource */
 		if (base != 0) {
-			(void) pci_memlist_remove(mem_avail, base, len);
-			pci_memlist_insert(mem_used, base, len);
+			memlist_rsrc_delete(mem_avail, base, len);
+			memlist_rsrc_add(mem_used, base, len);
 			pci_bus_res[bus].mem_size += len;
 		}
 	}
@@ -2313,7 +2338,7 @@ memlist_to_ranges(void **rp, struct memlist *list, const int bus,
 static void
 add_ranges_prop(struct pci_bus_resource *pci_bus_res, int bus, boolean_t ppb)
 {
-	int total, alloc_size;
+	size_t total, alloc_size;
 	void	*rp, *next_rp;
 	struct memlist *iolist, *memlist, *pmemlist;
 
@@ -2325,16 +2350,16 @@ add_ranges_prop(struct pci_bus_resource *pci_bus_res, int bus, boolean_t ppb)
 
 	iolist = memlist = pmemlist = (struct memlist *)NULL;
 
-	pci_memlist_merge(&pci_bus_res[bus].io_avail, &iolist);
-	pci_memlist_merge(&pci_bus_res[bus].io_used, &iolist);
-	pci_memlist_merge(&pci_bus_res[bus].mem_avail, &memlist);
-	pci_memlist_merge(&pci_bus_res[bus].mem_used, &memlist);
-	pci_memlist_merge(&pci_bus_res[bus].pmem_avail, &pmemlist);
-	pci_memlist_merge(&pci_bus_res[bus].pmem_used, &pmemlist);
+	memlist_rsrc_merge(pci_bus_res[bus].io_avail, &iolist);
+	memlist_rsrc_merge(pci_bus_res[bus].io_used, &iolist);
+	memlist_rsrc_merge(pci_bus_res[bus].mem_avail, &memlist);
+	memlist_rsrc_merge(pci_bus_res[bus].mem_used, &memlist);
+	memlist_rsrc_merge(pci_bus_res[bus].pmem_avail, &pmemlist);
+	memlist_rsrc_merge(pci_bus_res[bus].pmem_used, &pmemlist);
 
-	total = pci_memlist_count(iolist);
-	total += pci_memlist_count(memlist);
-	total += pci_memlist_count(pmemlist);
+	total = memlist_count(iolist);
+	total += memlist_count(memlist);
+	total += memlist_count(pmemlist);
 
 	/* no property is created if no ranges are present */
 	if (total == 0)
@@ -2356,27 +2381,16 @@ add_ranges_prop(struct pci_bus_resource *pci_bus_res, int bus, boolean_t ppb)
 	    OBP_RANGES, (int *)rp, alloc_size / sizeof (int));
 
 	kmem_free(rp, alloc_size);
-	pci_memlist_free_all(&iolist);
-	pci_memlist_free_all(&memlist);
-	pci_memlist_free_all(&pmemlist);
+	memlist_rsrc_free(&iolist);
+	memlist_rsrc_free(&memlist);
+	memlist_rsrc_free(&pmemlist);
 }
 
-static void
-pci_memlist_remove_list(struct memlist **list, struct memlist *remove_list)
-{
-	while (list && *list && remove_list) {
-		(void) pci_memlist_remove(list, remove_list->ml_address,
-		    remove_list->ml_size);
-		remove_list = remove_list->ml_next;
-	}
-}
-
-
-static int
+static size_t
 memlist_to_spec(struct pci_phys_spec *sp, const int bus, struct memlist *list,
     const uint32_t type)
 {
-	uint_t i = 0;
+	size_t i = 0;
 
 	while (list != NULL) {
 		uint32_t newtype = type;
@@ -2412,16 +2426,16 @@ memlist_to_spec(struct pci_phys_spec *sp, const int bus, struct memlist *list,
 static void
 add_bus_available_prop(struct pci_bus_resource *pci_bus_res, int bus)
 {
-	int i, count;
+	size_t i, count;
 	struct pci_phys_spec *sp;
 
 	/* no devinfo node - unused bus, return */
 	if (pci_bus_res[bus].dip == NULL)
 		return;
 
-	count = pci_memlist_count(pci_bus_res[bus].io_avail) +
-	    pci_memlist_count(pci_bus_res[bus].mem_avail) +
-	    pci_memlist_count(pci_bus_res[bus].pmem_avail);
+	count = memlist_count(pci_bus_res[bus].io_avail) +
+	    memlist_count(pci_bus_res[bus].mem_avail) +
+	    memlist_count(pci_bus_res[bus].pmem_avail);
 
 	if (count == 0)		/* nothing available */
 		return;
@@ -2433,7 +2447,7 @@ add_bus_available_prop(struct pci_bus_resource *pci_bus_res, int bus)
 	    PCI_ADDR_MEM32 | PCI_RELOCAT_B);
 	i += memlist_to_spec(&sp[i], bus, pci_bus_res[bus].pmem_avail,
 	    PCI_ADDR_MEM32 | PCI_RELOCAT_B | PCI_PREFETCH_B);
-	ASSERT(i == count);
+	ASSERT3U(i, ==, count);
 
 	(void) ndi_prop_update_int_array(DDI_DEV_T_NONE, pci_bus_res[bus].dip,
 	    "available", (int *)sp,

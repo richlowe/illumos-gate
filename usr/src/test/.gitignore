@@ -247,6 +247,7 @@ os-tests/tests/sockfs/drop_priv
 os-tests/tests/sockfs/nosignal
 os-tests/tests/sockfs/so_protocol
 os-tests/tests/sockfs/sockpair
+os-tests/tests/sockopt/v4mapped
 os-tests/tests/spoof-ras/spoof-ras
 os-tests/tests/stress/dladm-kstat
 os-tests/tests/tcpsig/tcpsig
