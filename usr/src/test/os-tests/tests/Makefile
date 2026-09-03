@@ -42,6 +42,7 @@ SUBDIRS =       \
 		libsocket \
 		libtopo \
 		mac \
+		memlist \
 		minttl \
 		oclo \
 		pf_key \
@@ -55,6 +56,7 @@ SUBDIRS =       \
 		signalfd \
 		sigqueue \
 		sockfs \
+		sockopt \
 		spawn \
 		spoof-ras \
 		stackalign \
