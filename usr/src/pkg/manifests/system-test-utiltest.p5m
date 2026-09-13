@@ -34,12 +34,14 @@ dir  path=opt/util-tests/runfiles
 file path=opt/util-tests/runfiles/default.run mode=0444
 dir  path=opt/util-tests/tests
 $(MULTILIB_ONLY)dir path=opt/util-tests/tests/32
+$(MULTILIB_ONLY)file path=opt/util-tests/tests/32/libdhcputil.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/util-tests/tests/32/libjedec_hex2spd.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/util-tests/tests/32/libjedec_spd.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/util-tests/tests/32/libjedec_temp.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/util-tests/tests/32/libjedec_vendors.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/util-tests/tests/32/smbios.32 mode=0555
 dir  path=opt/util-tests/tests/64
+file path=opt/util-tests/tests/64/libdhcputil.64 mode=0555
 file path=opt/util-tests/tests/64/libjedec_hex2spd.64 mode=0555
 file path=opt/util-tests/tests/64/libjedec_spd.64 mode=0555
 file path=opt/util-tests/tests/64/libjedec_temp.64 mode=0555

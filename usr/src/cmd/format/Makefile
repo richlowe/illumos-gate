@@ -47,8 +47,6 @@ DATA= format.dat
 
 include ../Makefile.cmd
 
-CERRWARN += $(CNOWARN_UNINIT)
-
 # not linted
 SMATCH=off
 
