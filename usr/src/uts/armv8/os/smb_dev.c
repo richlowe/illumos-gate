@@ -66,9 +66,9 @@ smbios_open(const char *file, int version, int flags, int *errp)
 {
 	smbios_hdl_t *shp = NULL;
 	smbios_entry_t *ep;
-	caddr_t stbuf, bios, smb3;
-	uint64_t startaddr, startoff = 0;
-	size_t bioslen;
+	caddr_t stbuf, bios;
+	uint64_t startaddr;
+	size_t bioslen, eplen;
 	uint_t smbe_stlen;
 	uint8_t smbe_major, smbe_minor;
 	int err;
@@ -80,25 +80,37 @@ smbios_open(const char *file, int version, int flags, int *errp)
 	    DDI_PROP_DONTPASS, "smbios-address", 0)) == 0)
 		return (smb_open_error(shp, errp, ESMB_NOTFOUND));
 
-	bioslen = MMU_PAGESIZE;
-	startoff = startaddr & MMU_PAGEOFFSET;
-	startaddr &= MMU_PAGEMASK;
+	/*
+	 * We have the smbios address from the boot loader. Map only the
+	 * entry point header. Page alignment is handled by psm_map_phys.
+	 */
+	bioslen = sizeof (smbios_entry_t);
 
 	if ((bios = psm_map_phys(startaddr, bioslen, PROT_READ)) == NULL)
 		return (smb_open_error(shp, errp, ESMB_MAPDEV));
 
-	smb3 = bios + startoff;
-	if (strncmp(smb3, SMB3_ENTRY_EANCHOR, SMB3_ENTRY_EANCHORLEN) != 0) {
+	if (strncmp(bios, SMB3_ENTRY_EANCHOR, SMB3_ENTRY_EANCHORLEN) != 0) {
 		psm_unmap_phys(bios, bioslen);
 		return (smb_open_error(shp, errp, ESMB_NOTFOUND));
 	}
 
 	ep = smb_alloc(SMB_ENTRY_MAXLEN);
-	bcopy(smb3, ep, sizeof (smbios_entry_t));
-	ep->ep30.smbe_elen = MIN(ep->ep30.smbe_elen, SMB_ENTRY_MAXLEN);
-	bcopy(smb3, ep, ep->ep30.smbe_elen);
-
+	bcopy(bios, ep, sizeof (smbios_entry_t));
+	eplen = MIN(ep->ep30.smbe_elen, SMB_ENTRY_MAXLEN);
 	psm_unmap_phys(bios, bioslen);
+
+	/*
+	 * Remap the whole entrypoint if it is larger than our structure.
+	 */
+	if (eplen > sizeof (smbios_entry_t)) {
+		bios = psm_map_phys(startaddr, eplen, PROT_READ);
+		if (bios == NULL) {
+			smb_free(ep, SMB_ENTRY_MAXLEN);
+			return (smb_open_error(shp, errp, ESMB_MAPDEV));
+		}
+		bcopy(bios, ep, eplen);
+		psm_unmap_phys(bios, eplen);
+	}
 
 	smbe_major = ep->ep30.smbe_major;
 	smbe_minor = ep->ep30.smbe_minor;
