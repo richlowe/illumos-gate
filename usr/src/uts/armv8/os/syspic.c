@@ -300,3 +300,12 @@ syspic_delspl(int irq, int ipl, int min_ipl, int max_ipl)
 }
 
 int (*delspl)(int, int, int, int) = syspic_delspl;
+
+int
+syspic_config_irq(int irq, boolean_t edge)
+{
+	ASSERT(MUTEX_HELD(&syspic_intrs_lock));
+	VERIFY3P(spo_ops->spo_config_irq, !=, NULL);
+
+	return (spo_ops->spo_config_irq(spo_ctx, (intr_intid_t)irq, edge));
+}
