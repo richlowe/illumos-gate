@@ -113,6 +113,8 @@ typedef int (*spo_addspl_t)(spo_ctx_t ctx, intr_intid_t intid,
     intr_ipl_t ipl, intr_ipl_t min_ipl, intr_ipl_t max_ipl);
 typedef int (*spo_delspl_t)(spo_ctx_t ctx, intr_intid_t intid,
     intr_ipl_t ipl, intr_ipl_t min_ipl, intr_ipl_t max_ipl);
+typedef int (*spo_config_irq_t)(spo_ctx_t ctx, intr_intid_t intid,
+    boolean_t edge);
 
 typedef struct {
 	spo_cpu_init_t		spo_cpu_init;
@@ -126,6 +128,7 @@ typedef struct {
 	spo_send_ipi_t		spo_send_ipi;
 	spo_addspl_t		spo_addspl;
 	spo_delspl_t		spo_delspl;
+	spo_config_irq_t	spo_config_irq;
 } syspic_ops_t;
 
 /*
@@ -144,6 +147,15 @@ extern kmutex_t syspic_intrs_lock;
 extern syspic_intr_state_t *syspic_get_state(int irq);
 /* caller must hold `syspic_intrs_lock' */
 extern void syspic_remove_state(int irq);
+/*
+ * Program the trigger mode (edge or level) for an interrupt in the
+ * interrupt controller hardware.  Caller must hold `syspic_intrs_lock'.
+ * Returns DDI_SUCCESS if the mode was programmed or the interrupt was
+ * already active with the requested mode; DDI_FAILURE if the interrupt
+ * is already active with a different mode (refuses to change trigger
+ * mode under a live user).
+ */
+extern int syspic_config_irq(int irq, boolean_t edge);
 
 /*
  * Called in startup.c to initialise global system PIC state.

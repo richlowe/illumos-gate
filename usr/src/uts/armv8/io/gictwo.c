@@ -365,6 +365,68 @@ unlock:
 }
 
 /*
+ * syspic spo_config_irq implementation: program the trigger mode for
+ * an interrupt.
+ *
+ * Returns DDI_SUCCESS if the mode was programmed or the interrupt was
+ * already active with the requested mode; DDI_FAILURE if the interrupt
+ * is already active with a different mode.  Software must disable an
+ * interrupt before changing its Int_config field (§8.9.7); behavior is
+ * otherwise UNPREDICTABLE, so we refuse rather than reprogram it under
+ * a live user.
+ *
+ * This duplicates the active check in gicv2_config_irq so that
+ * function (and the DDI path through it) keeps its warn-and-continue
+ * behavior unchanged.
+ */
+static int
+gicv2_spo_config_irq(spo_ctx_t ctx, intr_intid_t intid, boolean_t edge)
+{
+	gicv2_conf_t *sc = ctx;
+	const uint32_t v = (edge ?
+	    GICD_ICFGR_INT_CONFIG_EDGE : GICD_ICFGR_INT_CONFIG_LEVEL);
+
+	if (GIC_INTID_IS_SGI(intid)) {
+		/* SGIs are not configurable */
+		return (DDI_SUCCESS);
+	}
+
+	if (!GIC_INTID_IS_SPI(intid)) {
+		/* PPIs keep the DDI path's behavior. */
+		gicv2_config_irq(sc, intid, edge);
+		return (DDI_SUCCESS);
+	}
+
+	GICV2_GICD_LOCK(sc);
+	if ((gicd_read(sc,
+	    GICD_ISENABLERn(GICD_IENABLER_REGNUM(intid))) &
+	    GICD_IENABLER_REGBIT(intid)) != 0) {
+		if (gicd_read(sc,
+		    GICD_ICFGRn(GICD_ICFGR_REGNUM(intid))) !=
+		    GICD_ICFGR_REGVAL(intid, v)) {
+			cmn_err(CE_WARN, "gictwo: vector %d already "
+			    "configured differently", intid);
+			GICV2_GICD_UNLOCK(sc);
+			return (DDI_FAILURE);
+		}
+		GICV2_GICD_UNLOCK(sc);
+		return (DDI_SUCCESS);
+	}
+
+	/*
+	 * GICD_ICFGR<n> is a packed field with 2 bits per interrupt,
+	 * the even bit is reserved, the odd bit is 1 for
+	 * edge-triggered 0 for level.
+	 */
+	(void) gicd_rmw(sc,
+	    GICD_ICFGRn(GICD_ICFGR_REGNUM(intid)),
+	    GICD_ICFGR_REGVAL(intid, GICD_ICFGR_INT_CONFIG_MASK),
+	    GICD_ICFGR_REGVAL(intid, v));
+	GICV2_GICD_UNLOCK(sc);
+	return (DDI_SUCCESS);
+}
+
+/*
  * Configure an SPI as edge-triggered or level-sensitive.
  *
  * This is a private interface, for use by GICv2m in setting edge-triggered
@@ -1153,6 +1215,7 @@ gicv2_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	xconf->gc_syspic.spo_send_ipi = gicv2_send_ipi;
 	xconf->gc_syspic.spo_addspl = gicv2_addspl;
 	xconf->gc_syspic.spo_delspl = gicv2_delspl;
+	xconf->gc_syspic.spo_config_irq = gicv2_spo_config_irq;
 
 	if (!syspic_register_syspic(xconf, &xconf->gc_syspic, dip)) {
 		dev_err(dip, CE_PANIC, "Failed to register GIC as the "

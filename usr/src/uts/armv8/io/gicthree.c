@@ -1177,6 +1177,62 @@ gicv3_config_irq(gicv3_conf_t *gc, uint32_t irq, boolean_t is_edge)
 }
 
 /*
+ * syspic spo_config_irq implementation: program the trigger mode for
+ * an interrupt.
+ *
+ * Returns DDI_SUCCESS if the mode was programmed or the interrupt was
+ * already active with the requested mode; DDI_FAILURE if the interrupt
+ * is already active with a different mode.  Changing Int_config on an
+ * enabled interrupt is UNPREDICTABLE (§12.9.9), so we refuse rather
+ * than reprogram it under a live user.
+ *
+ * This duplicates the active check in gicv3_config_irq_spi so that
+ * function (and the DDI path through it) keeps its warn-and-continue
+ * behavior unchanged.
+ */
+static int
+gicv3_spo_config_irq(spo_ctx_t ctx, intr_intid_t intid, boolean_t edge)
+{
+	gicv3_conf_t *gc = ctx;
+	const uint32_t v = (edge ?
+	    GICD_ICFGR_INT_CONFIG_EDGE : GICD_ICFGR_INT_CONFIG_LEVEL);
+
+	if (GIC_INTID_IS_SGI(intid)) {
+		/* SGIs are not configurable */
+		return (DDI_SUCCESS);
+	}
+
+	if (!GIC_INTID_IS_SPI(intid)) {
+		/* PPIs keep the DDI path's behavior. */
+		gicv3_config_irq(gc, intid, edge);
+		return (DDI_SUCCESS);
+	}
+
+	GICD_LOCK(gc);
+	if ((gicd_read4(gc,
+	    GICD_ISENABLERn(GICD_IENABLER_REGNUM(intid))) &
+	    GICD_IENABLER_REGBIT(intid)) != 0) {
+		if (gicd_read4(gc,
+		    GICD_ICFGRn(GICD_ICFGR_REGNUM(intid))) !=
+		    GICD_ICFGR_REGVAL(intid, v)) {
+			cmn_err(CE_WARN, "gicthree: vector %d already "
+			    "configured differently", intid);
+			GICD_UNLOCK(gc);
+			return (DDI_FAILURE);
+		}
+		GICD_UNLOCK(gc);
+		return (DDI_SUCCESS);
+	}
+
+	(void) gicd_rmw4(gc,
+	    GICD_ICFGRn(GICD_ICFGR_REGNUM(intid)),
+	    GICD_ICFGR_REGVAL(intid, GICD_ICFGR_INT_CONFIG_MASK),
+	    GICD_ICFGR_REGVAL(intid, v));
+	GICD_UNLOCK(gc);
+	return (DDI_SUCCESS);
+}
+
+/*
  * Mask interrupts of priority lower than, or equal to, IRQ.
  */
 static int
@@ -2525,6 +2581,7 @@ gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	gc->gc_syspic.spo_send_ipi = gicv3_send_ipi;
 	gc->gc_syspic.spo_addspl = gicv3_addspl;
 	gc->gc_syspic.spo_delspl = gicv3_delspl;
+	gc->gc_syspic.spo_config_irq = gicv3_spo_config_irq;
 
 	if (!syspic_register_syspic(gc, &gc->gc_syspic, dip)) {
 		dev_err(dip, CE_PANIC, "Failed to register GIC as the "
