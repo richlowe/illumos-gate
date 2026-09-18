@@ -83,23 +83,34 @@ extern void cpudrv_mach_free_speeds(int *, int);
 	cpudrv_mach_free_speeds(speeds, nspeeds)
 
 /*
- * Idle and user watermark percentages.  These are only used by the
- * PM governor which is not active without DVFS, but must compile.
+ * Compute the idle cnt percentage for a given speed.
  */
 #define	CPUDRV_IDLE_CNT_PERCENT(hwm, speeds, i) \
-	(100 - ((100 - hwm) * speeds[i]))
-
-#define	CPUDRV_USER_CNT_PERCENT(hwm, speeds, i) \
-	((hwm * speeds[i - 1]) / speeds[i])
+	(100 - (((100 - hwm) * speeds[0]) / speeds[i]))
 
 /*
- * pm-components property formatting.  Not used without DVFS, but
- * referenced by cpudrv_comp_create() which must compile.
+ * Compute the user cnt percentage for a given speed.
  */
-#define	CPUDRV_COMP_SIZE()	\
+#define	CPUDRV_USER_CNT_PERCENT(hwm, speeds, i) \
+	((hwm * speeds[i]) / speeds[i - 1]);
+
+/*
+ * pm-components property definitions for this machine type.
+ *
+ * Fully constructed pm-components property should be an array of
+ * strings that look something like:
+ *
+ * pmc[0] = "NAME=CPU Speed"
+ * pmc[1] = "1=2800MHz"
+ * pmc[2] = "2=3200MHz"
+ *
+ * The amount of memory needed for each string is:
+ * 	digits for power level + '=' +  digits for freq + 'MHz' + '\0'
+ */
+#define	CPUDRV_COMP_SIZE() \
 	(CPUDRV_COMP_MAX_DIG + 1 + CPUDRV_COMP_MAX_DIG + 3 + 1);
 #define	CPUDRV_COMP_SPEED(cpupm, cur_spd) cur_spd->speed;
-#define	CPUDRV_COMP_SPRINT(pmc, cpupm, cur_spd, comp_spd)	\
+#define	CPUDRV_COMP_SPRINT(pmc, cpupm, cur_spd, comp_spd) \
 	(void) sprintf(pmc, "%d=%dMHz", cur_spd->pm_level, comp_spd);
 
 #ifdef __cplusplus
