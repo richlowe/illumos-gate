@@ -34,10 +34,10 @@ extern "C" {
  */
 
 /*
- * Cross-call readiness check.  On aarch64 we consider all online CPUs
- * ready for cross-calls.
+ * Cross-call readiness check.
  */
-#define	CPUDRV_XCALL_IS_READY(cpuid)	(B_TRUE)
+extern cpuset_t cpu_ready_set;	/* cpus ready for x-calls */
+#define	CPUDRV_XCALL_IS_READY(cpuid)	(CPU_IN_SET(cpu_ready_set, (cpuid)))
 
 /*
  * No governor thread on aarch64.
