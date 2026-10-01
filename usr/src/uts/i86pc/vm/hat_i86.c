@@ -4529,8 +4529,7 @@ hat_cpu_offline(struct cpu *cpup)
 }
 
 /*
- * Function called after all CPUs are brought online.
- * Used to remove low address boot mappings.
+ * Function used to remove low address boot mappings.
  */
 void
 clear_boot_mappings(uintptr_t low, uintptr_t high)
