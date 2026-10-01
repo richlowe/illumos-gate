@@ -553,7 +553,7 @@ main(void)
 	 * and swap have been set up.
 	 */
 	consconfig();
-#if !defined(__sparc)
+#if !defined(__sparc) && !defined(__aarch64__)
 	release_bootstrap();
 #endif
 
@@ -604,10 +604,11 @@ main(void)
 	 */
 	start_other_cpus(0);
 
-#if defined(__sparc)
+#if defined(__sparc) || defined(__aarch64__)
 	/*
-	 * Release bootstrap here since PROM interfaces are
-	 * used to start other CPUs above.
+	 * Release bootstrap here since on SPARC PROM interfaces are used to
+	 * start other CPUs above, and on AArch64 the cpus boot via identity
+	 * mapped physical addresses.
 	 */
 	release_bootstrap();
 #endif
