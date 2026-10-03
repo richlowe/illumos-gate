@@ -106,7 +106,8 @@ struct hat_mmu_info mmu;
 
 static ulong_t		*asid_bitmap;
 static ulong_t		*asid_summary;	/* 1 bit per long in asid_bitmap */
-static uint32_t		asid_summary_len; /* summary bits (= main bitmap words) */
+/* summary bits (= main bitmap words) */
+static uint32_t		asid_summary_len;
 static kmutex_t		asid_lock;
 static uint32_t		asid_next = ASID_FIRST_AVAILABLE;
 static volatile int32_t	asid_epoch;
@@ -504,7 +505,7 @@ hat_asid_alloc(hat_t *hat)
 		 * (down from 1024 with the single-level word scan).
 		 *
 		 * Phase 1: partial word containing asid_next (bypass
-		 *          summary: we know which word to check).
+		 *	    summary: we know which word to check).
 		 * Phase 2: summary-guided scan forward to end.
 		 * Phase 3: summary-guided wrap to start.
 		 */
@@ -3415,13 +3416,101 @@ hat_exit(hat_t *hat)
 	mutex_exit(&hat->hat_mutex);
 }
 
+/* arguably this could be boot_mapout() in kvm */
+static void
+free_boot_page(pfn_t page)
+{
+	page_t *pp = page_numtopp_nolock(page);
+
+	ASSERT3P(pp, !=, NULL);
+
+	if (page_tryupgrade(pp) == 0) {
+		panic("%s: couldn't upgrade ttbr0-ish PT "
+		    "lock, pp: %p", __func__, pp);
+	}
+
+	ASSERT(!PP_ISFREE(pp));
+	ASSERT3P(pp->p_vnode, ==, &kvp);
+
+	/*
+	 * boot_mapin() does not do a full page_pp_lock() and
+	 * just sets the lock count.  We do the reverse, this
+	 * is necessary to stop page_destroy() over
+	 * accounting.
+	 */
+	pp->p_lckcnt = 0;
+	page_unresv(1);
+	page_destroy(pp, 0);
+}
+
+static void
+clear_page_table(pte_t *ptbl, uint_t level)
+{
+	ASSERT3P(ptbl, !=, NULL);
+
+	/*
+	 * There are three kinds of pages in the ttbr0 map:
+	 *    - identity mapped from boot, never imported, free
+	 *    - page tables in the tree below ttbr0
+	 *    - identity mapped from boot, imported as page tables below ttbr1,
+	 *	un-free.
+	 *
+	 * We walk the tables and return to the system any page used as a page
+	 * table.  No page or block needs attention as they're either already
+	 * free or should not be freed here.
+	 */
+	for (uint64_t i = 0; i < NPTEPERPT; i++) {
+		if (PTE_ISTABLE(ptbl[i], level)) {
+			caddr_t va = hat_kpm_pfn2va(PTE2PFN(ptbl[i], level));
+
+			clear_page_table((pte_t *)va, level - 1);
+
+			free_boot_page(PTE2PFN(ptbl[i], level));
+		}
+	}
+}
+
 /*
- * Function called after all CPUs are brought online.
- * Used to remove low address boot mappings.
+ * Kick the low page table out of TTBR0 on every CPU.
+ *
+ * Each cpu needs to carry the initial identity mapping at least until all are
+ * booted, and we can't be sure on which CPU `main` will enter
+ * `release_bootstrap` and `clear_user_mappings` as in some very small
+ * percentage of cases cpu0 has been preempted out of main.
+ *
+ * XXXARM: When booting additional PEs is tidier, it is likely this can be
+ * cleaned up and avoided.
+ */
+static int
+clear_ttbr0(xc_arg_t a0 __unused, xc_arg_t a1 __unused, xc_arg_t a2 __unused)
+{
+	/* A toxic value that can't ever refer to a page */
+	write_ttbr0(-1UL);
+	return (0);
+}
+
+/*
+ * Function called after all CPUs are online to clean up mappings through
+ * TTBR0.
  */
 void
-clear_boot_mappings(uintptr_t low, uintptr_t high)
+clear_user_mappings(void)
 {
+	pfn_t root = btop(TTBR_BADDR48(read_ttbr0()));
+	cpuset_t all;
+
+	ASSERT3U(root, !=, 0xffffffff);
+	ASSERT3U(root, !=, 0);
+
+	/* Remove the TTBR0 table from all CPUs */
+	CPUSET_ALL(all);
+	xc_sync(0, 0, 0, CPUSET2BV(all), clear_ttbr0);
+
+	/* Walk the table freeing subordinate pages */
+	clear_page_table((pte_t *)hat_kpm_pfn2va(root), mmu.max_level);
+
+	/* And now we can free the actual root page */
+	free_boot_page(root);
 }
 
 /*
@@ -3563,6 +3652,7 @@ hat_page_fault(hat_t *hat, caddr_t vaddr)
 			}
 
 			PTE_SET(newpte, PTE_AF);
+
 			if (pte_update(ht, entry, oldpte, newpte)
 			    != oldpte) {
 				hm_exit(pp);
