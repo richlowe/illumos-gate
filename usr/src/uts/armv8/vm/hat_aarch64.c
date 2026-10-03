@@ -106,7 +106,8 @@ struct hat_mmu_info mmu;
 
 static ulong_t		*asid_bitmap;
 static ulong_t		*asid_summary;	/* 1 bit per long in asid_bitmap */
-static uint32_t		asid_summary_len; /* summary bits (= main bitmap words) */
+/* summary bits (= main bitmap words) */
+static uint32_t		asid_summary_len;
 static kmutex_t		asid_lock;
 static uint32_t		asid_next = ASID_FIRST_AVAILABLE;
 static volatile int32_t	asid_epoch;
@@ -504,7 +505,7 @@ hat_asid_alloc(hat_t *hat)
 		 * (down from 1024 with the single-level word scan).
 		 *
 		 * Phase 1: partial word containing asid_next (bypass
-		 *          summary: we know which word to check).
+		 *	    summary: we know which word to check).
 		 * Phase 2: summary-guided scan forward to end.
 		 * Phase 3: summary-guided wrap to start.
 		 */
@@ -3415,13 +3416,69 @@ hat_exit(hat_t *hat)
 	mutex_exit(&hat->hat_mutex);
 }
 
+
+void
+clear_page_table(pte_t *ptbl, uint_t level)
+{
+	ASSERT3U(ptbl, !=, NULL);
+
+	/*
+	 * There are three kinds of pages in the ttbr0 map:
+	 *    - identity mapped from boot, never imported, free
+	 *    - page tables in the tree below ttbr0
+	 *    - identity mapped from boot, imported as page tables below ttbr1,
+	 *	un-free.
+	 *
+	 * We walk the tables and return to the system any page used as a page
+	 * table below ttbr0.  No page or block needs attention as they're
+	 * either already free or should not be freed here.
+	 */
+	for (uint64_t i = 0; i < NPTEPERPT; i++) {
+		if (PTE_ISTABLE(ptbl[i], level)) {
+			clear_page_table((pte_t *)PTE2ADDR(ptbl[i], level),
+			    level - 1);
+
+			page_t *pp = page_numtopp_nolock(PTE2PFN(ptbl[i],
+			    level));
+
+			ASSERT3P(pp, !=, NULL);
+			ASSERT(!PP_ISFREE(pp));
+			ASSERT3P(pp->p_vnode, ==, &kvp);
+
+			if (page_tryupgrade(pp) == 0) {
+				panic("%s: couldn't upgrade ttbr0-ish PT "
+				    "lock, pp: %p", __func__, pp);
+			}
+
+			/*
+			 * Clear the entry from the tables, and let the CPUs
+			 * see, before we free the page and possibly have it
+			 * re-used.
+			 */
+			ptbl[i] = 0;
+			dsb(ish);
+
+			/*
+			 * boot_mapin() does not do a full page_pp_lock() and
+			 * just sets the lock count.  We do the reverse, this
+			 * is necessary to stop page_destroy() over
+			 * accounting.
+			 */
+			pp->p_lckcnt = 0;
+			page_unresv(1);
+			page_destroy(pp, 0);
+		}
+	}
+}
+
 /*
- * Function called after all CPUs are brought online.
- * Used to remove low address boot mappings.
+ * Function called on the boot CPU after all CPUs are online.
+ * Used to clean up mappings through TTBR0.
  */
 void
-clear_boot_mappings(uintptr_t low, uintptr_t high)
+clear_user_mappings(void)
 {
+	clear_page_table((pte_t *)read_ttbr0(), mmu.max_level);
 }
 
 /*
@@ -3563,6 +3620,7 @@ hat_page_fault(hat_t *hat, caddr_t vaddr)
 			}
 
 			PTE_SET(newpte, PTE_AF);
+
 			if (pte_update(ht, entry, oldpte, newpte)
 			    != oldpte) {
 				hm_exit(pp);
