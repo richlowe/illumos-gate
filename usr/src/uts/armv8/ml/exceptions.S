@@ -23,7 +23,7 @@
  * Use is subject to license terms.
  *
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2024 Michael van der Westhuizen
+ * Copyright 2026 Michael van der Westhuizen
  */
 
 #include <sys/asm_linkage.h>
@@ -58,10 +58,11 @@
 	.endif
 
 	.data
-.unexpected_exception:	.asciz "unexpected exception type"
+.unexpected_exception:	.asciz "unexpected exception type, esr=%lx"
 
 #define UNEXPECTED()				\
 	clrex;					\
+	mrs x1, esr_el1;			\
 	adrp x0, .unexpected_exception;		\
 	add x0, x0, :lo12:.unexpected_exception;	\
 	bl panic
