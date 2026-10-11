@@ -71,6 +71,7 @@ int	chown(char *, uid_t, gid_t);
 int	chroot(char *);
 int	cladm(int, int, void *);
 int	close(int);
+int	close_range(uint_t, uint_t, int);
 int	exece(const char *, const char **, const char **, int);
 int	faccessat(int, char *, int, int);
 int	fchmodat(int, char *, int, int);
@@ -471,7 +472,7 @@ struct sysent sysent[NSYSCALL] =
 	[38]	= SYSENT_NOSYS(),		/* (was 32bit fstatfs) */
 	[39]	= SYSENT_CI("setpgrp",		setpgrp,	3),
 	[40]	= SYSENT_CI("uucopystr",	uucopystr,	3),
-	[41]	= SYSENT_LOADABLE(),		/* (was dup) */
+	[41]	= SYSENT_CI("close_range",	close_range,	3),
 	[42]	= SYSENT_LOADABLE(),		/* pipe */
 	[43]	= SYSENT_CL("times",		times,		1),
 	[44]	= SYSENT_CI("prof",		profil,		4),
@@ -800,12 +801,12 @@ struct sysent sysent32[NSYSCALL] =
 	[37]	= SYSENT_CI("kill",		kill,		2),
 	[38]	= SYSENT_CI("fstatfs",		fstatfs32,	4),
 	[39]	= SYSENT_CI("setpgrp",		setpgrp,	3),
-	[40]	= SYSENT_CI("uucopystr",		uucopystr,	3),
-	[41]	= SYSENT_LOADABLE32(),			/* (was dup) */
+	[40]	= SYSENT_CI("uucopystr",	uucopystr,	3),
+	[41]	= SYSENT_CI("close_range",	close_range,	3),
 	[42]	= SYSENT_LOADABLE32(),			/* pipe */
 	[43]	= SYSENT_CI("times",		times32,	1),
 	[44]	= SYSENT_CI("prof",		profil,		4),
-	[45]	= SYSENT_CI("faccessat",		faccessat,	4),
+	[45]	= SYSENT_CI("faccessat",	faccessat,	4),
 	[46]	= SYSENT_CI("setgid",		setgid,		1),
 	[47]	= SYSENT_2CI("getgid",		getgid,		0),
 	[48]	= SYSENT_CI("mknodat",		mknodat,	4),
@@ -840,7 +841,7 @@ struct sysent sysent32[NSYSCALL] =
 	[75]	= SYSENT_2CI("sidsys",		sidsys,		4),
 	[76]	= SYSENT_LOADABLE32(),			/* (was fsat) */
 	[77]	= SYSENT_CI("lwp_park",		syslwp_park,	3),
-	[78]	= SYSENT_CI("sendfilev",		sendfilev,	5),
+	[78]	= SYSENT_CI("sendfilev",	sendfilev,	5),
 	[79]	= SYSENT_CI("rmdir",		rmdir,		1),
 	[80]	= SYSENT_CI("mkdir",		mkdir,		2),
 	[81]	= SYSENT_CI("getdents",		getdents32,	3),
@@ -853,14 +854,14 @@ struct sysent sysent32[NSYSCALL] =
 	[88]	= SYSENT_CI("lstat",		lstat32,	2),
 	[89]	= SYSENT_CI("symlink",		symlink,	2),
 	[90]	= SYSENT_CI("readlink",		readlink32,	3),
-	[91]	= SYSENT_CI("setgroups",		setgroups,	2),
-	[92]	= SYSENT_CI("getgroups",		getgroups,	2),
+	[91]	= SYSENT_CI("setgroups",	setgroups,	2),
+	[92]	= SYSENT_CI("getgroups",	getgroups,	2),
 	[93]	= SYSENT_CI("fchmod",		fchmod,		2),
 	[94]	= SYSENT_CI("fchown",		fchown,		3),
 	[95]	= SYSENT_CI("sigprocmask",	sigprocmask,	3),
 	[96]	= SYSENT_CI("sigsuspend",	sigsuspend,	1),
 	[97]	= SYSENT_CI("sigaltstack",	sigaltstack32,	2),
-	[98]	= SYSENT_CI("sigaction",		sigaction32,	3),
+	[98]	= SYSENT_CI("sigaction",	sigaction32,	3),
 	[99]	= SYSENT_CI("sigpending",	sigpending,	2),
 	[100]	= SYSENT_CI("getsetcontext",	getsetcontext32, 2),
 	[101]	= SYSENT_CI("fchmodat",		fchmodat,	4),

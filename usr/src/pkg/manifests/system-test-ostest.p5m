@@ -39,6 +39,7 @@ file path=opt/os-tests/runfiles/default.run mode=0444
 dir  path=opt/os-tests/tests
 $(MULTILIB_ONLY)dir path=opt/os-tests/tests/32
 $(MULTILIB_ONLY)file path=opt/os-tests/tests/32/clock_gettime.32 mode=0555
+$(MULTILIB_ONLY)file path=opt/os-tests/tests/32/close_range.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/os-tests/tests/32/eventfd.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/os-tests/tests/32/fifo-tvnsec.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/os-tests/tests/32/getcontext_extd.32 mode=0555
@@ -49,6 +50,7 @@ $(MULTILIB_ONLY)file path=opt/os-tests/tests/32/ucontext.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/os-tests/tests/32/writev.32 mode=0555
 dir  path=opt/os-tests/tests/64
 file path=opt/os-tests/tests/64/clock_gettime.64 mode=0555
+file path=opt/os-tests/tests/64/close_range.64 mode=0555
 file path=opt/os-tests/tests/64/eventfd.64 mode=0555
 file path=opt/os-tests/tests/64/fifo-tvnsec.64 mode=0555
 file path=opt/os-tests/tests/64/getcontext_extd.64 mode=0555

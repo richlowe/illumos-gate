@@ -35,6 +35,7 @@ syssync			36
 kill			37
 setpgrp			39
 uucopystr		40
+close_range		41
 pipe			42
 times			43
 profil			44

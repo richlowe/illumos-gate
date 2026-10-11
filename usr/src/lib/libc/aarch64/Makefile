@@ -169,6 +169,7 @@ COMSYSOBJS=			\
 	chroot.o		\
 	cladm.o			\
 	close.o			\
+	close_range.o		\
 	execve.o		\
 	execvex.o		\
 	exit.o			\

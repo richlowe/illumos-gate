@@ -35,6 +35,7 @@ arch = i86pc
 tests = [
 	'eventfd.32',
 	'odirectory.32',
+	'close_range.32',
 	'clock_gettime.32',
 	'statvfs.32',
 	'syncfs.32',
@@ -47,6 +48,7 @@ tests = [
 tests = [
 	'eventfd.64',
 	'odirectory.64',
+	'close_range.64',
 	'clock_gettime.64',
 	'statvfs.64',
 	'syncfs.64',
