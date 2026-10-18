@@ -13,14 +13,12 @@
 # Copyright 2025 Michael van der Westhuizen
 #
 
-SRCS +=	bootsvcs.c \
-	cache.c \
+SRCS +=	cache.c \
 	exec.c \
 	isadir.c \
 	start.S
 
-OBJS +=	bootsvcs.o \
-	cache.o \
+OBJS +=	cache.o \
 	exec.o \
 	isadir.o \
 	start.o
