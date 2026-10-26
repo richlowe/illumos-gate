@@ -521,6 +521,7 @@ i386_SUBDIRS=		\
 	biosdev		\
 	cxgbetool	\
 	diskscan	\
+	efibootmgr	\
 	ficl		\
 	nvmeadm		\
 	pptadm		\

@@ -288,6 +288,7 @@ SUBDIRS +=				\
 
 i386_SUBDIRS=		\
 	lib9p		\
+	libefivar	\
 	libfdisk	\
 	libppt		\
 	libsaveargs	\
@@ -652,6 +653,7 @@ libdtrace:	libproc libgen libctf libmapmalloc
 libdtrace_jni:	libuutil libdtrace
 libdwarf:	../cmd/sgs/libelf
 libefi:		libuuid libsmbios
+libefivar:	libuuid
 libelfsign:	libcryptoutil libkmf ../cmd/sgs/libelf
 libeti:		libcurses
 libexacct/demo:	libexacct libproject

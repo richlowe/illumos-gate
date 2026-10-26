@@ -613,6 +613,8 @@ ed/ed.xpg6
 
 eeprom/*/eeprom
 
+efibootmgr/efibootmgr
+
 eject/eject
 
 emul64ioctl/emul64ioctl

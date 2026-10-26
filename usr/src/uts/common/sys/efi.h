@@ -172,8 +172,17 @@ typedef struct {
  */
 #define	EFI_ERROR_BIT		0x8000000000000000ull
 #define	EFI_SUCCESS		0
+
+#define	EFI_ERROR(s)		((s & EFI_ERROR_BIT) != 0)
+
+#define	EFI_INVALID_PARAMETER	(EFI_ERROR_BIT | 2)
 #define	EFI_UNSUPPORTED		(EFI_ERROR_BIT | 3)
+#define	EFI_BUFFER_TOO_SMALL	(EFI_ERROR_BIT | 5)
 #define	EFI_DEVICE_ERROR	(EFI_ERROR_BIT | 7)
+#define	EFI_WRITE_PROTECTED	(EFI_ERROR_BIT | 8)
+#define	EFI_OUT_OF_RESOURCES	(EFI_ERROR_BIT | 9)
+#define	EFI_NOT_FOUND		(EFI_ERROR_BIT | 14)
+#define	EFI_SECURITY_VIOLATION	(EFI_ERROR_BIT | 26)
 
 typedef uint32_t	efiptr32_t;
 typedef uint64_t	efiptr64_t;

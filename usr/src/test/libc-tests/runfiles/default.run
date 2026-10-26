@@ -13,7 +13,7 @@
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2015 Garrett D'Amore <garrett@damore.org>
 # Copyright 2019 Joyent, Inc.
-# Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2026 Bill Sommerfeld <sommerfeld@hamachi.org>
 # Copyright 2026 Oxide Computer Company
 #
@@ -37,6 +37,7 @@ tests = [
 	'call_once.32',
 	'clock_lock.32',
 	'closefrom.32',
+	'crypt_bsdbf.32',
 	'dprintf.32',
 	'endian.32',
 	'env-7076.32',
@@ -88,6 +89,7 @@ tests = [
 	'call_once.64',
 	'clock_lock.64',
 	'closefrom.64',
+	'crypt_bsdbf.64',
 	'dprintf.64',
 	'endian.64',
 	'env-7076.64',

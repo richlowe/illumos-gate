@@ -16,6 +16,7 @@
 # Copyright 2020 Joyent, Inc.
 # Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2026 Hans Rosenfeld
+# Copyright 2026 Jason King
 #
 
 [DEFAULT]
@@ -55,6 +56,7 @@ tests = [
 	'libjedec_temp.32',
 	'libjedec_spd.32',
 	'libjedec_hex2spd.32',
+	'libofmt_print.32',
 	'smbios.32',
 	]
 
@@ -64,6 +66,7 @@ tests = [
 	'libjedec_temp.64',
 	'libjedec_spd.64',
 	'libjedec_hex2spd.64',
+	'libofmt_print.64',
 	'smbios.64',
 	]
 
