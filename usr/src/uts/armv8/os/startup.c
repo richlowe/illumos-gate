@@ -185,8 +185,6 @@ struct bootops		*bootops = 0;
 int physMemInit = 0;
 struct memlist *boot_scratch;
 
-uintptr_t	postbootkernelbase;	/* not set till boot loader is gone */
-uintptr_t	eprom_kernelbase;
 pgcnt_t		orig_npages;
 struct memseg *memseg_base;
 
@@ -742,7 +740,6 @@ startup_memlist(void)
 	size_t memseg_sz;
 	size_t pagehash_sz;
 	size_t pp_sz;
-	uintptr_t va __unused;	/* XXXARM */
 	size_t len;
 	int memblocks;
 	caddr_t pagecolor_mem;
@@ -791,7 +788,6 @@ startup_memlist(void)
 	 * memory mapped at or above above the start of the kernel text segment.
 	 */
 	npages = physinstalled;
-	va = KERNEL_TEXT;
 	PRM_DEBUG(npages);
 
 	/*
