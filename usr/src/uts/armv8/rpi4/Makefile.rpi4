@@ -24,6 +24,7 @@
 #
 # Copyright 2021 Hayashi Naoyuki
 # Copyright 2025 Michael van der Westhuizen
+# Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
 #
 
 #
@@ -64,6 +65,7 @@ USR_RPI4_ISYS_DIR	= $(USR_RPI4_INC_DIR)/sys
 RPI4_KMODS	=	\
 	bcm2711_emmctwo \
 	bcm2711_genet	\
+	bcm2711_i2c	\
 	bcm2711_pcie	\
 	bcm2711_sensors \
 	platmod

@@ -255,6 +255,7 @@ aarch64_MANFILES=	ahci.4d			\
 			audioixp.4d		\
 			audiosolo.4d		\
 			audiovia823x.4d		\
+			bcm2711_i2c.4d		\
 			bcm2711_pcie.4d		\
 			bcm2711_sensors.4d	\
 			bfe.4d			\

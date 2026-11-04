@@ -1,0 +1,64 @@
+.\"
+.\" This file and its contents are supplied under the terms of the
+.\" Common Development and Distribution License ("CDDL"), version 1.0.
+.\" You may only use this file in accordance with the terms of version
+.\" 1.0 of the CDDL.
+.\"
+.\" A full copy of the text of the CDDL should have accompanied this
+.\" source.  A copy of the CDDL is also available via the Internet at
+.\" http://www.illumos.org/license/CDDL.
+.\"
+.\"
+.\" Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
+.\"
+.Dd October 25, 2026
+.Dt BCM2711_I2C 4D
+.Os
+.Sh NAME
+.Nm bcm2711_i2c
+.Nd Broadcom BCM2711 I2C controller driver
+.Sh DESCRIPTION
+The
+.Nm
+driver supports the Broadcom Serial Controller
+.Pq BSC
+I2C controllers found in the BCM2711 SoC used by the Raspberry Pi 4.
+.Pp
+The
+.Nm
+driver is part of the system's I2C framework and is accessible
+through common tools such as
+.Xr i2cadm 8 .
+The controller supports I2C transfers to devices with 7-bit addresses,
+including a write followed by a read with a repeated start condition.
+SMBus operations are translated into I2C transfers by the framework.
+Transfers of up to 256 bytes in each direction are supported.
+.Pp
+The controller operates at either 100 kHz or 400 kHz.
+The initial speed is taken from the
+.Sy clock-frequency
+property of the controller's device tree node, defaulting to 100 kHz,
+and can be changed with the
+.Cm speed
+controller property.
+The bus clock is derived from the SoC's core clock and so scales with it
+if the firmware changes the core clock.
+.Pp
+When the controller attaches, the driver applies the default pin
+configuration from its device tree node, which switches the pins used for
+the bus to their I2C function.
+.Pp
+On the Raspberry Pi 4, the I2C bus on the GPIO header is disabled unless
+it is enabled in the firmware configuration, for example by adding
+.Ql dtparam=i2c_arm=on
+to
+.Pa config.txt .
+.Sh ARCHITECTURE
+.Sy aarch64
+.Sh FILES
+.Bl -tag -width Pa
+.It Pa /platform/RaspberryPi,4/kernel/drv/aarch64/bcm2711_i2c
+Device driver (aarch64)
+.El
+.Sh SEE ALSO
+.Xr i2cadm 8

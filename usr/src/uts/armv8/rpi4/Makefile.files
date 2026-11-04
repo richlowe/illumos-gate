@@ -24,6 +24,7 @@
 #
 # Copyright 2017 Hayashi Naoyuki
 # Copyright 2025 Michael van der Westhuizen
+# Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
 #
 
 #
@@ -37,6 +38,7 @@
 # bcm2711 drivers
 BCM2711_EMMCTWO_OBJS	+= bcm2711_emmctwo.o
 BCM2711_GENET_OBJS	+= bcm2711_genet.o
+BCM2711_I2C_OBJS	+= bcm2711_i2c.o
 BCM2711_PCIE_OBJS	+= bcm2711_pcie.o
 BCM2711_SENSORS_OBJS	+= bcm2711_sensors.o
 
