@@ -1913,7 +1913,6 @@ zfs_mountroot(vfs_t *vfsp, enum whymountroot why)
 out:
 		vdev_disk_preroot_fini();
 		vfs_unlock(vfsp);
-		vdev_disk_preroot_fini();
 		return (error);
 	} else if (why == ROOT_REMOUNT) {
 		readonly_changed_cb(vfsp->vfs_data, B_FALSE);
