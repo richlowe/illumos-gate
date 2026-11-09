@@ -615,6 +615,8 @@ eeprom/*/eeprom
 
 efibootmgr/efibootmgr
 
+efibootmgr/efibootmgr
+
 eject/eject
 
 emul64ioctl/emul64ioctl

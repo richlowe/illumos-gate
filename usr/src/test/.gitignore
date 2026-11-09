@@ -139,6 +139,9 @@ header-tests/tests/cxx-symbols/setup
 
 i2c-tests/i2csimd/i2csimd
 
+header-tests/tests/c-symbols/setup
+header-tests/tests/cxx-symbols/setup
+
 i2c-tests/i2csimd/i2csimd
 
 libc-tests/tests/catopen/catopen
