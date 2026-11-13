@@ -86,6 +86,7 @@ driver name=acpinex alias=acpivirtnex
 driver name=acpipwrbtn alias=PNP0C0C
 driver name=arm_gtmr alias=arm,armv8-timer
 driver name=cpudrv \
+    alias=ACPI0007 \
     alias=arm,armv8 \
     alias=arm,c1-nano \
     alias=arm,c1-premium \

@@ -25,6 +25,9 @@ file path=platform/ARMH,sbbr/kernel/$(ARCH)/unix mode=0755 \
     pkg.depend.bypass-generate=dtracestubs
 dir  path=platform/ARMH,sbbr/kernel/drv
 dir  path=platform/ARMH,sbbr/kernel/drv/$(ARCH)
+file path=platform/ARMH,sbbr/kernel/drv/$(ARCH)/cpudrv \
+    pkg.depend.runpath=$PKGDEPEND_RUNPATH:/platform/armv8/kernel
+file path=platform/ARMH,sbbr/kernel/drv/cpudrv.conf
 dir  path=platform/ARMH,sbbr/kernel/misc
 dir  path=platform/ARMH,sbbr/kernel/misc/$(ARCH)
 file path=platform/ARMH,sbbr/kernel/misc/$(ARCH)/platmod mode=0755

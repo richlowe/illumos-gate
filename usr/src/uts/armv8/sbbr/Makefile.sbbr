@@ -60,7 +60,7 @@ USR_SBBR_ISYS_DIR	= $(USR_SBBR_INC_DIR)/sys
 #
 #	Define modules.
 #
-SBBR_KMODS = platmod
+SBBR_KMODS = platmod cpudrv
 
 #
 #	Include the makefiles which define build rule templates, the
