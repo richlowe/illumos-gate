@@ -22,6 +22,7 @@
 /*
  * Copyright 2017 Hayashi Naoyuki
  * Copyright 2026 Michael van der Westhuizen
+ * Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #ifndef _SYS_PLATMOD_H
@@ -57,6 +58,7 @@ struct prom_hwclock;
 #pragma weak	plat_gpio_set
 #pragma weak	plat_clk_get_rate
 #pragma weak	plat_clk_get_rate_by_name
+#pragma weak	plat_pinctrl_select
 #pragma weak	plat_pcie_osc_set
 #pragma weak	plat_pcie_osc
 
@@ -88,6 +90,17 @@ extern int plat_gpio_set(struct gpio_ctrl *, int);
 
 extern int plat_clk_get_rate(dev_info_t *, uint_t);
 extern int plat_clk_get_rate_by_name(dev_info_t *, const char *);
+
+/*
+ * Pin configuration.
+ *
+ * plat_pinctrl_select: apply the pin configuration that the device's
+ *     device tree node gives for the named state (e.g. "default").
+ *     Returns 0 on success, ENOENT if the node has no configuration
+ *     for that state, or another errno value if the configuration
+ *     could not be applied.
+ */
+extern int plat_pinctrl_select(dev_info_t *, const char *);
 
 /*
  * PCIe _OSC negotiation.
