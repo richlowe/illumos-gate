@@ -995,6 +995,19 @@ fcnname##_info:								\
 	NO_UNLOAD_STUB(dcopy, dcopy_cmd_poll, nomod_minus_one);
 	END_MODULE(dcopy);
 
+/*
+ * Stubs for acpica
+ */
+	MODULE(acpica,misc);
+	NO_UNLOAD_STUB(acpica, AcpiInstallNotifyHandler, nomod_minus_one) ;
+	NO_UNLOAD_STUB(acpica, AcpiRemoveNotifyHandler, nomod_minus_one) ;
+	NO_UNLOAD_STUB(acpica, AcpiEvaluateObject, nomod_minus_one) ;
+	NO_UNLOAD_STUB(acpica, AcpiEvaluateObjectTyped, nomod_minus_one) ;
+	NO_UNLOAD_STUB(acpica, AcpiOsFree, nomod_minus_one) ;
+	NO_UNLOAD_STUB(acpica, acpica_write_cpupm_capabilities,
+	    nomod_minus_one) ;
+	END_MODULE(acpica);
+
 	MODULE(ipnet,drv);
 	STUB(ipnet, ipnet_if_getdev, nomod_zero);
 	STUB(ipnet, ipnet_walk_if, nomod_zero);
