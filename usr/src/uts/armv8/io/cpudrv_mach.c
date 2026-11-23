@@ -256,7 +256,8 @@ cpudrv_parse_one_state(dev_info_t *state_dip, lpi_state_t *lsp)
 	}
 
 	if ((uint32_t)psci_param & PSCI_STATE_TYPE_POWERDOWN) {
-		lsp->ls_ctx_loss_flags |= LPI_CTX_LOSS_CPU | LPI_CTX_LOSS_GICR;
+		lsp->ls_ctx_loss_flags |= LPI_CTX_LOSS_CPU |
+		  LPI_CTX_LOSS_GICR | LPI_CTX_LOSS_TIMER;
 	}
 
 	return (B_TRUE);
