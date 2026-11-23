@@ -73,6 +73,7 @@ extern "C" {
 #define	LPI_CTX_LOSS_GICR	(1U << 1)	/* GIC Redistributor lost */
 #define	LPI_CTX_LOSS_GICD	(1U << 2)	/* GIC Distributor lost */
 #define	LPI_CTX_LOSS_CPU	(1U << 3)	/* CPU register state lost */
+#define	LPI_CTX_LOSS_TRACE	(1U << 4)	/* Trace context lost */
 
 #endif
 
