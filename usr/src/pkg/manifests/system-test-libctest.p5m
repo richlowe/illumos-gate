@@ -60,6 +60,7 @@ $(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/nl_langinfo_test.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/posix_memalign.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/printf-15294.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/printf-9511.32 mode=0555
+$(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/printf-altp.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/printf-intmax.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/psignal-5097.32 mode=0555
 $(MULTILIB_ONLY)file path=opt/libc-tests/tests/32/ptsname.32 mode=0555
@@ -117,6 +118,7 @@ file path=opt/libc-tests/tests/64/posix_memalign.64 mode=0555
 file path=opt/libc-tests/tests/64/printf-15294.64 mode=0555
 file path=opt/libc-tests/tests/64/printf-6961.64 mode=0555
 file path=opt/libc-tests/tests/64/printf-9511.64 mode=0555
+file path=opt/libc-tests/tests/64/printf-altp.64 mode=0555
 file path=opt/libc-tests/tests/64/printf-intmax.64 mode=0555
 file path=opt/libc-tests/tests/64/printf-intmax.c89 mode=0555
 file path=opt/libc-tests/tests/64/psignal-5097.64 mode=0555

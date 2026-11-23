@@ -65,6 +65,7 @@ PROGS = \
 	posix_memalign \
 	printf-15294 \
 	printf-9511 \
+	printf-altp \
 	psignal-5097 \
 	ptsname \
 	quick_exit_order \

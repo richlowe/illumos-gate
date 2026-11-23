@@ -1562,6 +1562,9 @@ file path=opt/zfs-tests/tests/functional/cli_root/zpool_detach/setup mode=0555
 file \
     path=opt/zfs-tests/tests/functional/cli_root/zpool_detach/zpool_detach_001_neg \
     mode=0555
+file \
+    path=opt/zfs-tests/tests/functional/cli_root/zpool_detach/zpool_detach_spare_throttle \
+    mode=0555
 dir  path=opt/zfs-tests/tests/functional/cli_root/zpool_expand
 file path=opt/zfs-tests/tests/functional/cli_root/zpool_expand/cleanup mode=0555
 file path=opt/zfs-tests/tests/functional/cli_root/zpool_expand/setup mode=0555
@@ -2894,6 +2897,7 @@ file path=opt/zfs-tests/tests/functional/removal/removal_with_send_recv \
 file path=opt/zfs-tests/tests/functional/removal/removal_with_snapshot mode=0555
 file path=opt/zfs-tests/tests/functional/removal/removal_with_write mode=0555
 file path=opt/zfs-tests/tests/functional/removal/removal_with_zdb mode=0555
+file path=opt/zfs-tests/tests/functional/removal/remove_attach_mirror mode=0555
 file path=opt/zfs-tests/tests/functional/removal/remove_expanded mode=0555
 file path=opt/zfs-tests/tests/functional/removal/remove_mirror mode=0555
 file path=opt/zfs-tests/tests/functional/removal/remove_mirror_sanity mode=0555
@@ -2911,6 +2915,8 @@ file path=opt/zfs-tests/tests/functional/replacement/replacement_001_pos \
 file path=opt/zfs-tests/tests/functional/replacement/replacement_002_pos \
     mode=0555
 file path=opt/zfs-tests/tests/functional/replacement/replacement_003_pos \
+    mode=0555
+file path=opt/zfs-tests/tests/functional/replacement/scrub_after_replace \
     mode=0555
 file path=opt/zfs-tests/tests/functional/replacement/setup mode=0555
 dir  path=opt/zfs-tests/tests/functional/reservation

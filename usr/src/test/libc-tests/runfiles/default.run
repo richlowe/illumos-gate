@@ -241,6 +241,10 @@ user = root
 [/opt/libc-tests/tests/posix_spawn/64/posix_spawn_priv.64]
 user = root
 
+[/opt/libc-tests/tests/32/printf-altp.32]
+arch = i86pc
+
+[/opt/libc-tests/tests/64/printf-altp.64]
 [/opt/libc-tests/tests/64/printf-6961.64]
 [/opt/libc-tests/tests/printf-intmax]
 [/opt/libc-tests/tests/priv_gettext]
