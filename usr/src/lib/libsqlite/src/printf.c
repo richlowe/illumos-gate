@@ -337,8 +337,8 @@ static int vxprintf(
     */
     switch( xtype ){
       case etRADIX:
-        if( flag_long )  longvalue = va_arg(ap,long);
-        else             longvalue = va_arg(ap,int);
+        if( flag_long )  longvalue = va_arg(ap,unsigned long);
+        else             longvalue = va_arg(ap,unsigned int);
 #if 1
         /* For the format %#x, the value zero is printed "0" not "0x0".
         ** I think this is stupid. */
