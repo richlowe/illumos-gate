@@ -11,6 +11,7 @@
 
 # Copyright 2022, Richard Lowe
 # Copyright 2025 Michael van der Westhuizen
+# Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
 
 <include global_zone_only_component>
 set name=pkg.fmri value=pkg:/system/kernel/platform/raspberry-pi-4@$(PKGVERS)
@@ -25,6 +26,7 @@ file path=platform/RaspberryPi,4/kernel/drv/$(ARCH)/bcm2711_pcie \
 dir  path=platform/RaspberryPi,4/kernel/drv/aarch64
 file path=platform/RaspberryPi,4/kernel/drv/aarch64/bcm2711_emmctwo
 file path=platform/RaspberryPi,4/kernel/drv/aarch64/bcm2711_genet
+file path=platform/RaspberryPi,4/kernel/drv/aarch64/bcm2711_i2c
 file path=platform/RaspberryPi,4/kernel/drv/aarch64/bcm2711_sensors
 file path=platform/RaspberryPi,4/kernel/drv/bcm2711_emmctwo.conf
 file path=platform/RaspberryPi,4/kernel/drv/bcm2711_genet.conf
@@ -33,11 +35,15 @@ dir  path=platform/RaspberryPi,4/kernel/misc
 dir  path=platform/RaspberryPi,4/kernel/misc/$(ARCH)
 file path=platform/RaspberryPi,4/kernel/misc/$(ARCH)/platmod mode=0755
 link path=platform/raspberrypi,4-model-b target=RaspberryPi,4
+file path=usr/share/man/man4d/bcm2711_i2c.4d
 # XXXARM: Hayashi's copyright
 file path=usr/share/man/man4d/bcm2711_pcie.4d
 file path=usr/share/man/man4d/bcm2711_sensors.4d
 driver name=bcm2711_emmctwo perms="* 0666 root sys" alias=brcm,bcm2711-emmc2
 driver name=bcm2711_genet perms="* 0666 root sys" alias=brcm,bcm2711-genet-v5
+driver name=bcm2711_i2c \
+    alias=brcm,bcm2711-i2c \
+    alias=brcm,bcm2835-i2c
 driver name=bcm2711_pcie alias=brcm,bcm2711-pcie
 driver name=bcm2711_sensors perms="* 0666 root sys"
 license lic_CDDL license=lic_CDDL
