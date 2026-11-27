@@ -55,12 +55,21 @@ extern "C" {
 #include <errno.h>
 #endif
 
+#if defined(__aarch64__)
+#if defined(ACPI_REDUCED_HARDWARE)
+#undef	ACPI_REDUCED_HARDWARE
+#endif
+#define	ACPI_REDUCED_HARDWARE	1
+#endif
+
 /* Function name used for debug output. */
 #define	ACPI_GET_FUNCTION_NAME	__func__
 
+#if !defined(ACPI_REDUCED_HARDWARE)
 uint32_t __acpi_acquire_global_lock(void *);
 uint32_t __acpi_release_global_lock(void *);
 void	 __acpi_wbinvd(void);
+#endif
 uint32_t acpi_strtoul(const char *, char **, int);
 
 #ifdef	_ILP32
@@ -75,7 +84,9 @@ uint32_t acpi_strtoul(const char *, char **, int);
 #define	ACPI_CAST_PTHREAD_T(pthread)	((ACPI_THREAD_ID) (pthread))
 
 #define	ACPI_USE_NATIVE_DIVIDE
+#if !defined(ACPI_REDUCED_HARDWARE)
 #define	ACPI_FLUSH_CPU_CACHE()	(__acpi_wbinvd())
+#endif
 
 #ifndef ACPI_DISASSEMBLER
 #define	ACPI_DISASSEMBLER
@@ -102,13 +113,6 @@ uint32_t acpi_strtoul(const char *, char **, int);
  */
 #define	ACPI_USE_SYSTEM_CLIBRARY
 
-#if defined(__aarch64__)
-#if defined(ACPI_REDUCED_HARDWARE)
-#undef	ACPI_REDUCED_HARDWARE
-#endif
-#define	ACPI_REDUCED_HARDWARE	1
-#endif
-
 #ifdef _KERNEL
 #define	strtoul(s, r, b)	acpi_strtoul(s, r, b)
 #define	toupper(x)		(islower(x) ? (x) - 'a' + 'A' : (x))
@@ -117,13 +121,19 @@ uint32_t acpi_strtoul(const char *, char **, int);
 
 #define	ACPI_ASM_MACROS
 #define	BREAKPOINT3
+
+#if defined(__x86)
 #define	ACPI_DISABLE_IRQS()	cli()
 #define	ACPI_ENABLE_IRQS()	sti()
+#endif
+
+#if !defined(ACPI_REDUCED_HARDWARE)
 #define	ACPI_ACQUIRE_GLOBAL_LOCK(Facs, Acq)	\
 	((Acq) = __acpi_acquire_global_lock(Facs))
 
 #define	ACPI_RELEASE_GLOBAL_LOCK(Facs, Acq)	\
 	((Acq) = __acpi_release_global_lock(Facs))
+#endif
 
 #ifdef __cplusplus
 }
