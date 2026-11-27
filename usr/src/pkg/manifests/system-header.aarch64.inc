@@ -40,6 +40,7 @@ file path=usr/include/sys/kdi_svc.h
 dir  path=usr/platform/armv8
 dir  path=usr/platform/armv8/include
 dir  path=usr/platform/armv8/include/sys
+file path=usr/platform/armv8/include/sys/acpidev.h
 file path=usr/platform/armv8/include/sys/clock.h
 file path=usr/platform/armv8/include/sys/ddi_subrdefs.h
 file path=usr/platform/armv8/include/sys/gic.h

@@ -70,7 +70,7 @@ UNAME_M		= $(PLATFORM)
 #IMPLEMENTED_PLATFORM	=
 #PLATFORMS		= $(IMPLEMENTED_PLATFORM)
 
-IMPLEMENTATIONS		= rpi4 virt
+IMPLEMENTATIONS		= rpi4 sbbr virt
 
 #ROOT_PLAT_DIRS		= $(PLATFORMS:%=$(ROOT_PLAT_DIR)/%)
 #USR_PLAT_DIRS		= $(PLATFORMS:%=$(USR_PLAT_DIR)/%)
@@ -233,6 +233,9 @@ DRV_KMODS += efifb
 DRV_KMODS += pcieb
 DRV_KMODS += cpudrv
 DRV_KMODS += cpunex
+DRV_KMODS += acpiged
+DRV_KMODS += acpipwrbtn
+DRV_KMODS += acpinex
 
 #
 #	'Dacf' Modules (/kernel/dacf):
@@ -242,11 +245,14 @@ DACF_KMODS += consconfig_dacf
 #
 #	'Misc' Modules (/kernel/misc):
 #
+MISC_KMODS += acpidev
 MISC_KMODS += bootdev
+MISC_KMODS += acpicppc
 MISC_KMODS += cpuidle
 MISC_KMODS += ffa
 MISC_KMODS += gfx_private
 MISC_KMODS += pci_prd
 MISC_KMODS += pcicfg
 MISC_KMODS += pcie
+MISC_KMODS += acpipcc
 MISC_KMODS += platmod
