@@ -119,6 +119,10 @@ struct xboot_info {
 	uint64_t		bi_framebuffer;	/* frame buffer address */
 	uint64_t		bi_hyp_stubs;	/* hypervisor stubs */
 	uint64_t		bi_cpuinfo;	/* CPU information */
+	uint64_t		bi_acpi_srat;		/* ACPI SRAT table */
+	uint64_t		bi_acpi_slit;		/* ACPI SLIT table */
+	uint64_t		bi_acpi_msct;		/* ACPI MSCT table */
+	uint64_t		bi_acpi_pptt;		/* ACPI PPTT table */
 	xbi_bsvc_uart_type_t	bi_bsvc_uart_type; /* uart type */
 	uint32_t		bi_cpuinfo_cnt;	   /* number of CPUs */
 	uint32_t		bi_pcierc_cnt;	   /* number of PCIe roots */

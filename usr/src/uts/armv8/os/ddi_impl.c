@@ -4356,6 +4356,13 @@ impl_bus_initialprobe(void)
 {
 	struct bus_probe *probe;
 
+	/* load modules to install bus probes */
+#if defined(_SBBR)
+	if (modload("misc", "acpidev") < 0) {
+		panic("failed to load misc/acpidev");
+	}
+#endif
+
 	probe = bus_probes;
 	while (probe) {
 		/* run the probe functions */

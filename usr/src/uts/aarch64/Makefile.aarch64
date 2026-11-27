@@ -554,6 +554,7 @@ SYS_KMODS	+= acctctl
 #
 #	'Misc' Modules (/kernel/misc)
 MISC_KMODS	+= ac97
+MISC_KMODS	+= acpica
 MISC_KMODS	+= bignum
 MISC_KMODS	+= busra
 MISC_KMODS	+= cmlb
