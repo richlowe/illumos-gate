@@ -182,7 +182,9 @@ boot_compinfo(int fd, struct compinfo *cbp)
 void
 bop_relocate(void)
 {
+#if defined(_USE_FDT)
 	caddr_t vaddr;
+#endif
 
 	if (xbootp == NULL)
 		return;

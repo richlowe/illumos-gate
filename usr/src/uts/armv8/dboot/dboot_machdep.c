@@ -188,13 +188,6 @@ exitto(int (*entrypoint)(struct xboot_info *), struct xboot_info *bi)
 	dsb(ish);
 	isb();
 
-	if (bi->bi_fdt == 0) {
-		dboot_printf(
-		    "dboot: ACPI kernel support is a work in progress\n");
-		for (;;)
-			/* spin forever */;
-	}
-
 	/*
 	 * There can be no more screen output in the nominal case once we've
 	 * copied out cursor information to the data structure the kernel
