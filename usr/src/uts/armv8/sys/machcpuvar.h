@@ -41,6 +41,8 @@
 extern "C" {
 #endif
 
+struct cppc_cpu;
+
 struct	machcpu {
 	struct hat	*mcpu_current_hat;
 	int		mcpu_pri;
@@ -71,6 +73,9 @@ struct	machcpu {
 	/* Low power idle state array, populated from firmware */
 	struct lpi_state *mcpu_lpi_states;
 	int		mcpu_lpi_nstates;
+
+	/* CPPC performance control state, set by cppc_cpu_init() */
+	struct cppc_cpu	*mcpu_cppc;
 };
 
 #ifndef NINTR_THREADS
@@ -83,6 +88,7 @@ struct	machcpu {
 #define	cpu_pri		cpu_m.mcpu_pri
 #define	cpu_revision	cpu_m.mcpu_revision
 #define	cpu_softinfo	cpu_m.mcpu_softinfo
+#define	cpu_cppc	cpu_m.mcpu_cppc
 
 struct	cpu_startup_data {
 	uint64_t	mair;

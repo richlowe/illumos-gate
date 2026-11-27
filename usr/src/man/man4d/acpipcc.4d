@@ -1,0 +1,117 @@
+.\"
+.\" This file and its contents are supplied under the terms of the
+.\" Common Development and Distribution License ("CDDL"), version 1.0.
+.\" You may only use this file in accordance with the terms of version
+.\" 1.0 of the CDDL.
+.\"
+.\" A full copy of the text of the CDDL should have accompanied this
+.\" source.  A copy of the CDDL is also available via the Internet at
+.\" http://www.illumos.org/license/CDDL.
+.\"
+.\" Copyright 2026 Michael van der Westhuizen
+.\"
+.Dd October 14, 2026
+.Dt ACPIPCC 4D
+.Os
+.Sh NAME
+.Nm acpipcc
+.Nd ACPI Platform Communications Channel
+.Sh SYNOPSIS
+.In sys/acpipcc.h
+.Sh DESCRIPTION
+The
+.Nm
+module is a kernel misc module implementing the Platform Communications
+Channel (PCC) described in chapter 14 of the ACPI 6.6 specification.
+.Pp
+At load, the module parses the Platform Communications Channel Table
+(PCCT), validating each subspace description.
+If the firmware fails to
+meet specification requirements during parsing the module fails all
+subspace initialization.
+When basic parsing of the firmware table fails
+we assume that the firmware cannot be trusted.
+.Pp
+Initialisation then proceeds to map resources and install interrupt handlers.
+If any error occurs in this phase of initialization the affected subspaces
+fail to initialize.
+.Pp
+Finally, initialization publishes each usable subspace as a channel handle
+that clients can retrieve based on subspace ID.
+.Pp
+Consumers obtain a channel with
+.Xr pcc_chan_get 9F
+and perform transactions serialised by the channel mutex.
+.Ss Requirements on PCC consumers
+PCC consumers must include the header file
+.In sys/acpipcc.h .
+.Pp
+PCC consumers must also specify a link dependency on
+.Dq misc/acpipcc .
+(See the
+.Fl N
+option in
+.Xr ld 1 ) .
+.Pp
+Channel handles are opaque.
+Consumers must not attempt to inspect the handle
+contents.
+.Sh USAGE
+A typical write transaction:
+.Bd -literal -offset indent
+pcc_chan_t *pc = pcc_chan_get(subspace);
+if (pc == NULL) {
+	return (DDI_FAILURE);
+}
+
+if (pcc_chan_txn_begin(pc) != DDI_SUCCESS) {
+	pcc_chan_put(pc);
+	return (DDI_FAILURE);
+}
+
+if (pcc_chan_write32(pc, REG_OFFSET, val) != DDI_SUCCESS ||
+    pcc_chan_txn_commit(pc, CMD_WRITE, sizeof (val)) != DDI_SUCCESS) {
+	pcc_chan_txn_end(pc);
+	pcc_chan_put(pc);
+	return (DDI_FAILURE);
+}
+
+if (pcc_chan_read32(pc, REG_OFFSET2, val) != DDI_SUCCESS) {
+	pcc_chan_txn_end(pc);
+	pcc_chan_put(pc);
+	return (DDI_FAILURE);
+}
+
+pcc_chan_txn_end(pc);
+pcc_chan_put(pc);
+.Ed
+.Pp
+A read transaction commits a read command first and then collects
+the results with the
+.Xr pcc_chan_read32 9F
+functions before ending the transaction.
+A transaction is always begun before any payload access and ended
+after the results have been read; the accessors assert that the
+channel mutex is held and that a transaction is in progress.
+.Sh FILES
+.Bl -tag -width Pa
+.It Pa /kernel/misc/aarch64/acpipcc
+64-bit aarch64 ELF kernel misc module
+.El
+.Sh SEE ALSO
+.Xr pcc_chan 9F
+.Rs
+.%T ACPI Specification
+.%U https://uefi.org/specifications
+.Re
+.Sh NOTES
+This module is only available on aarch64 systems with ACPI firmware that
+provides a Platform Communications Channel Table.
+.Pp
+Only channel types 1, 2 and 3 are presently supported.
+Type 0 requires ACPI
+hardware, type 4 is notification-only and has no current consumer and type 5
+has no current consumer.
+.Pp
+The specification-deprecated notification functionality for types 1 and 2 is
+not implemented.

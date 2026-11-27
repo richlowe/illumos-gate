@@ -306,7 +306,7 @@ file path=kernel/mac/$(ARCH64)/mac_ipv6 group=sys mode=0755
 file path=kernel/mac/$(ARCH64)/mac_wifi group=sys mode=0755
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys
-$(i386_ONLY)file path=kernel/misc/$(ARCH64)/acpica group=sys mode=0755
+file path=kernel/misc/$(ARCH64)/acpica group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/bignum group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/bootdev group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/busra group=sys mode=0755
@@ -614,6 +614,8 @@ license usr/src/common/mpi/THIRDPARTYLICENSE \
     license=usr/src/common/mpi/THIRDPARTYLICENSE
 license usr/src/common/util/THIRDPARTYLICENSE.uiuc \
     license=usr/src/common/util/THIRDPARTYLICENSE.uiuc
+$(aarch64_ONLY)license usr/src/uts/aarch64/io/acpica/THIRDPARTYLICENSE \
+    license=usr/src/uts/aarch64/io/acpica/THIRDPARTYLICENSE
 license usr/src/uts/common/inet/cc/THIRDPARTYLICENSE \
     license=usr/src/uts/common/inet/cc/THIRDPARTYLICENSE
 license usr/src/uts/common/inet/ip/THIRDPARTYLICENSE.rts \
