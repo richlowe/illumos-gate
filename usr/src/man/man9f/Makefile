@@ -586,6 +586,12 @@ MANFILES=	ASSERT.9f				\
 		vmem_create.9f				\
 		vmem_walk.9f
 
+aarch64_MANFILES=	pcc_chan.9f
+
+MANFILES +=		$($(MACH)_MANFILES)
+
+aarch64_MANLINK_SRC=	Manlink.aarch64
+
 .KEEP_STATE:
 
 include		$(SRC)/man/Makefile.man

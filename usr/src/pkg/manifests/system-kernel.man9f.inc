@@ -1078,6 +1078,23 @@ link path=usr/share/man/man9f/otherq.9f target=OTHERQ.9f
 file path=usr/share/man/man9f/outb.9f
 link path=usr/share/man/man9f/outl.9f target=outb.9f
 link path=usr/share/man/man9f/outw.9f target=outb.9f
+$(aarch64_ONLY)file path=usr/share/man/man9f/pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_get.9f target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_put.9f target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_read32.9f \
+    target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_read64.9f \
+    target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_txn_begin.9f \
+    target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_txn_commit.9f \
+    target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_txn_end.9f \
+    target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_write32.9f \
+    target=pcc_chan.9f
+$(aarch64_ONLY)link path=usr/share/man/man9f/pcc_chan_write64.9f \
+    target=pcc_chan.9f
 link path=usr/share/man/man9f/pci_config_get16.9f target=pci_config_get8.9f
 link path=usr/share/man/man9f/pci_config_get32.9f target=pci_config_get8.9f
 link path=usr/share/man/man9f/pci_config_get64.9f target=pci_config_get8.9f
