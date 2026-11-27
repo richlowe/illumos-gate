@@ -242,6 +242,7 @@ DACF_KMODS += consconfig_dacf
 #
 #	'Misc' Modules (/kernel/misc):
 #
+MISC_KMODS += acpidev
 MISC_KMODS += bootdev
 MISC_KMODS += cpuidle
 MISC_KMODS += ffa
