@@ -29,6 +29,7 @@ CORE_OBJS_FDT +=		\
 
 CORE_OBJS +=			\
 	aarch64_subr.o		\
+	cpuid_mach.o		\
 	ddi_aarch64.o		\
 	efirt_machdep.o		\
 	efirt_call.o		\
@@ -195,6 +196,30 @@ CPUDRV_OBJS += \
 	cpudrv_mach.o
 
 CPUNEX_OBJS +=	cpunex.o
+
+ACPIDEV_OBJS +=			\
+	acpidev_drv.o		\
+	acpidev_scope.o		\
+	acpidev_device.o	\
+	acpidev_container.o	\
+	acpidev_cpucontainer.o	\
+	acpidev_cpu.o		\
+	acpidev_devprop.o	\
+	acpidev_dr.o		\
+	acpidev_memory.o	\
+	acpidev_pci.o		\
+	acpidev_resource.o	\
+	acpidev_usbport.o	\
+	acpidev_gic.o		\
+	acpidev_iort.o		\
+	acpidev_arm_gtmr.o	\
+	acpidev_mcfg.o		\
+	acpidev_osc.o		\
+	acpidev_util.o
+
+ACPINEX_OBJS +=			\
+	acpinex_drv.o		\
+	acpinex_event.o
 
 ASSYM_DEPS +=			\
 	aarch64_subr.o		\
